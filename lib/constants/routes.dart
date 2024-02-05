@@ -13,6 +13,8 @@ import 'package:d_manager/screens/manage_masters/manage_party/party_list.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/dashboard/dashboard_screen.dart';
+
 class AppRoutes {
   static const String splashScreen = '/';
   static const String login = '/login';
@@ -32,6 +34,10 @@ class AppRoutes {
 
   // Manage Cloth Quality
   static const String clothQualityList = '/cloth-quality-list';
+
+  // Manage Reminders
+
+  static const String homeScreen = '/home_screen';
 
   static final Map<String, WidgetBuilder> routes = {
     splashScreen: (context) => const SplashScreen(),
@@ -64,5 +70,9 @@ class AppRoutes {
 
     // Manage Cloth Quality
     clothQualityList: (context) => const ClothQualityList(),
+
+    // Manage Reminders
+    homeScreen: (context) => const DashboardHeader(),
+
   };
 }

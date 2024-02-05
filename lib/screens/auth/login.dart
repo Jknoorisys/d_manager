@@ -43,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Logo or Header
                 const AnimatedLogo(),
                 SizedBox(height: Dimensions.height20),
-
                 // Email TextField
                 CustomTextField(
                   controller: emailController,
@@ -113,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 SizedBox(height: Dimensions.height20),
-
                 // Login Button
                 CustomElevatedButton(
                   onPressed: () {
