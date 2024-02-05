@@ -29,10 +29,24 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
   Widget build(BuildContext context) {
     var errorClothQualityName = submitted == true ? _validateClothQualityName(clothQualityController.text) : null;
     return AlertDialog(
-      backgroundColor: Colors.white,
-      title: Text(
-        S.of(context).addClothQuality,
-        style: AppTheme.heading2,
+      backgroundColor: AppTheme.white,
+      elevation: 10,
+      surfaceTintColor: AppTheme.white,
+      shadowColor: AppTheme.primary.withOpacity(0.5),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            S.of(context).addClothQuality,
+            style: AppTheme.heading2,
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: AppTheme.primary),
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+          ),
+        ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,

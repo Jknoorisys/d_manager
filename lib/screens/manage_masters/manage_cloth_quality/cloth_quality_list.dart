@@ -1,6 +1,5 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
@@ -11,6 +10,8 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+
+import 'cloth_quality_add.dart';
 
 class ClothQualityList extends StatefulWidget {
   const ClothQualityList({Key? key}) : super(key: key);
@@ -82,7 +83,12 @@ class _ClothQualityListState extends State<ClothQualityList> {
                         iconColor: AppTheme.white,
                         iconData: Icons.add,
                         onPressed: () {
-                          Navigator.of(context).pushNamed(AppRoutes.clothQualityAdd);
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return const ClothQualityAdd();
+                            },
+                          );
                         }
                     ),
                   ],
@@ -136,7 +142,12 @@ class _ClothQualityListState extends State<ClothQualityList> {
                               children: [
                                 IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.firmAdd, arguments: {'firmData': filteredClothQualityList[index]});
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return ClothQualityAdd(clothQualityData: filteredClothQualityList[index]);
+                                        },
+                                      );
                                     },
                                     icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                 ),
@@ -174,18 +185,6 @@ class _ClothQualityListState extends State<ClothQualityList> {
               ],
             ),
           )
-      ),
-    );
-  }
-
-  Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
-        ],
       ),
     );
   }

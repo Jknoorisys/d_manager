@@ -31,7 +31,6 @@ class AppRoutes {
   static const String partyList = '/party-list';
 
   // Manage Cloth Quality
-  static const String clothQualityAdd = '/cloth-quality-add';
   static const String clothQualityList = '/cloth-quality-list';
 
   static final Map<String, WidgetBuilder> routes = {
@@ -65,16 +64,5 @@ class AppRoutes {
 
     // Manage Cloth Quality
     clothQualityList: (context) => const ClothQualityList(),
-    clothQualityAdd: (context) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? clothQualityData = args?['clothQualityData'];
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return ClothQualityAdd(clothQualityData: clothQualityData);
-        },
-      );
-      return Container();
-    },
   };
 }
