@@ -13,15 +13,22 @@ import 'package:d_manager/screens/manage_masters/manage_party/party_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_party/party_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_transport/transport_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_yarn_type/yarn_type_list.dart';
+import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_add.dart';
+import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_list.dart';
+import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
   static const String splashScreen = '/';
+
+  // Auth
   static const String login = '/login';
   static const String forgotPassword = '/forgot-password';
   static const String forgotPasswordCode = '/forgot-password-code';
   static const String setNewPassword = '/set-new-password';
+
+  // Dashboard and Change Password
   static const String dashboard = '/dashboard';
   static const String homeScreen = '/home-screen';
   static const String settings = '/settings';
@@ -45,6 +52,11 @@ class AppRoutes {
 
   // Manage Hammal
   static const String hammalList = '/hammal-list';
+
+  // Manage Yarn Purchase
+  static const String yarnPurchaseList = '/yarn-purchase-list';
+  static const String yarnPurchaseAdd = '/yarn-purchase-add';
+  static const String yarnPurchaseView = '/yarn-purchase-view';
 
   static final Map<String, WidgetBuilder> routes = {
     splashScreen: (context) => const SplashScreen(),
@@ -88,5 +100,17 @@ class AppRoutes {
     // Manage Hammal
     hammalList: (context) => const HammalList(),
 
+    // Manage Yarn Purchase
+    yarnPurchaseList: (context) => const YarnPurchaseList(),
+    yarnPurchaseAdd: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
+      return YarnPurchaseAdd(yarnPurchaseData: yarnPurchaseData);
+    },
+    yarnPurchaseView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
+      return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData);
+    },
   };
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class YarnPurchaseView extends StatefulWidget {
-  const YarnPurchaseView({Key? key}) : super(key: key);
+  final Map<String, dynamic>? yarnPurchaseData;
+  const YarnPurchaseView({Key? key, this.yarnPurchaseData}) : super(key: key);
 
   @override
   _YarnPurchaseViewState createState() => _YarnPurchaseViewState();

@@ -11,7 +11,6 @@ import 'package:gap/gap.dart';
 class FirmAdd extends StatefulWidget {
   final Map<String, dynamic>? firmData;
   const FirmAdd({Key? key, this.firmData}) : super(key: key);
-
   @override
   _FirmAddState createState() => _FirmAddState();
 }

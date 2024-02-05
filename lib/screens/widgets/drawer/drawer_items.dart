@@ -73,7 +73,7 @@ class DrawerItems extends StatelessWidget {
                 trailing: const Icon(Icons.arrow_drop_down, color: AppTheme.secondaryLight),
                 children: [
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.homeScreen);
                   }, S.of(context).boxToBeReceived),
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.dashboard);
