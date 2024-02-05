@@ -86,7 +86,6 @@ class DrawerItems extends StatelessWidget {
                   }, S.of(context).paymentToBeReceived),
                 ],
               ),
-
               // Manage History
               ExpansionTile(
                 shape: InputBorder.none,
