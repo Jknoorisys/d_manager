@@ -26,7 +26,8 @@ class _PurchasesState extends State<Purchases> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(Dimensions.height15),
-      child: ListView.builder(
+      child:
+      ListView.builder(
         itemCount: yarnPurchaseList.length,
         itemBuilder: (context, index) {
           return CustomAccordion(

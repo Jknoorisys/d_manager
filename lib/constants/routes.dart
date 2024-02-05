@@ -19,6 +19,8 @@ import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/reminder_screen/boxToBeReceived/boxToBeReceived.dart';
+
 class AppRoutes {
   static const String splashScreen = '/';
 
@@ -57,6 +59,11 @@ class AppRoutes {
   static const String yarnPurchaseList = '/yarn-purchase-list';
   static const String yarnPurchaseAdd = '/yarn-purchase-add';
   static const String yarnPurchaseView = '/yarn-purchase-view';
+
+  // Reminder screens
+
+  static const String boxToBeReceived = '/box-to-be-received';
+
 
   static final Map<String, WidgetBuilder> routes = {
     splashScreen: (context) => const SplashScreen(),
@@ -112,5 +119,8 @@ class AppRoutes {
       final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
       return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData);
     },
+
+    //Manage Reminders
+    boxToBeReceived: (context) => const BoxToBeReceivedScreen(),
   };
 }
