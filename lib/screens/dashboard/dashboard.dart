@@ -24,7 +24,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _pages = [
     // yarn purchases
     const Purchases(),
-
     // cloth sells
     const ClothSells(),
   ];
@@ -42,14 +41,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return CustomDrawer(
       content: CustomBody(
         content: _pages[_currentIndex],
-
         // BottomNavigationBar
         bottomNavigationBar: Container(
           padding: EdgeInsets.all( Dimensions.width20),
           height: Dimensions.height60 + Dimensions.height10,
           decoration: BoxDecoration(
             color: AppTheme.white,
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(Dimensions.radius20), topRight: Radius.circular(Dimensions.radius20),),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(Dimensions.radius20),
+              topRight: Radius.circular(Dimensions.radius20),),
             boxShadow: [
               BoxShadow(
                 color: AppTheme.grey.withOpacity(0.4),
@@ -89,18 +89,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
-        ],
       ),
     );
   }

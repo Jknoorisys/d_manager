@@ -76,7 +76,7 @@ class DrawerItems extends StatelessWidget {
                     Navigator.of(context).pushNamed(AppRoutes.dashboard);
                   }, S.of(context).boxToBeReceived),
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.homeScreen);
                   }, S.of(context).paymentDueDate),
                   buildTitle(S.of(context).clothSell, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.dashboard);
@@ -86,7 +86,6 @@ class DrawerItems extends StatelessWidget {
                   }, S.of(context).paymentToBeReceived),
                 ],
               ),
-
               // Manage History
               ExpansionTile(
                 shape: InputBorder.none,

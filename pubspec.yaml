@@ -43,6 +43,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   gap: ^3.0.1
   getwidget: ^4.0.0
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,7 @@ flutter:
   assets:
     - assets/images/logo/
     - assets/images/icons/
+    - assets/images/svg/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
