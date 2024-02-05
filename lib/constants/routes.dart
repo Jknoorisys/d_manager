@@ -4,6 +4,7 @@ import 'package:d_manager/screens/auth/login.dart';
 import 'package:d_manager/screens/auth/set_new_password.dart';
 import 'package:d_manager/screens/change_password/change_password.dart';
 import 'package:d_manager/screens/dashboard/dashboard.dart';
+import 'package:d_manager/screens/dashboard/dashboard_screen.dart';
 import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_list.dart';
@@ -22,6 +23,7 @@ class AppRoutes {
   static const String forgotPasswordCode = '/forgot-password-code';
   static const String setNewPassword = '/set-new-password';
   static const String dashboard = '/dashboard';
+  static const String homeScreen = '/home-screen';
   static const String settings = '/settings';
 
   // Manage My Firm
@@ -55,6 +57,7 @@ class AppRoutes {
     },
     setNewPassword: (context) => const SetNewPasswordScreen(),
     dashboard: (context) => const DashboardScreen(),
+    homeScreen: (context) => const DashboardHeader(),
     settings: (context) => const ChangePasswordScreen(),
 
     // Manage My Firm
