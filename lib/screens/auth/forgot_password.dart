@@ -1,0 +1,116 @@
+import 'package:d_manager/constants/app_theme.dart';
+import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/screens/widgets/animated_logo.dart';
+import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/get_utils/get_utils.dart';
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final TextEditingController emailController = TextEditingController();
+  bool submitted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    var errorEmail = submitted == true ? _validateEmail(emailController.text) : null;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Container(
+          height: Dimensions.screenHeight,
+          decoration: const BoxDecoration(
+            gradient: AppTheme.appGradientLight,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(Dimensions.width25),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo or Header
+                const AnimatedLogo(),
+
+                SizedBox(height: Dimensions.height20),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: Dimensions.width10),
+                  child: Text(
+                    S.of(context).forgotPassword,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: Dimensions.font20),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                Padding(
+                  padding:
+                  EdgeInsets.symmetric(horizontal: Dimensions.width30, vertical: Dimensions.width10),
+                  child: RichText(
+                    text: TextSpan(
+                      text: S.of(context).enterYourEmailAddressToResetYourPassword,
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: Dimensions.font14,
+                      ),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                SizedBox(
+                  height: Dimensions.height30,
+                ),
+
+                CustomTextField(
+                  controller: emailController,
+                  labelText: S.of(context).email,
+                  errorText: errorEmail.toString() != 'null' ? errorEmail.toString() : '',
+                  keyboardType: TextInputType.emailAddress,
+                  prefixIcon: Icons.email,
+                  borderColor: AppTheme.primary,
+                ),
+                SizedBox(height: Dimensions.height20),
+
+                // Login Button
+                CustomElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        submitted = true;
+                      });
+                      if (_isFormValid()) {
+                        Navigator.of(context).pushNamed(AppRoutes.forgotPasswordCode, arguments: {'emailAddress': emailController.text});
+                      }
+                    },
+                    buttonText: S.of(context).sendCode,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String? _validateEmail(String value) {
+    if (value.isEmpty) {
+      return S.of(context).emailIsRequired;
+    }
+
+    if (!GetUtils.isEmail(value)) {
+      return S.of(context).invalidEmail;
+    }
+    return null;
+  }
+
+  bool _isFormValid() {
+    String emailError = _validateEmail(emailController.text) ?? '';
+
+    return emailError.isEmpty;
+  }
+}
