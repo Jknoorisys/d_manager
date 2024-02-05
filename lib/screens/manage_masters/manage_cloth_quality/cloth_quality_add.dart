@@ -43,7 +43,7 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
           IconButton(
             icon: const Icon(Icons.close, color: AppTheme.primary),
             onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pop();
             },
           ),
         ],
@@ -67,7 +67,7 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
               submitted = true;
             });
             if (_isFormValid()) {
-              Navigator.of(context).pushReplacementNamed(AppRoutes.clothQualityList);
+              Navigator.of(context).pop();
             }
           },
           buttonText: "Submit",

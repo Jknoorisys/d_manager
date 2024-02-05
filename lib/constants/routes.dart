@@ -4,12 +4,14 @@ import 'package:d_manager/screens/auth/login.dart';
 import 'package:d_manager/screens/auth/set_new_password.dart';
 import 'package:d_manager/screens/change_password/change_password.dart';
 import 'package:d_manager/screens/dashboard/dashboard.dart';
-import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_list.dart';
+import 'package:d_manager/screens/manage_masters/manage_hammal/hammal_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_party/party_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_party/party_list.dart';
+import 'package:d_manager/screens/manage_masters/manage_transport/transport_list.dart';
+import 'package:d_manager/screens/manage_masters/manage_yarn_type/yarn_type_list.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -32,6 +34,15 @@ class AppRoutes {
 
   // Manage Cloth Quality
   static const String clothQualityList = '/cloth-quality-list';
+
+  // Manage Yarn Type
+  static const String yarnTypeList = '/yarn-type-list';
+
+  // Manage Transport
+  static const String transportList = '/transport-list';
+
+  // Manage Hammal
+  static const String hammalList = '/hammal-list';
 
   static final Map<String, WidgetBuilder> routes = {
     splashScreen: (context) => const SplashScreen(),
@@ -64,5 +75,15 @@ class AppRoutes {
 
     // Manage Cloth Quality
     clothQualityList: (context) => const ClothQualityList(),
+
+    // Manage Yarn Type
+    yarnTypeList: (context) => const YarnTypeList(),
+
+    // Manage Transport
+    transportList: (context) => const TransportList(),
+
+    // Manage Hammal
+    hammalList: (context) => const HammalList(),
+
   };
 }

@@ -122,13 +122,13 @@ class DrawerItems extends StatelessWidget {
                     Navigator.of(context).pushNamed(AppRoutes.clothQualityList);
                   }),
                   buildTitle(S.of(context).yarnType, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.yarnTypeList);
                   }),
                   buildTitle(S.of(context).transport, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.transportList);
                   }),
                   buildTitle(S.of(context).hammal, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.hammalList);
                   }),
                 ],
               ),

@@ -24,6 +24,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "addClothQuality":
             MessageLookupByLibrary.simpleMessage("Add Cloth Quality"),
+        "addHammal": MessageLookupByLibrary.simpleMessage("Add Hammal"),
+        "addTransport": MessageLookupByLibrary.simpleMessage("Add Transport"),
+        "addYarnType": MessageLookupByLibrary.simpleMessage("Add Yarn Type"),
         "allowingToPasteText":
             MessageLookupByLibrary.simpleMessage("Allowing to paste \$text"),
         "boxToBeReceived":
@@ -65,6 +68,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Forgot Password"),
         "hammal": MessageLookupByLibrary.simpleMessage("Hammal"),
+        "hammalList": MessageLookupByLibrary.simpleMessage("Hammal List"),
         "invalidEmail": MessageLookupByLibrary.simpleMessage("Invalid Email"),
         "login": MessageLookupByLibrary.simpleMessage("Login"),
         "loginWithGoogle":
@@ -111,7 +115,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchClothQuality":
             MessageLookupByLibrary.simpleMessage("Search Cloth Quality"),
         "searchFirm": MessageLookupByLibrary.simpleMessage("Search Firm"),
+        "searchHammal": MessageLookupByLibrary.simpleMessage("Search Hammal"),
         "searchParty": MessageLookupByLibrary.simpleMessage("Search Party"),
+        "searchTransport":
+            MessageLookupByLibrary.simpleMessage("Search Transport"),
+        "searchYarnType":
+            MessageLookupByLibrary.simpleMessage("Search Yarn Type"),
         "sellHistory": MessageLookupByLibrary.simpleMessage("Sell History"),
         "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
         "setNewPasswordForYourAccount": MessageLookupByLibrary.simpleMessage(
@@ -121,8 +130,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "thansToBeDelivered":
             MessageLookupByLibrary.simpleMessage("Thans to be Delivered"),
         "transport": MessageLookupByLibrary.simpleMessage("Transport"),
+        "transportList": MessageLookupByLibrary.simpleMessage("Transport List"),
         "verify": MessageLookupByLibrary.simpleMessage("VERIFY"),
         "yarnPurchase": MessageLookupByLibrary.simpleMessage("Yarn Purchase"),
-        "yarnType": MessageLookupByLibrary.simpleMessage("Yarn Type")
+        "yarnType": MessageLookupByLibrary.simpleMessage("Yarn Type"),
+        "yarnTypeList": MessageLookupByLibrary.simpleMessage("Yarn Type List")
       };
 }

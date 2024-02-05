@@ -66,5 +66,14 @@
   "searchFirm": "Search Firm",
   "clothQualityList": "Cloth Quality List",
   "searchClothQuality": "Search Cloth Quality",
-  "addClothQuality": "Add Cloth Quality"
+  "addClothQuality": "Add Cloth Quality",
+  "yarnTypeList": "Yarn Type List",
+  "searchYarnType": "Search Yarn Type",
+  "addYarnType": "Add Yarn Type",
+  "transportList": "Transport List",
+  "addTransport": "Add Transport",
+  "hammalList": "Hammal List",
+  "searchTransport": "Search Transport",
+  "searchHammal": "Search Hammal",
+  "addHammal": "Add Hammal"
 }

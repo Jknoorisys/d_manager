@@ -100,8 +100,8 @@ class CustomElevatedButton extends StatelessWidget {
   final bool submitted;
   final IconData? icon;
   final double? iconSize;
-
   final bool? isBackgroundGradient;
+  final Color? backgroundColor;
 
   final Color? color;
 
@@ -115,6 +115,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.iconSize,
     this.isBackgroundGradient = true,
     this.color,
+    this.backgroundColor,
   });
 
   @override
@@ -122,7 +123,8 @@ class CustomElevatedButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Dimensions.radius30),
-        gradient: isBackgroundGradient == true ? AppTheme.appGradient : AppTheme.appGradientWhite,
+        gradient: isBackgroundGradient == true ? AppTheme.appGradient : null,
+        color: backgroundColor,
       ),
       child: ElevatedButton(
         onPressed: onPressed,

@@ -729,6 +729,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Yarn Type List`
+  String get yarnTypeList {
+    return Intl.message(
+      'Yarn Type List',
+      name: 'yarnTypeList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search Yarn Type`
+  String get searchYarnType {
+    return Intl.message(
+      'Search Yarn Type',
+      name: 'searchYarnType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Yarn Type`
+  String get addYarnType {
+    return Intl.message(
+      'Add Yarn Type',
+      name: 'addYarnType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transport List`
+  String get transportList {
+    return Intl.message(
+      'Transport List',
+      name: 'transportList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Transport`
+  String get addTransport {
+    return Intl.message(
+      'Add Transport',
+      name: 'addTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hammal List`
+  String get hammalList {
+    return Intl.message(
+      'Hammal List',
+      name: 'hammalList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search Transport`
+  String get searchTransport {
+    return Intl.message(
+      'Search Transport',
+      name: 'searchTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search Hammal`
+  String get searchHammal {
+    return Intl.message(
+      'Search Hammal',
+      name: 'searchHammal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Hammal`
+  String get addHammal {
+    return Intl.message(
+      'Add Hammal',
+      name: 'addHammal',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
