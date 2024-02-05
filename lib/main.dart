@@ -8,6 +8,9 @@ import 'generated/l10n.dart';
 
 void main() {
   runApp(const MyApp());
+  SystemChrome.setSystemUIOverlayStyle( SystemUiOverlayStyle(
+    statusBarColor: AppTheme.secondary,
+  ));
   // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
   //   statusBarColor: AppTheme.secondary, // set Status bar color in Android devices
   //   statusBarIconBrightness: Brightness.dark, // set Status bar icons color in Android devices
@@ -18,7 +21,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

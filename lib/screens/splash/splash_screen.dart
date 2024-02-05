@@ -5,6 +5,7 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,7 +31,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+    ),
+      child:Scaffold(
       backgroundColor: Colors.white,
       body : Container(
         decoration: const BoxDecoration(
@@ -40,9 +45,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           child: ScaleTransition(
             scale: animation,
             child: Image.asset(AppImages.appLogoTransparent, width: Dimensions.height50 * 3, height: Dimensions.height50 * 3,),
+            ),
           ),
         ),
-      ),
+      )
     );
   }
 }
