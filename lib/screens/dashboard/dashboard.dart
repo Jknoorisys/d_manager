@@ -1,5 +1,6 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/dashboard/cloth_sells.dart';
 import 'package:d_manager/screens/dashboard/purchases.dart';
@@ -41,6 +42,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return CustomDrawer(
       content: CustomBody(
+        title: S.of(context).dashboard,
+        filterButton: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primary,
+          ),
+          onPressed: (){},
+          child: Row(
+            children: [
+              SmallText(text: 'Select Date', color: AppTheme.white,),
+              SizedBox(width: Dimensions.width20,),
+              SvgPicture.asset(AppImages.calenderIcon, width: Dimensions.iconSize20, height: Dimensions.iconSize20,),
+            ],
+          ),
+        ),
         content: _pages[_currentIndex],
         // BottomNavigationBar
         bottomNavigationBar: Container(

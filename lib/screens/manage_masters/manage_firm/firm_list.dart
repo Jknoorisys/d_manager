@@ -41,13 +41,12 @@ class _FirmListState extends State<FirmList> {
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
+          title: S.of(context).firmList,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(S.of(context).firmList, style: AppTheme.headline ),
-                SizedBox(height: Dimensions.height10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

@@ -36,10 +36,14 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         body:
         Stack(
           children: [
-            Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              color: Colors.white,
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                color: Colors.white,
+              ),
             ),
             Positioned(
               top: 0,
@@ -78,7 +82,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                   Text("Select Date",
                                       style: TextStyle(color: Colors.white,fontSize: 12,fontWeight: FontWeight.bold)),
                                   SizedBox(width: 5,),
-                                  SvgPicture.asset("assets/images/svg/calendar.svg",
+                                  SvgPicture.asset("assets/images/svg/calender.svg",
                                   height: 20,width: 20,),
                                 ],
                               ),
@@ -92,7 +96,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
               ),
             ),
             Positioned(
-              top: 70, // Adjust this value to position the second container
+              top: 80, // Adjust this value to position the second container
               left: 0,
               right: 0,
               child: Padding(
@@ -171,22 +175,6 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                   ]
                 ),
               ),
-            ),
-            const Positioned(
-              top: 270, // Adjust this value to position the new container
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 25,vertical: 20),
-                child: Column(
-                  children: [
-                    Divider(
-                      height: 1,
-                      color: AppTheme.secondary,
-                    )
-                  ],
-                ),
-              )
             ),
           ],
         ),

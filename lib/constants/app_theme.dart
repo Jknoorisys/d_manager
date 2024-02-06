@@ -52,13 +52,12 @@ class AppTheme {
 
   static TextStyle headline = TextStyle( // h5 -> headline
     fontWeight: FontWeight.bold,
-    fontSize: Dimensions.font22,
-    letterSpacing: 0.27,
+    fontSize: Dimensions.font20,
+    letterSpacing: 0,
     color: black,
   );
 
 static TextStyle title = TextStyle( // h6 -> title
-
     fontWeight: FontWeight.bold,
     fontSize: Dimensions.font16,
     letterSpacing: 0.18,

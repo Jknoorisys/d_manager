@@ -61,7 +61,7 @@ class DrawerItems extends StatelessWidget {
 
               // Manage Cloth Sell Deal
               buildTitle(S.of(context).manageClothSellDeal, Icons.edit, () {
-                Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                Navigator.of(context).pushNamed(AppRoutes.homeScreen);
               }),
 
               // Manage Reminders
@@ -86,6 +86,7 @@ class DrawerItems extends StatelessWidget {
                   }, S.of(context).paymentToBeReceived),
                 ],
               ),
+
               // Manage History
               ExpansionTile(
                 shape: InputBorder.none,

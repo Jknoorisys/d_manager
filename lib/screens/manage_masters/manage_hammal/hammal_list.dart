@@ -37,13 +37,12 @@ class _HammalListState extends State<HammalList> {
   Widget build(BuildContext context) {
     return CustomDrawer(
       content: CustomBody(
-          content: Padding(
+        title: S.of(context).hammalList,
+        content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(S.of(context).hammalList, style: AppTheme.headline ),
-                SizedBox(height: Dimensions.height10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

@@ -8,9 +8,6 @@ import 'generated/l10n.dart';
 
 void main() {
   runApp(const MyApp());
-  SystemChrome.setSystemUIOverlayStyle( const SystemUiOverlayStyle(
-    statusBarColor: AppTheme.secondary,
-  ));
 }
 
 class MyApp extends StatelessWidget {

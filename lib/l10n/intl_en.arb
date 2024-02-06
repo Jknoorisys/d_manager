@@ -75,5 +75,7 @@
   "hammalList": "Hammal List",
   "searchTransport": "Search Transport",
   "searchHammal": "Search Hammal",
-  "addHammal": "Add Hammal"
+  "addHammal": "Add Hammal",
+  "addFirm": "Add Firm",
+  "addParty": "Add Party"
 }

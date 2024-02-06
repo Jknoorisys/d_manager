@@ -38,161 +38,160 @@ class _TransportListState extends State<TransportList> {
   Widget build(BuildContext context) {
     return CustomDrawer(
       content: CustomBody(
-          content: Padding(
-            padding: EdgeInsets.all(Dimensions.height15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(S.of(context).transportList, style: AppTheme.headline ),
-                SizedBox(height: Dimensions.height10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                          isFilled: false,
-                          controller: searchController,
-                          hintText: S.of(context).searchTransport,
-                          prefixIcon: Icons.search,
-                          suffixIcon: Icons.close,
-                          borderRadius: Dimensions.radius10,
-                          borderColor: AppTheme.primary,
-                          onSuffixTap: () {
-                            searchController.clear();
-                            setState(() {
-                              filteredTransportList = transportList;
-                            });
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              filteredTransportList = transportList
-                                  .where((firm) =>
-                                  firm['transportName']
-                                      .toLowerCase()
-                                      .contains(value.toLowerCase()))
-                                  .toList();
-                            });
-                          }
-                      ),
-                    ),
-                    SizedBox(width: Dimensions.width20),
-                    CustomIconButton(
-                        radius: Dimensions.radius10,
-                        backgroundColor: AppTheme.primary,
-                        iconColor: AppTheme.white,
-                        iconData: Icons.add,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return const TransportAdd();
-                            },
-                          );
+        title: S.of(context).transportList,
+        content: Padding(
+          padding: EdgeInsets.all(Dimensions.height15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                        isFilled: false,
+                        controller: searchController,
+                        hintText: S.of(context).searchTransport,
+                        prefixIcon: Icons.search,
+                        suffixIcon: Icons.close,
+                        borderRadius: Dimensions.radius10,
+                        borderColor: AppTheme.primary,
+                        onSuffixTap: () {
+                          searchController.clear();
+                          setState(() {
+                            filteredTransportList = transportList;
+                          });
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            filteredTransportList = transportList
+                                .where((firm) =>
+                                firm['transportName']
+                                    .toLowerCase()
+                                    .contains(value.toLowerCase()))
+                                .toList();
+                          });
                         }
                     ),
-                  ],
-                ),
-                SizedBox(height: Dimensions.height10),
-                AppTheme.divider,
-                SizedBox(height: Dimensions.height10),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredTransportList.length,
-                    itemBuilder: (context, index) {
-                      return CustomAccordion(
-                        titleChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(width: Dimensions.width10),
-                                CircleAvatar(
-                                  backgroundColor: AppTheme.secondary,
-                                  radius: Dimensions.height20,
-                                  child: BigText(text: filteredTransportList[index]['transportName'][0], color: AppTheme.primary, size: Dimensions.font18),
-                                ),
-                                SizedBox(width: Dimensions.height10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    BigText(text: filteredTransportList[index]['transportName'], color: AppTheme.primary, size: Dimensions.font16),
-                                    Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: AppTheme.black,
-                                          radius: Dimensions.height10,
-                                          child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                        ),
-                                        SizedBox(width: Dimensions.width10),
-                                        SmallText(text: filteredTransportList[index]['phoneNumber'], color: AppTheme.black, size: Dimensions.font12),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                          ],
-                        ),
-                        contentChild: Column(
-                          children: [
-                            AppTheme.divider,
-                            SizedBox(height: Dimensions.height10),
-                            _buildInfoColumn('Description', filteredTransportList[index]['description']),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _buildInfoColumn('', filteredTransportList[index]['status'] ? 'Active' : 'Inactive'),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return TransportAdd(transportData: filteredTransportList[index]);
-                                            },
-                                          );
-                                        },
-                                        icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                                    ),
-                                    IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            filteredTransportList.removeAt(index);
-                                          });
-                                        },
-                                        icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                                    ),
-                                    GFCheckbox(
-                                      size: Dimensions.height20,
-                                      type: GFCheckboxType.custom,
-                                      inactiveBgColor: AppTheme.nearlyWhite,
-                                      inactiveBorderColor: AppTheme.primary,
-                                      customBgColor: AppTheme.primary,
-                                      activeBorderColor: AppTheme.primary,
-                                      onChanged: (value) {
+                  ),
+                  SizedBox(width: Dimensions.width20),
+                  CustomIconButton(
+                      radius: Dimensions.radius10,
+                      backgroundColor: AppTheme.primary,
+                      iconColor: AppTheme.white,
+                      iconData: Icons.add,
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const TransportAdd();
+                          },
+                        );
+                      }
+                  ),
+                ],
+              ),
+              SizedBox(height: Dimensions.height10),
+              AppTheme.divider,
+              SizedBox(height: Dimensions.height10),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredTransportList.length,
+                  itemBuilder: (context, index) {
+                    return CustomAccordion(
+                      titleChild: Column(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(width: Dimensions.width10),
+                              CircleAvatar(
+                                backgroundColor: AppTheme.secondary,
+                                radius: Dimensions.height20,
+                                child: BigText(text: filteredTransportList[index]['transportName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                              ),
+                              SizedBox(width: Dimensions.height10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  BigText(text: filteredTransportList[index]['transportName'], color: AppTheme.primary, size: Dimensions.font16),
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: AppTheme.black,
+                                        radius: Dimensions.height10,
+                                        child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                      ),
+                                      SizedBox(width: Dimensions.width10),
+                                      SmallText(text: filteredTransportList[index]['phoneNumber'], color: AppTheme.black, size: Dimensions.font12),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: Dimensions.height10),
+                        ],
+                      ),
+                      contentChild: Column(
+                        children: [
+                          AppTheme.divider,
+                          SizedBox(height: Dimensions.height10),
+                          _buildInfoColumn('Description', filteredTransportList[index]['description']),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildInfoColumn('', filteredTransportList[index]['status'] ? 'Active' : 'Inactive'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return TransportAdd(transportData: filteredTransportList[index]);
+                                          },
+                                        );
+                                      },
+                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
+                                  ),
+                                  IconButton(
+                                      onPressed: () {
                                         setState(() {
-                                          filteredTransportList[index]['status'] = value;
+                                          filteredTransportList.removeAt(index);
                                         });
                                       },
-                                      value: filteredTransportList[index]['status'],
-                                      inactiveIcon: null,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                                      icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
+                                  ),
+                                  GFCheckbox(
+                                    size: Dimensions.height20,
+                                    type: GFCheckboxType.custom,
+                                    inactiveBgColor: AppTheme.nearlyWhite,
+                                    inactiveBorderColor: AppTheme.primary,
+                                    customBgColor: AppTheme.primary,
+                                    activeBorderColor: AppTheme.primary,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        filteredTransportList[index]['status'] = value;
+                                      });
+                                    },
+                                    value: filteredTransportList[index]['status'],
+                                    inactiveIcon: null,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
-          )
+              ),
+            ],
+          ),
+        )
       ),
     );
   }

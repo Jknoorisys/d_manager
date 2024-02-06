@@ -819,6 +819,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Add Firm`
+  String get addFirm {
+    return Intl.message(
+      'Add Firm',
+      name: 'addFirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Party`
+  String get addParty {
+    return Intl.message(
+      'Add Party',
+      name: 'addParty',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

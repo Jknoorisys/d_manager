@@ -40,13 +40,12 @@ class _PartyListState extends State<PartyList> {
   Widget build(BuildContext context) {
     return CustomDrawer(
       content: CustomBody(
-          content: Padding(
+        title: S.of(context).partyList,
+        content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(S.of(context).partyList, style: AppTheme.headline ),
-                SizedBox(height: Dimensions.height10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

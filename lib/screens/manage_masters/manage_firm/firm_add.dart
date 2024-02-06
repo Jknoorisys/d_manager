@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -58,6 +59,7 @@ class _FirmAddState extends State<FirmAdd> {
         errorGroupCode = submitted == true ? _validateGroupCode(groupCodeController.text) : null;
     return CustomDrawer(
         content: CustomBody(
+          title: S.of(context).addFirm,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
