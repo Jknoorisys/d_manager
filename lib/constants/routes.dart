@@ -20,8 +20,12 @@ import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_list.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../screens/reminder_screen/boxToBeReceived/boxToBeReceived.dart';
+import '../screens/history/purchase_history.dart';
+import '../screens/history/sell_history.dart';
+import '../screens/reminders/cloth_sell/payment_to_be_received.dart';
+import '../screens/reminders/cloth_sell/thans_to_be_delivered.dart';
+import '../screens/reminders/yarn_purchase/box_to_be_received.dart';
+import '../screens/reminders/yarn_purchase/payment_due_date.dart';
 
 class AppRoutes {
   static const String splashScreen = '/';
@@ -68,6 +72,13 @@ class AppRoutes {
 
   // Reminder screens
   static const String boxToBeReceived = '/box-to-be-received';
+  static const String paymentDueDate = '/payment-due-date';
+  static const String thansToBeDelivered = '/thans-to-be-delivered';
+  static const String paymentToBeReceived = '/payment-to-be-received';
+
+  // History
+  static const String purchaseHistory = '/purchase-history';
+  static const String sellHistory = '/sell-history';
 
 
   static final Map<String, WidgetBuilder> routes = {
@@ -138,6 +149,11 @@ class AppRoutes {
     },
 
     //Manage Reminders
-    boxToBeReceived: (context) => const BoxToBeReceivedScreen(),
+    boxToBeReceived: (context) => const BoxToBeReceived(),
+    paymentDueDate: (context) => const PaymentDueDate(),
+    thansToBeDelivered: (context) => const ThansToBeDelivered(),
+    paymentToBeReceived: (context) => const PaymentToBeReceived(),
+    purchaseHistory: (context) => const PurchaseHistory(),
+    sellHistory: (context) => const SellHistory(),
   };
 }
