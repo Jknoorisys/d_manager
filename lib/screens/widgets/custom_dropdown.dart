@@ -8,17 +8,22 @@ class CustomDropdown extends StatelessWidget {
   final String? selectedValue;
   final ValueChanged<String?> onChanged;
 
+  final double? height;
+  final double? width;
+
   CustomDropdown({
     required this.dropdownItems,
     required this.selectedValue,
     required this.onChanged,
+    this.height,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: Dimensions.height50,
-      width: MediaQuery.of(context).size.width / 2.65,
+      height: height ?? Dimensions.height50,
+      width: width ?? MediaQuery.of(context).size.width / 2.65,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Dimensions.radius10),
         color: Colors.white,

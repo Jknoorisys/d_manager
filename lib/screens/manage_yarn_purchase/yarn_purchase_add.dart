@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/body.dart';
+import 'package:d_manager/screens/widgets/custom_datepicker.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
@@ -59,38 +60,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          GestureDetector(
-                            onTap: (){
-                              showDatePicker(context: context, firstDate: firstDate, lastDate: lastDate);
-                            },
-                            child: Container(
-                              height: Dimensions.height50,
-                              width: MediaQuery.of(context).size.width/2.65,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radius10),
-                                color: Colors.white,
-                                border: Border.all(color: AppTheme.primary, width: 0.5),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(Dimensions.height10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      DateFormat('dd/MM/yyyy').format(selectedDate),
-                                    ),
-                                    Padding(
-                                        padding: EdgeInsets.zero,
-                                        child: Icon(
-                                          Icons.calendar_month,
-                                          color: AppTheme.black,
-                                          size: Dimensions.font20,
-                                        )),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                          CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
                           CustomDropdown(
                             dropdownItems: ['Danish Textiles', 'SS Textiles', 'Mahesh Textiles and Sons', 'Laxmi Traders'],
                             selectedValue: myFirm,
