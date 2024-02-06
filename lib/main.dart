@@ -8,15 +8,9 @@ import 'generated/l10n.dart';
 
 void main() {
   runApp(const MyApp());
-  SystemChrome.setSystemUIOverlayStyle( SystemUiOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle( const SystemUiOverlayStyle(
     statusBarColor: AppTheme.secondary,
   ));
-  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
-  //   statusBarColor: AppTheme.secondary, // set Status bar color in Android devices
-  //   statusBarIconBrightness: Brightness.dark, // set Status bar icons color in Android devices
-  //   statusBarBrightness: Brightness.dark, // set Status bar icon color in iOS
-  //   )
-  // );
 }
 
 class MyApp extends StatelessWidget {
