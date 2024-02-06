@@ -1,5 +1,6 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -60,9 +61,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                DateFormat('dd/MM/yyyy').format(selectedDate),
-              ),
+              BigText(text: DateFormat('dd/MM/yyyy').format(selectedDate), size: Dimensions.font14,),
               Padding(
                 padding: EdgeInsets.zero,
                 child: Icon(

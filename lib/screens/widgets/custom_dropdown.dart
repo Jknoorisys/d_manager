@@ -22,6 +22,7 @@ class CustomDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.symmetric(horizontal: Dimensions.width10/2, vertical: Dimensions.height10/2),
       height: height ?? Dimensions.height50,
       width: width ?? MediaQuery.of(context).size.width / 2.65,
       decoration: BoxDecoration(
