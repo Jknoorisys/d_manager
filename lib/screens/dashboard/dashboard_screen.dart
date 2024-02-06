@@ -33,7 +33,8 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           title: Image.asset(AppImages.appLogoHorizontal, width: Dimensions.width50*5, height: Dimensions.height50*5),
           centerTitle: true,
         ),
-        body: Stack(
+        body:
+        Stack(
           children: [
             Container(
               height: MediaQuery.of(context).size.height,
