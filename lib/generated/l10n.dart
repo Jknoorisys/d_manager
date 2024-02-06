@@ -559,15 +559,6 @@ class S {
       args: [],
     );
   }
-  /// `Yarn Purchase - Box to be Received`
-  String get yarnPurchaseBoxToBeReceived {
-    return Intl.message(
-      'Yarn Purchase - Box to be Received',
-      name: 'yarnPurchaseBoxToBeReceived',
-      desc: '',
-      args: [],
-    );
-  }
 
   /// `Payment Due Date`
   String get paymentDueDate {
@@ -668,7 +659,6 @@ class S {
       args: [],
     );
   }
-
 
   /// `Change Password`
   String get changePassword {

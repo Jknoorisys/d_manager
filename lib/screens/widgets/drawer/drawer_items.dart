@@ -76,13 +76,13 @@ class DrawerItems extends StatelessWidget {
                     Navigator.of(context).pushNamed(AppRoutes.boxToBeReceived);
                   }, S.of(context).boxToBeReceived),
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.paymentDueDate);
                   }, S.of(context).paymentDueDate),
                   buildTitle(S.of(context).clothSell, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.thansToBeDelivered);
                   }, S.of(context).thansToBeDelivered),
                   buildTitle(S.of(context).clothSell, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.paymentToBeReceived);
                   }, S.of(context).paymentToBeReceived),
                 ],
               ),
@@ -96,10 +96,10 @@ class DrawerItems extends StatelessWidget {
                 trailing: const Icon(Icons.arrow_drop_down, color: AppTheme.secondaryLight),
                 children: [
                   buildTitle(S.of(context).purchaseHistory, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.purchaseHistory);
                   }),
                   buildTitle(S.of(context).sellHistory, Icons.arrow_right, () {
-                    Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                    Navigator.of(context).pushNamed(AppRoutes.sellHistory);
                   }),
                 ],
               ),
