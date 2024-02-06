@@ -12,7 +12,6 @@ class Purchases extends StatefulWidget {
   @override
   _PurchasesState createState() => _PurchasesState();
 }
-
 class _PurchasesState extends State<Purchases> {
   List<Map<String, dynamic>> yarnPurchaseList = [
     {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mehta and Sons Yarn Trades','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.00','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},

@@ -18,8 +18,7 @@ import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_list.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../screens/reminder_screen/boxToBeReceived/boxToBeReceived.dart';
+import '../screens/reminder_screen/box_to_be_received/boxToBeReceived.dart';
 
 class AppRoutes {
   static const String splashScreen = '/';
