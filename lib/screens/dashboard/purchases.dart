@@ -4,7 +4,6 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/accordion/gf_accordion.dart';
 
 class Purchases extends StatefulWidget {
   const Purchases({Key? key}) : super(key: key);

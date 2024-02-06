@@ -56,12 +56,12 @@ class DrawerItems extends StatelessWidget {
 
               // Manage Yarn Purchase Deal
               buildTitle(S.of(context).manageYarnPurchaseDeal, Icons.list, () {
-                Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseList);
               }),
 
               // Manage Cloth Sell Deal
               buildTitle(S.of(context).manageClothSellDeal, Icons.edit, () {
-                Navigator.of(context).pushNamed(AppRoutes.homeScreen);
+                Navigator.of(context).pushNamed(AppRoutes.clothSellList);
               }),
 
               // Manage Reminders

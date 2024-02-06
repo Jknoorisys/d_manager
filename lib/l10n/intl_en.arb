@@ -77,5 +77,9 @@
   "searchHammal": "Search Hammal",
   "addHammal": "Add Hammal",
   "addFirm": "Add Firm",
-  "addParty": "Add Party"
+  "addParty": "Add Party",
+  "selectDate": "Select Date",
+  "totalPurchaseAmount": "Total Purchase Amount",
+  "yarnPurchasesList": "Yarn Purchases List",
+  "clothSellList": "Cloth Sell List"
 }

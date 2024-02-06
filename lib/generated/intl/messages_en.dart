@@ -40,6 +40,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "clothQualityList":
             MessageLookupByLibrary.simpleMessage("Cloth Quality List"),
         "clothSell": MessageLookupByLibrary.simpleMessage("Cloth Sell"),
+        "clothSellList":
+            MessageLookupByLibrary.simpleMessage("Cloth Sell List"),
         "clothSells": MessageLookupByLibrary.simpleMessage("Cloth Sells"),
         "codeShouldBe4DigitsLong": MessageLookupByLibrary.simpleMessage(
             "Code should be 4 digits long"),
@@ -123,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Search Transport"),
         "searchYarnType":
             MessageLookupByLibrary.simpleMessage("Search Yarn Type"),
+        "selectDate": MessageLookupByLibrary.simpleMessage("Select Date"),
         "sellHistory": MessageLookupByLibrary.simpleMessage("Sell History"),
         "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
         "setNewPasswordForYourAccount": MessageLookupByLibrary.simpleMessage(
@@ -131,10 +134,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "thansToBeDelivered":
             MessageLookupByLibrary.simpleMessage("Thans to be Delivered"),
+        "totalPurchaseAmount":
+            MessageLookupByLibrary.simpleMessage("Total Purchase Amount"),
         "transport": MessageLookupByLibrary.simpleMessage("Transport"),
         "transportList": MessageLookupByLibrary.simpleMessage("Transport List"),
         "verify": MessageLookupByLibrary.simpleMessage("VERIFY"),
         "yarnPurchase": MessageLookupByLibrary.simpleMessage("Yarn Purchase"),
+        "yarnPurchasesList":
+            MessageLookupByLibrary.simpleMessage("Yarn Purchases List"),
         "yarnType": MessageLookupByLibrary.simpleMessage("Yarn Type"),
         "yarnTypeList": MessageLookupByLibrary.simpleMessage("Yarn Type List")
       };

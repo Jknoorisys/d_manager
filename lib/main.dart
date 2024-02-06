@@ -2,11 +2,12 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'generated/l10n.dart';
 
 void main() {
+  initializeDateFormatting('en');
   runApp(const MyApp());
 }
 
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: S.delegate.supportedLocales,
       locale: const Locale('en'),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.primary),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.secondary),
         primaryColor: AppTheme.primary,
         useMaterial3: true,
         textTheme: GoogleFonts.montserratTextTheme(

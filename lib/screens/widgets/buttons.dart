@@ -2,6 +2,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 class CustomButton extends StatelessWidget {
@@ -99,6 +100,7 @@ class CustomElevatedButton extends StatelessWidget {
   final double? textSize;
   final bool submitted;
   final IconData? icon;
+  final SvgPicture? image;
   final double? iconSize;
   final bool? isBackgroundGradient;
   final Color? backgroundColor;
@@ -116,6 +118,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.isBackgroundGradient = true,
     this.color,
     this.backgroundColor,
+    this.image,
   });
 
   @override
@@ -137,6 +140,8 @@ class CustomElevatedButton extends StatelessWidget {
           children: [
             if (icon != null) Icon(icon, size: iconSize ?? Dimensions.font20, color: color ?? AppTheme.white,),
             if (icon != null) SizedBox(width: Dimensions.height10),
+            if (image != null) image!,
+            if (image != null) SizedBox(width: Dimensions.height10),
             BigText(
               text: buttonText ?? '',
                 size: textSize ?? Dimensions.font16,

@@ -72,7 +72,10 @@ class CustomBody extends StatelessWidget {
         ) : Container(),
         title != null ?  SizedBox(height: Dimensions.width10,) : Container(),
         dashboardCard ?? Container(),
-        dashboardCard != null ? SizedBox(height: Dimensions.width10,) : Container(),
+        dashboardCard != null ? Padding(
+            padding: EdgeInsets.only(left:Dimensions.height30 , right: Dimensions.height30, top: Dimensions.height10),
+            child: AppTheme.divider,
+        ) : Container(),
         Expanded(
           child: content,
         ),

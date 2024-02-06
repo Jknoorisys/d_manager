@@ -65,7 +65,7 @@ static TextStyle title = TextStyle( // h6 -> title
   );
 
   static TextStyle heading2 = TextStyle( // h6 -> title
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.bold,
     fontSize: Dimensions.font18,
     letterSpacing: 0.18,
     color: nearlyBlack,

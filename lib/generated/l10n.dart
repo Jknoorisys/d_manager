@@ -839,6 +839,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Select Date`
+  String get selectDate {
+    return Intl.message(
+      'Select Date',
+      name: 'selectDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Purchase Amount`
+  String get totalPurchaseAmount {
+    return Intl.message(
+      'Total Purchase Amount',
+      name: 'totalPurchaseAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yarn Purchases List`
+  String get yarnPurchasesList {
+    return Intl.message(
+      'Yarn Purchases List',
+      name: 'yarnPurchasesList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cloth Sell List`
+  String get clothSellList {
+    return Intl.message(
+      'Cloth Sell List',
+      name: 'clothSellList',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

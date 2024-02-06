@@ -7,11 +7,9 @@ import 'package:d_manager/screens/dashboard/purchases.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
-import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:getwidget/components/accordion/gf_accordion.dart';
+import 'dashboard_card.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -40,22 +38,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget dynamicDashboardCard = const DashboardCard();
+    if (_currentIndex == 0) {
+      // Total Yarn Purchases card
+      dynamicDashboardCard = const DashboardCard(
+        title: 'Total Yarn Purchases',
+        value: '1,00,000',
+        date: '2024-01-25',
+        image: AppImages.purchaseIcon,
+      );
+    } else if (_currentIndex == 1) {
+      // Other card for Cloth Sells
+      dynamicDashboardCard = const DashboardCard(
+        title: 'Total Cloth Sells Deals',
+        value: '500,000',
+        date: '2024-01-26',
+        image: AppImages.salesIcon,
+      );
+    }
     return CustomDrawer(
       content: CustomBody(
-        title: S.of(context).dashboard,
-        filterButton: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.primary,
-          ),
-          onPressed: (){},
-          child: Row(
-            children: [
-              SmallText(text: 'Select Date', color: AppTheme.white,),
-              SizedBox(width: Dimensions.width20,),
-              SvgPicture.asset(AppImages.calenderIcon, width: Dimensions.iconSize20, height: Dimensions.iconSize20,),
-            ],
-          ),
-        ),
+        dashboardCard: dynamicDashboardCard,
         content: _pages[_currentIndex],
         // BottomNavigationBar
         bottomNavigationBar: Container(
@@ -85,8 +88,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   });
                 },
                 buttonText: S.of(context).purchases,
-                icon: FontAwesomeIcons.cartFlatbedSuitcase,
-                iconSize: Dimensions.iconSize20,
+                image: SvgPicture.asset(
+                  AppImages.purchaseFillIcon,
+                  color: _currentIndex == 0 ? AppTheme.white : AppTheme.primary,
+                  width: Dimensions.iconSize24,
+                  height: Dimensions.iconSize24,
+                ),
                 isBackgroundGradient: _currentIndex == 0 ? true : false,
                 color: _currentIndex == 0 ? AppTheme.white : AppTheme.primary,
               ),
@@ -97,8 +104,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   });
                 },
                 buttonText: S.of(context).clothSells,
-                icon: FontAwesomeIcons.cashRegister,
-                iconSize: Dimensions.iconSize20,
+                image: SvgPicture.asset(
+                  AppImages.salesFillIcon,
+                  color: _currentIndex == 1 ? AppTheme.white : AppTheme.primary,
+                  width: Dimensions.iconSize24,
+                  height: Dimensions.iconSize24,
+                ),
                 isBackgroundGradient: _currentIndex == 1 ? true : false,
                 color: _currentIndex == 1 ? AppTheme.white : AppTheme.primary,
               ),

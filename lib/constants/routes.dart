@@ -4,7 +4,9 @@ import 'package:d_manager/screens/auth/login.dart';
 import 'package:d_manager/screens/auth/set_new_password.dart';
 import 'package:d_manager/screens/change_password/change_password.dart';
 import 'package:d_manager/screens/dashboard/dashboard.dart';
-import 'package:d_manager/screens/dashboard/dashboard_screen.dart';
+import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_add.dart';
+import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_list.dart';
+import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_view.dart';
 import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_list.dart';
@@ -32,7 +34,6 @@ class AppRoutes {
 
   // Dashboard and Change Password
   static const String dashboard = '/dashboard';
-  static const String homeScreen = '/home-screen';
   static const String settings = '/settings';
 
   // Manage My Firm
@@ -60,8 +61,12 @@ class AppRoutes {
   static const String yarnPurchaseAdd = '/yarn-purchase-add';
   static const String yarnPurchaseView = '/yarn-purchase-view';
 
-  // Reminder screens
+  // Manage Cloth Sell
+  static const String clothSellList = '/cloth-sell-list';
+  static const String clothSellAdd = '/cloth-sell-add';
+  static const String clothSellView = '/cloth-sell-view';
 
+  // Reminder screens
   static const String boxToBeReceived = '/box-to-be-received';
 
 
@@ -76,7 +81,6 @@ class AppRoutes {
     },
     setNewPassword: (context) => const SetNewPasswordScreen(),
     dashboard: (context) => const DashboardScreen(),
-    homeScreen: (context) => const DashboardHeader(),
     settings: (context) => const ChangePasswordScreen(),
 
     // Manage My Firm
@@ -118,6 +122,19 @@ class AppRoutes {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
       return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData);
+    },
+
+    // Manage Cloth Sell
+    clothSellList: (context) => const ClothSellList(),
+    clothSellAdd: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? clothSellData = args?['clothSellData'];
+      return ClothSellAdd(clothSellData: clothSellData);
+    },
+    clothSellView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? clothSellData = args?['clothSellData'];
+      return ClothSellView(clothSellData: clothSellData);
     },
 
     //Manage Reminders
