@@ -1,4 +1,5 @@
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/generated/l10n.dart';
@@ -7,6 +8,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
+import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 class ClothSellView extends StatefulWidget {
@@ -24,7 +26,7 @@ class _ClothSellViewState extends State<ClothSellView> {
   List<Map<String, dynamic>> invoiceDataList = [
     {'no': 1,
       'invoiceDate': '2024-01-25',
-      'invoiceNumber': '24-25_1',
+      'invoiceNumber': '24-25_10',
       'rate': '20.10',
       'baleNumber': '1-10',
       'than': '80',
@@ -46,7 +48,7 @@ class _ClothSellViewState extends State<ClothSellView> {
     },
     {'no': 2,
       'invoiceDate': '2024-01-25',
-      'invoiceNumber': '24-25_1',
+      'invoiceNumber': '24-25_11',
       'rate': '20.10',
       'baleNumber': '1-10',
       'than': '80',
@@ -69,6 +71,9 @@ class _ClothSellViewState extends State<ClothSellView> {
   ];
 
   List<Map<String, dynamic>> invoicesList = [];
+  String billReceived = 'Yes';
+  String paymentPaid = 'Yes';
+
 
   @override
   void initState() {
@@ -83,7 +88,7 @@ class _ClothSellViewState extends State<ClothSellView> {
         content: CustomBody(
           title: S.of(context).clothSellDealDetails,
           content: Padding(
-            padding: EdgeInsets.all(Dimensions.height15),
+            padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -153,24 +158,6 @@ class _ClothSellViewState extends State<ClothSellView> {
                             _buildInfoColumn('Status', clothSellData['status']),
                           ],
                         ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                                onPressed: () {
-                                  // Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': clothSellData});
-                                },
-                                icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
-                            ),
-                            IconButton(
-                                onPressed: () {
-                                  // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellData});
-                                },
-                                icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -193,6 +180,49 @@ class _ClothSellViewState extends State<ClothSellView> {
                   SizedBox(height: Dimensions.height10),
                   AppTheme.divider,
                   SizedBox(height: Dimensions.height10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Bill Received', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomDropdown(
+                            dropdownItems: const ['Yes', 'No'],
+                            selectedValue: billReceived,
+                            onChanged: (newValue) {
+                              setState(() {
+                                billReceived = newValue!;
+                              });
+                            },
+                            width: Dimensions.height30 * 3,
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: Dimensions.width20),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Payment Paid', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomDropdown(
+                            dropdownItems: const ['Yes', 'No'],
+                            selectedValue: paymentPaid,
+                            onChanged: (newValue) {
+                              setState(() {
+                                paymentPaid = newValue!;
+                              });
+                            },
+                            width: Dimensions.height30 * 3,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: Dimensions.height10),
                   SizedBox(
                     height: MediaQuery.of(context).size.height / 1.5,
                     child: ListView.builder(
@@ -203,7 +233,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                             children: [
                               _buildInfoColumn('Invoice Date', invoiceDataList[index]['invoiceDate']),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Invoice Number', invoiceDataList[index]['invoiceNumber']),
+                              _buildInfoColumn('Invoice No', invoiceDataList[index]['invoiceNumber']),
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Rate', invoiceDataList[index]['rate']),
                             ],
