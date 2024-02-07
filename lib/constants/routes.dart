@@ -15,6 +15,8 @@ import 'package:d_manager/screens/manage_masters/manage_party/party_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_party/party_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_transport/transport_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_yarn_type/yarn_type_list.dart';
+import 'package:d_manager/screens/manage_yarn_purchase/manage_delivery_details/delivery_detail_add.dart';
+import 'package:d_manager/screens/manage_yarn_purchase/manage_delivery_details/delivery_detail_view.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_add.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_list.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
@@ -64,6 +66,10 @@ class AppRoutes {
   static const String yarnPurchaseList = '/yarn-purchase-list';
   static const String yarnPurchaseAdd = '/yarn-purchase-add';
   static const String yarnPurchaseView = '/yarn-purchase-view';
+
+  // Manage Delivery Details
+  static const String deliveryDetailAdd = '/delivery-detail-add';
+  static const String deliveryDetailView = '/delivery-detail-view';
 
   // Manage Cloth Sell
   static const String clothSellList = '/cloth-sell-list';
@@ -133,6 +139,18 @@ class AppRoutes {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
       return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData);
+    },
+
+    // Manage Delivery Details
+    deliveryDetailAdd: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? deliveryDetailData = args?['deliveryDetailData'];
+      return DeliveryDetailAdd(deliveryDetailData: deliveryDetailData);
+    },
+    deliveryDetailView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? deliveryDetailData = args?['deliveryDetailData'];
+      return DeliveryDetailView(deliveryDetailData: deliveryDetailData);
     },
 
     // Manage Cloth Sell

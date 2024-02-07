@@ -25,7 +25,7 @@ class _ClothSellViewState extends State<ClothSellView> {
     Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
 
     return CustomBody(
-      title: S.of(context).viewClothSellDealDetails,
+      title: 'Cloth Sell View',
       content: Padding(
         padding: EdgeInsets.all(Dimensions.height15),
         child: Column(

@@ -25,7 +25,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
 
-  List<Map<String, dynamic>> unfilteredDeliveryDetailList = [
+  List<Map<String, dynamic>> deliveryDetailList = [
     {'no': 1, 'dealDate': '2024-01-25', 'paymentType': 'Current', 'paymentMethod': 'Cheque', 'boxReceived': '500', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-10', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
     {'no': 2, 'dealDate': '2024-01-26', 'paymentType': 'Dhara', 'paymentMethod': 'RTGS', 'boxReceived': '400', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-12', 'paid': true, 'paidDate': '2024-02-05', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
     {'no': 3, 'dealDate': '2024-01-27', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '650', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-15', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'Completed'},
@@ -33,13 +33,6 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
     {'no': 5, 'dealDate': '2024-01-29', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '600', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-20', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
   ];
 
-  List<Map<String, dynamic>> deliveryDetailList = [];
-
-  @override
-  void initState() {
-    super.initState();
-    deliveryDetailList = unfilteredDeliveryDetailList;
-  }
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
@@ -207,7 +200,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd);
+                            Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd);
                           }
                       ),
                     ],
@@ -266,11 +259,11 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                         return CustomAccordion(
                           titleChild: Row(
                             children: [
-                              _buildInfoColumn('Deal Date', unfilteredDeliveryDetailList[index]['dealDate']),
+                              _buildInfoColumn('Deal Date', deliveryDetailList[index]['dealDate']),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Payment Type', unfilteredDeliveryDetailList[index]['paymentType']),
+                              _buildInfoColumn('Payment Type', deliveryDetailList[index]['paymentType']),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Payment Method', unfilteredDeliveryDetailList[index]['paymentMethod']),
+                              _buildInfoColumn('Payment Method', deliveryDetailList[index]['paymentMethod']),
                             ],
                           ),
                           contentChild: Column(
@@ -282,7 +275,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                 children: [
                                   _buildInfoColumn('Box Ordered', widget.yarnPurchaseData!['boxOrdered']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Received', unfilteredDeliveryDetailList[index]['boxReceived']),
+                                  _buildInfoColumn('Box Received', deliveryDetailList[index]['boxReceived']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Box Remaining', widget.yarnPurchaseData!['boxRemaining']),
                                 ],
@@ -290,49 +283,49 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Net Weight', unfilteredDeliveryDetailList[index]['netWeight']),
+                                  _buildInfoColumn('Net Weight', deliveryDetailList[index]['netWeight']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Rate', unfilteredDeliveryDetailList[index]['rate']),
+                                  _buildInfoColumn('Rate', deliveryDetailList[index]['rate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill Amount', unfilteredDeliveryDetailList[index]['billAmount']),
+                                  _buildInfoColumn('Bill Amount', deliveryDetailList[index]['billAmount']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('GST', unfilteredDeliveryDetailList[index]['GST']),
+                                  _buildInfoColumn('GST', deliveryDetailList[index]['GST']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Due Date', unfilteredDeliveryDetailList[index]['dueDate']),
+                                  _buildInfoColumn('Due Date', deliveryDetailList[index]['dueDate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Paid', unfilteredDeliveryDetailList[index]['paid'] == true ? 'Yes' : 'No'),
+                                  _buildInfoColumn('Paid', deliveryDetailList[index]['paid'] == true ? 'Yes' : 'No'),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Paid Date', unfilteredDeliveryDetailList[index]['paidDate']),
+                                  _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Amount Paid', unfilteredDeliveryDetailList[index]['amountPaid']),
+                                  _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Difference In Amount', unfilteredDeliveryDetailList[index]['differenceInAmount']),
+                                  _buildInfoColumn('Difference In Amount', deliveryDetailList[index]['differenceInAmount']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Cops', unfilteredDeliveryDetailList[index]['cops']),
+                                  _buildInfoColumn('Cops', deliveryDetailList[index]['cops']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Denyar', unfilteredDeliveryDetailList[index]['denyar']),
+                                  _buildInfoColumn('Denyar', deliveryDetailList[index]['denyar']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill Received', unfilteredDeliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
+                                  _buildInfoColumn('Bill Received', deliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('View PDF', unfilteredDeliveryDetailList[index]['viewPDF']),
+                                  _buildInfoColumn('View PDF', deliveryDetailList[index]['viewPDF']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Status', unfilteredDeliveryDetailList[index]['status']),
+                                  _buildInfoColumn('Status', deliveryDetailList[index]['status']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('', ''),
                                 ],
@@ -362,7 +355,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                               ),
                                               children: [
                                                 TextSpan(
-                                                  text: unfilteredDeliveryDetailList[index]['netWeight'],
+                                                  text: deliveryDetailList[index]['netWeight'],
                                                 ),
                                                 TextSpan(
                                                   text: ' kg',
@@ -403,20 +396,20 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailView, arguments: {'deliveryDetailData': deliveryDetailList[index]});
                                     },
                                     icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd, arguments: {'deliveryDetailData': deliveryDetailList[index]});
                                     },
                                     icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                                   ),
                                   IconButton(
                                     onPressed: () {
                                       setState(() {
-                                        unfilteredDeliveryDetailList.removeAt(index);
+                                        deliveryDetailList.removeAt(index);
                                       });
                                     },
                                     icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
@@ -430,10 +423,10 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                     activeBorderColor: AppTheme.primary,
                                     onChanged: (value) {
                                       setState(() {
-                                        unfilteredDeliveryDetailList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                        deliveryDetailList[index]['status'] = value == true ? 'Completed' : 'On Going';
                                       });
                                     },
-                                    value: unfilteredDeliveryDetailList[index]['status'] == 'Completed' ? true : false,
+                                    value: deliveryDetailList[index]['status'] == 'Completed' ? true : false,
                                     inactiveIcon: null,
                                   ),
                                 ],

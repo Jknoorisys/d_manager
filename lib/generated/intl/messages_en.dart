@@ -54,6 +54,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Confirm Password must be at least 6 characters"),
         "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
+        "deliveryDetail":
+            MessageLookupByLibrary.simpleMessage("Delivery Detail"),
         "didntReceiveTheCode":
             MessageLookupByLibrary.simpleMessage("Didn\'t receive the code?"),
         "editFirm": MessageLookupByLibrary.simpleMessage("Edit Firm"),

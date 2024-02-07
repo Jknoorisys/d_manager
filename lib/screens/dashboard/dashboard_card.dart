@@ -6,12 +6,21 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class DashboardCard extends StatelessWidget {
+class DashboardCard extends StatefulWidget {
   final String? title;
   final String? value;
   final String? date;
   final String? image;
   const DashboardCard({Key? key, this.title, this.value, this.date, this.image}) : super(key: key);
+
+  @override
+  State<DashboardCard> createState() => _DashboardCardState();
+}
+
+class _DashboardCardState extends State<DashboardCard> {
+  DateTime selectedDate = DateTime.now();
+  DateTime firstDate = DateTime.now();
+  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +54,23 @@ class DashboardCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
                           ),
-                          onPressed: (){},
+                          onPressed: () async {
+                            DateTime? pickedDate = (
+                              await showDateRangePicker(
+                                initialEntryMode: DatePickerEntryMode.input,
+                                helpText: S.of(context).selectDate,
+                                context: context,
+                                firstDate: firstDate,
+                                lastDate: lastDate,
+                              )
+                            ) as DateTime?;
+
+                            if (pickedDate != null && pickedDate != selectedDate) {
+                              setState(() {
+                                selectedDate = pickedDate;
+                              });
+                            }
+                          },
                           child: Row(
                             children: [
                               SmallText(text: S.of(context).selectDate, color: AppTheme.white,),
@@ -86,7 +111,7 @@ class DashboardCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           SvgPicture.asset(
-                            image ?? AppImages.purchaseIcon,
+                            widget.image ?? AppImages.purchaseIcon,
                             width: Dimensions.height50,
                             height: Dimensions.height50,
                           ),
@@ -94,13 +119,13 @@ class DashboardCard extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(title ?? S.of(context).totalPurchaseAmount,
+                              Text(widget.title ?? S.of(context).totalPurchaseAmount,
                                 style: AppTheme.title.copyWith(color: AppTheme.white)),
                               Row(
                                 children: [
                                   const Icon(Icons.currency_rupee,
                                     color: AppTheme.secondary,),
-                                  Text(value ?? "1,50,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                  Text(widget.value ?? "1,50,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                 ],
                               )
                             ],
@@ -115,7 +140,7 @@ class DashboardCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                              Text(date ?? "31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                              Text(widget.date ?? "31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                             ],
                           )
                         ],

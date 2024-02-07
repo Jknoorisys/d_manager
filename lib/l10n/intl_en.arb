@@ -84,5 +84,6 @@
   "clothSellList": "Cloth Sell List",
   "editFirm": "Edit Firm",
   "yarnPurchaseDealDetails": "Yarn Purchase Deal Details",
-  "searchDeliveryDetails": "Search Delivery Details"
+  "searchDeliveryDetails": "Search Delivery Details",
+  "deliveryDetail": "Delivery Detail"
 }
