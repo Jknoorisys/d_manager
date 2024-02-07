@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
-import 'package:getwidget/components/checkbox/gf_checkbox.dart';
-import 'package:getwidget/types/gf_checkbox_type.dart';
+import '../../../constants/routes.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/texts.dart';
 
@@ -19,132 +18,185 @@ class InvoiceView extends StatefulWidget {
 }
 
 class _InvoiceViewState extends State<InvoiceView> {
+  List<DeliveryDetails> transportDetails = [];
+
+  void _addTransportDetails(
+      String deliveryDate, String transportName, String hammalName) {
+    setState(() {
+      transportDetails.add(
+        DeliveryDetails(
+          deliveryDate: deliveryDate,
+          transportName: transportName,
+          hammalName: hammalName,
+        ),
+      );
+    });
+  }
+
+  void _deleteDeliveryDetails(int index) {
+    setState(() {
+      transportDetails.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
-        content: CustomBody(
+      content: CustomBody(
           content: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dimensions.width10),
-              child: Column(
-                children: [
-                  CustomAccordionWithoutExpanded(
-                    titleChild: Row(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: Dimensions.width10),
+          child: Column(
+            children: [
+              CustomAccordionWithoutExpanded(
+                titleChild: Row(
+                  children: [
+                    _buildInfoColumn(
+                        'Invoice Date', widget.invoiceData?['invoiceDate']),
+                    SizedBox(width: Dimensions.width20),
+                    _buildInfoColumn(
+                        'Invoice No', widget.invoiceData?['invoiceNumber']),
+                    SizedBox(width: Dimensions.width20),
+                    _buildInfoColumn('Rate', widget.invoiceData?['rate']),
+                  ],
+                ),
+                contentChild: Column(
+                  children: [
+                    AppTheme.divider,
+                    SizedBox(height: Dimensions.height10),
+                    Row(
                       children: [
-                        _buildInfoColumn('Invoice Date', widget.invoiceData?['invoiceDate']),
+                        _buildInfoColumn(
+                            'Bale Number', widget.invoiceData?['baleNumber']),
                         SizedBox(width: Dimensions.width20),
-                        _buildInfoColumn('Invoice No', widget.invoiceData?['invoiceNumber']),
+                        _buildInfoColumn('Than', widget.invoiceData?['than']),
                         SizedBox(width: Dimensions.width20),
-                        _buildInfoColumn('Rate', widget.invoiceData?['rate']),
+                        _buildInfoColumn('Meter', widget.invoiceData?['meter']),
                       ],
                     ),
-                    contentChild: Column(
+                    SizedBox(height: Dimensions.height10),
+                    Row(
                       children: [
-                        AppTheme.divider,
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Bale Number', widget.invoiceData?['baleNumber']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than', widget.invoiceData?['than']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Meter', widget.invoiceData?['meter']),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Cloth Quality', widget.invoiceData?['clothQuality']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('GST', widget.invoiceData?['gst']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Invoice Amount', widget.invoiceData?['invoiceAmount']),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Payment Type', widget.invoiceData?['paymentType']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Additional Discount', widget.invoiceData?['additionalDiscount']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Payment Received', widget.invoiceData?['paymentReceived']),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Payment Amount Received', widget.invoiceData?['paymentAmountReceived']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Difference in Amount', widget.invoiceData?['differenceInAmount']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Payment Method', widget.invoiceData?['paymentMethod']),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Due Date', widget.invoiceData?['dueDate']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Payment Received Date', widget.invoiceData?['paymentReceivedDate']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Reason', widget.invoiceData?['reason']),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('View PDF', 'viewPDF'),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Status', 'status'),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('', ''),
-                          ],
-                        ),
+                        _buildInfoColumn('Cloth Quality',
+                            widget.invoiceData?['clothQuality']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('GST', widget.invoiceData?['gst']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Invoice Amount',
+                            widget.invoiceData?['invoiceAmount']),
                       ],
                     ),
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Dimensions.width10,
-                    vertical: Dimensions.height10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    SizedBox(height: Dimensions.height10),
+                    Row(
                       children: [
-                        Text('Add Transport Details', style: AppTheme.heading2),
-                        CustomIconButton(
-                            radius: Dimensions.radius10,
-                            backgroundColor: AppTheme.primary,
-                            iconColor: AppTheme.white,
-                            iconData: Icons.add,
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return const TransportDetailAdd();
-                                },
-                              );
-                            }
-                        ),
+                        _buildInfoColumn(
+                            'Payment Type', widget.invoiceData?['paymentType']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Additional Discount',
+                            widget.invoiceData?['additionalDiscount']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Payment Received',
+                            widget.invoiceData?['paymentReceived']),
                       ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: Dimensions.height10),
+                    Row(
+                      children: [
+                        _buildInfoColumn('Payment Amount Received',
+                            widget.invoiceData?['paymentAmountReceived']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Difference in Amount',
+                            widget.invoiceData?['differenceInAmount']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Payment Method',
+                            widget.invoiceData?['paymentMethod']),
+                      ],
+                    ),
+                    SizedBox(height: Dimensions.height10),
+                    Row(
+                      children: [
+                        _buildInfoColumn(
+                            'Due Date', widget.invoiceData?['dueDate']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Payment Received Date',
+                            widget.invoiceData?['paymentReceivedDate']),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn(
+                            'Reason', widget.invoiceData?['reason']),
+                      ],
+                    ),
+                    SizedBox(height: Dimensions.height10),
+                    Row(
+                      children: [
+                        _buildInfoColumn('View PDF', 'viewPDF'),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('Status', 'status'),
+                        SizedBox(width: Dimensions.width20),
+                        _buildInfoColumn('', ''),
+                      ],
+                    ),
+                  ],
+                ),
               ),
+              SizedBox(height: Dimensions.height10),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: Dimensions.width10,
+                    vertical: Dimensions.height10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Add Transport Details', style: AppTheme.heading2),
+                    CustomIconButton(
+                        radius: Dimensions.radius10,
+                        backgroundColor: AppTheme.primary,
+                        iconColor: AppTheme.white,
+                        iconData: Icons.add,
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return TransportDetailAdd(
+                                addDeliveryDetails: _addTransportDetails,
+                              );
+                              //return DeliveryListScreen();
+                            },
+                          );
+                        }
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          )
+          ),
         )
+      ),
     );
   }
+
   Widget _buildInfoColumn(String title, String value) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(
+              text: value, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );
   }
+}
+
+class DeliveryDetails {
+  String deliveryDate;
+  String transportName;
+  String hammalName;
+
+  DeliveryDetails({
+    required this.deliveryDate,
+    required this.transportName,
+    required this.hammalName,
+  });
 }

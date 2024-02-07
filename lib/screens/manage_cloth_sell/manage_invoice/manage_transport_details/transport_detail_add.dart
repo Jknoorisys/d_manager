@@ -9,10 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
+import '../../../widgets/text_field.dart';
+
 class TransportDetailAdd extends StatefulWidget {
   final Map<String, dynamic>? transportDetailData;
-  const TransportDetailAdd({Key? key, this.transportDetailData}) : super(key: key);
-
+  const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
   @override
   _TransportDetailAddState createState() => _TransportDetailAddState();
 }
@@ -31,9 +32,25 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       selectedDate = DateFormat('dd-MM-yyyy').parse(widget.transportDetailData!['transportDate']);
     }
   }
+  TextEditingController transportNameController = TextEditingController();
+  TextEditingController hammalNameController = TextEditingController();
+  List<DeliveryDetails> transportDetails = [];
+  void _addDeliveryDetails(
+      String deliveryDate, String transportName, String hammalName) {
+    setState(() {
+      transportDetails.add(
+        DeliveryDetails(
+          deliveryDate: deliveryDate,
+          transportName: transportName,
+          hammalName: hammalName,
+        ),
+      );
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return
+      AlertDialog(
       backgroundColor: AppTheme.white,
       elevation: 10,
       surfaceTintColor: AppTheme.white,
@@ -60,7 +77,7 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BigText(text: 'Select Transport Date', size: Dimensions.font12,),
+              BigText(text: 'Select Delivery Date', size: Dimensions.font12,),
               Gap(Dimensions.height10/2),
               CustomDatePicker(
                 selectedDate: selectedDate,
@@ -71,6 +88,18 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             ],
           ),
           SizedBox(height: Dimensions.height15),
+          // CustomTextField(
+          //   controller: transportNameController,
+          //   labelText: S.of(context).transportName,
+          //   keyboardType: TextInputType.text,
+          //   borderColor: AppTheme.primary,
+          // ),
+          // CustomTextField(
+          //   controller: hammalNameController,
+          //   labelText: S.of(context).hammal,
+          //   keyboardType: TextInputType.text,
+          //   borderColor: AppTheme.primary,
+          // ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,6 +142,12 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       actions: [
         CustomElevatedButton(
           onPressed: () {
+            //Navigator.of(context).pop();
+            _addDeliveryDetails(
+              DateFormat('dd-MM-yyyy').format(selectedDate),
+              transportNameController.text,
+              hammalNameController.text,
+            );
             Navigator.of(context).pop();
           },
           buttonText: "Submit",
@@ -120,5 +155,15 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       ],
     );
   }
-  
+}
+class DeliveryDetails {
+  String deliveryDate;
+  String transportName;
+  String hammalName;
+
+  DeliveryDetails({
+    required this.deliveryDate,
+    required this.transportName,
+    required this.hammalName,
+  });
 }
