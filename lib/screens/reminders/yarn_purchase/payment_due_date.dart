@@ -33,7 +33,7 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
               ListView.builder(
                 itemCount: paymentDueDate.length,
                 itemBuilder: (context, index) {
-                  return CustomAccordion(
+                  return CustomAccordionWithoutExpanded(
                     titleChild: Column(
                       children: [
                         Row(
@@ -74,12 +74,14 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
                         SizedBox(height: Dimensions.height10),
                         AppTheme.divider,
                         SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Cloth Quality', paymentDueDate[index]['clothQuality']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Amount To Be Received', paymentDueDate[index]['balanceAmount']),
-                          ],
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Dimensions.width15),
+                          child: Row(
+                            children: [
+                              _buildInfoColumn('Cloth Quality', paymentDueDate[index]['clothQuality']),
+                              _buildInfoColumn('Amount To Be Received', paymentDueDate[index]['balanceAmount']),
+                            ],
+                          ),
                         ),
                       ],
                     ),
