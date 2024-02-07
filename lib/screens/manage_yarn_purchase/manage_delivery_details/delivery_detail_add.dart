@@ -41,7 +41,6 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
   double amountPaid = 0.0;
   bool isBillReceived = false;
   FilePickerResult? billImageResult;
-  FilePickerResult? billPdfResult;
 
 
   TextEditingController amountPaidController = TextEditingController();

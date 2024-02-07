@@ -308,13 +308,13 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': invoiceDataList[index]});
                                     },
                                     icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
                                     },
                                     icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                                   ),
