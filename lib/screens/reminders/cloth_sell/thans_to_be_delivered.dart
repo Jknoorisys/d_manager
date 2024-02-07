@@ -39,7 +39,7 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
               ListView.builder(
                 itemCount: thansToBeDelivered.length,
                 itemBuilder: (context, index) {
-                  return CustomAccordion(
+                  return CustomAccordionWithoutExpanded(
                     titleChild: Column(
                       children: [
                         Row(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/routes.dart';
 import '../../../generated/l10n.dart';
 import '../../widgets/body.dart';
 import '../../widgets/drawer/zoom_drawer.dart';
@@ -37,7 +38,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
               ListView.builder(
                 itemCount: boxToBeReceived.length,
                 itemBuilder: (context, index) {
-                  return CustomAccordion(
+                  return CustomAccordionWithoutExpanded(
                     titleChild: Column(
                       children: [
                         Row(
@@ -156,7 +157,9 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             CustomElevatedButton(
-                              onPressed: (){},
+                              onPressed: (){
+                                //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': boxToBeReceived[index]});
+                              },
                               buttonText: 'View Details',
                               isBackgroundGradient: false,
                               backgroundColor: AppTheme.primary,

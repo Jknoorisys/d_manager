@@ -1,14 +1,10 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../../../generated/l10n.dart';
 import '../../widgets/body.dart';
 import '../../widgets/drawer/zoom_drawer.dart';
-
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 
@@ -25,7 +21,6 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
     {'no': 2, 'dueDate': '2024-01-26','myFirm': 'Danish Textiles','partyName':'Jaju Cloth Traders','clothQuality': '6-kilo','dueAmount':'2,00,000'},
     {'no': 3, 'dueDate': '2024-01-27','myFirm': 'Danish Textiles','partyName':'Kalantri Textiles','clothQuality': '3-kilo','dueAmount':'90000'},
     {'no': 4, 'dueDate': '2024-01-28','myFirm': 'Danish Textiles','partyName':'Bablu Tex','clothQuality': '2-kilo','dueAmount':'1,40,000'},
-
   ];
   @override
   Widget build(BuildContext context) {
@@ -39,7 +34,7 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
               ListView.builder(
                 itemCount: paymentToBeReceived.length,
                 itemBuilder: (context, index) {
-                  return CustomAccordion(
+                  return CustomAccordionWithoutExpanded(
                     titleChild: Column(
                       children: [
                         Row(
