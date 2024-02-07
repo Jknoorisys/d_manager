@@ -900,6 +900,16 @@ class S {
     );
   }
 
+  /// `Cloth Sell Deal Details`
+  String get viewSellDealDetails {
+    return Intl.message(
+      'Cloth Sell Deal Details',
+      name: 'viewSellDealDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Search Delivery Details`
   String get searchDeliveryDetails {
     return Intl.message(
