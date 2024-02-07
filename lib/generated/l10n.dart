@@ -899,7 +899,6 @@ class S {
       args: [],
     );
   }
-
   /// `Cloth Sell Deal Details`
   String get viewSellDealDetails {
     return Intl.message(
