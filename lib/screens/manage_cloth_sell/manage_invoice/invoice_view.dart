@@ -101,38 +101,6 @@ class _InvoiceViewState extends State<InvoiceView> {
                             _buildInfoColumn('', ''),
                           ],
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // IconButton(
-                            //   onPressed: () {
-                            //     //Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': widget.invoiceData?});
-                            //   },
-                            //   icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
-                            // ),
-                            IconButton(
-                              onPressed: () {
-                                //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList});
-                              },
-                              icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
-                            ),
-                            // GFCheckbox(
-                            //   size: Dimensions.height20,
-                            //   type: GFCheckboxType.custom,
-                            //   inactiveBgColor: AppTheme.nearlyWhite,
-                            //   inactiveBorderColor: AppTheme.primary,
-                            //   customBgColor: AppTheme.primary,
-                            //   activeBorderColor: AppTheme.primary,
-                            //   onChanged: (value) {
-                            //     setState(() {
-                            //       widget.invoiceData?['status'] = value == true ? 'Completed' : 'On Going';
-                            //     });
-                            //   },
-                            //   value: widget.invoiceData?['status'] == 'Completed' ? true : false,
-                            //   inactiveIcon: null,
-                            // ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
