@@ -169,29 +169,6 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 },
                                 icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                             ),
-                            IconButton(
-                                onPressed: () {
-                                  // setState(() {
-                                  //   unFilteredClothSellList.removeAt(index);
-                                  // });
-                                },
-                                icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                            ),
-                            GFCheckbox(
-                              size: Dimensions.height20,
-                              type: GFCheckboxType.custom,
-                              inactiveBgColor: AppTheme.nearlyWhite,
-                              inactiveBorderColor: AppTheme.primary,
-                              customBgColor: AppTheme.primary,
-                              activeBorderColor: AppTheme.primary,
-                              onChanged: (value) {
-                                setState(() {
-                                  clothSellData['status'] = value == true ? 'Completed' : 'Ongoing';
-                                });
-                              },
-                              value: clothSellData['status'] == 'Completed' ? true : false,
-                              inactiveIcon: null,
-                            ),
                           ],
                         ),
                       ],
@@ -295,66 +272,6 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
-                              // Row(
-                              //   children: [
-                              //     Container(
-                              //         width: MediaQuery.of(context).size.width/2.65,
-                              //         height: Dimensions.height40*2,
-                              //         padding: EdgeInsets.all(Dimensions.height10),
-                              //         decoration: BoxDecoration(
-                              //           color: AppTheme.white,
-                              //           borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                              //           border: Border.all(color: AppTheme.primary),
-                              //         ),
-                              //         child: Column(
-                              //           crossAxisAlignment: CrossAxisAlignment.start,
-                              //           children: [
-                              //             BigText(text: 'Total Net Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                              //             RichText(
-                              //               text: TextSpan(
-                              //                 style: TextStyle(
-                              //                   color: AppTheme.primary,
-                              //                   fontSize: Dimensions.font18,
-                              //                   fontWeight: FontWeight.bold,
-                              //                 ),
-                              //                 children: [
-                              //                   TextSpan(
-                              //                     text: unfilteredDeliveryDetailList[index]['netWeight'],
-                              //                   ),
-                              //                   TextSpan(
-                              //                     text: ' kg',
-                              //                     style: TextStyle(
-                              //                       fontSize: Dimensions.font12,
-                              //                     ),
-                              //                   ),
-                              //                 ],
-                              //               ),
-                              //             ),
-                              //             BigText(text: 'Gross Weight ${widget.yarnPurchaseData!['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                              //           ],
-                              //         )
-                              //     ),
-                              //     SizedBox(width: Dimensions.width20),
-                              //     Container(
-                              //         width: MediaQuery.of(context).size.width/2.65,
-                              //         height: Dimensions.height40*2,
-                              //         padding: EdgeInsets.all(Dimensions.height10),
-                              //         decoration: BoxDecoration(
-                              //           color: AppTheme.white,
-                              //           borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                              //           border: Border.all(color: AppTheme.primary),
-                              //         ),
-                              //         child: Column(
-                              //           crossAxisAlignment: CrossAxisAlignment.start,
-                              //           children: [
-                              //             BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                              //             BigText(text: '₹ ${widget.yarnPurchaseData!['rate']}',color: AppTheme.primary, size: Dimensions.font18)
-                              //           ],
-                              //         )
-                              //     ),
-                              //   ],
-                              // ),
-                              SizedBox(height: Dimensions.height10),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -378,21 +295,21 @@ class _ClothSellViewState extends State<ClothSellView> {
                                     },
                                     icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
                                   ),
-                                  // GFCheckbox(
-                                  //   size: Dimensions.height20,
-                                  //   type: GFCheckboxType.custom,
-                                  //   inactiveBgColor: AppTheme.nearlyWhite,
-                                  //   inactiveBorderColor: AppTheme.primary,
-                                  //   customBgColor: AppTheme.primary,
-                                  //   activeBorderColor: AppTheme.primary,
-                                  //   onChanged: (value) {
-                                  //     setState(() {
-                                  //      // unfilteredDeliveryDetailList[index]['status'] = value == true ? 'Completed' : 'On Going';
-                                  //     });
-                                  //   },
-                                  //   value: unfilteredDeliveryDetailList[index]['status'] == 'Completed' ? true : false,
-                                  //   inactiveIcon: null,
-                                  // ),
+                                  GFCheckbox(
+                                    size: Dimensions.height20,
+                                    type: GFCheckboxType.custom,
+                                    inactiveBgColor: AppTheme.nearlyWhite,
+                                    inactiveBorderColor: AppTheme.primary,
+                                    customBgColor: AppTheme.primary,
+                                    activeBorderColor: AppTheme.primary,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        invoiceDataList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                      });
+                                    },
+                                    value: invoiceDataList[index]['status'] == 'Completed' ? true : false,
+                                    inactiveIcon: null,
+                                  ),
                                 ],
                               ),
                             ],
