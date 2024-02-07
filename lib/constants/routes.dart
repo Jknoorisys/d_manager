@@ -7,6 +7,8 @@ import 'package:d_manager/screens/dashboard/dashboard.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_add.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_list.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_view.dart';
+import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_add.dart';
+import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_view.dart';
 import 'package:d_manager/screens/manage_history/purchase_history.dart';
 import 'package:d_manager/screens/manage_history/sell_history.dart';
 import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_list.dart';
@@ -75,6 +77,10 @@ class AppRoutes {
   static const String clothSellList = '/cloth-sell-list';
   static const String clothSellAdd = '/cloth-sell-add';
   static const String clothSellView = '/cloth-sell-view';
+
+  // Manage Invoices
+  static const String invoiceAdd = '/invoice-add';
+  static const String invoiceView = '/invoice-view';
 
   // Reminder screens
   static const String boxToBeReceived = '/box-to-be-received';
@@ -164,6 +170,18 @@ class AppRoutes {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       final Map<String, dynamic>? clothSellData = args?['clothSellData'];
       return ClothSellView(clothSellData: clothSellData);
+    },
+
+    // Manage Invoices
+    invoiceAdd: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? invoiceData = args?['invoiceData'];
+      return InvoiceAdd(invoiceData: invoiceData);
+    },
+    invoiceView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? invoiceData = args?['invoiceData'];
+      return InvoiceView(invoiceData: invoiceData);
     },
 
     //Manage Purchase Reminders

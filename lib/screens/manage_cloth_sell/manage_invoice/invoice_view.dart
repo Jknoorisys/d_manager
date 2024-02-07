@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class InvoiceView extends StatefulWidget {
-  const InvoiceView({Key? key}) : super(key: key);
+  final Map<String, dynamic>? invoiceData;
+  const InvoiceView({Key? key, this.invoiceData}) : super(key: key);
 
   @override
   _InvoiceViewState createState() => _InvoiceViewState();
