@@ -57,12 +57,11 @@ class _PartyAddState extends State<PartyAdd> {
         errorAccountHolderName = submitted == true ? _validateAccountHolderName(accountHolderNameController.text) : null,
         errorBankName = submitted == true ? _validateBankName(bankNameController.text) : null,
         errorIFSCCode = submitted == true ? _validateIFSCCode(ifscCodeController.text) : null,
-        errorAccountNumber = submitted == true ? _validateAccountNumber(accountNumberController.text) : null,
-        errorPartyState = isInMaharashtra ? '' : 'Please select Party State';
+        errorAccountNumber = submitted == true ? _validateAccountNumber(accountNumberController.text) : null;
 
     return CustomDrawer(
         content: CustomBody(
-          title: S.of(context).addParty,
+          title: widget.partyData == null ? S.of(context).addParty : 'Edit Party',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -339,6 +338,6 @@ class _PartyAddState extends State<PartyAdd> {
     String accountNumberError = _validateAccountNumber(accountNumberController.text) ?? '';
     String partyStateError = isInMaharashtra ? '' : 'Please select Party State';
 
-    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && partyStateError.isEmpty;
+    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && partyStateError.isEmpty ? true : false;
   }
 }

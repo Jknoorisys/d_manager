@@ -879,6 +879,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit Firm`
+  String get editFirm {
+    return Intl.message(
+      'Edit Firm',
+      name: 'editFirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yarn Purchase Deal Details`
+  String get yarnPurchaseDealDetails {
+    return Intl.message(
+      'Yarn Purchase Deal Details',
+      name: 'yarnPurchaseDealDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search Delivery Details`
+  String get searchDeliveryDetails {
+    return Intl.message(
+      'Search Delivery Details',
+      name: 'searchDeliveryDetails',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

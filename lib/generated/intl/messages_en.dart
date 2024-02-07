@@ -56,6 +56,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
         "didntReceiveTheCode":
             MessageLookupByLibrary.simpleMessage("Didn\'t receive the code?"),
+        "editFirm": MessageLookupByLibrary.simpleMessage("Edit Firm"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailIsRequired":
             MessageLookupByLibrary.simpleMessage("Email is required"),
@@ -118,6 +119,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPassword": MessageLookupByLibrary.simpleMessage("Reset Password"),
         "searchClothQuality":
             MessageLookupByLibrary.simpleMessage("Search Cloth Quality"),
+        "searchDeliveryDetails":
+            MessageLookupByLibrary.simpleMessage("Search Delivery Details"),
         "searchFirm": MessageLookupByLibrary.simpleMessage("Search Firm"),
         "searchHammal": MessageLookupByLibrary.simpleMessage("Search Hammal"),
         "searchParty": MessageLookupByLibrary.simpleMessage("Search Party"),
@@ -140,6 +143,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "transportList": MessageLookupByLibrary.simpleMessage("Transport List"),
         "verify": MessageLookupByLibrary.simpleMessage("VERIFY"),
         "yarnPurchase": MessageLookupByLibrary.simpleMessage("Yarn Purchase"),
+        "yarnPurchaseDealDetails":
+            MessageLookupByLibrary.simpleMessage("Yarn Purchase Deal Details"),
         "yarnPurchasesList":
             MessageLookupByLibrary.simpleMessage("Yarn Purchases List"),
         "yarnType": MessageLookupByLibrary.simpleMessage("Yarn Type"),

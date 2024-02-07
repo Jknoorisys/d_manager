@@ -81,5 +81,8 @@
   "selectDate": "Select Date",
   "totalPurchaseAmount": "Total Purchase Amount",
   "yarnPurchasesList": "Yarn Purchases List",
-  "clothSellList": "Cloth Sell List"
+  "clothSellList": "Cloth Sell List",
+  "editFirm": "Edit Firm",
+  "yarnPurchaseDealDetails": "Yarn Purchase Deal Details",
+  "searchDeliveryDetails": "Search Delivery Details"
 }

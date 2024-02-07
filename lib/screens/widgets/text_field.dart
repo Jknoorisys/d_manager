@@ -121,6 +121,8 @@ class CustomTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final Function? onTap;
   final Function? onSuffixTap;
+  final double? height;
+  final double? width;
 
   const CustomTextField({
     super.key,
@@ -140,7 +142,7 @@ class CustomTextField extends StatelessWidget {
     this.onSuffixTap,
     this.borderRadius,
     this.maxLines,
-    this.borderColor,
+    this.borderColor, this.height, this.width,
   });
 
   @override
@@ -153,13 +155,17 @@ class CustomTextField extends StatelessWidget {
       obscureText: isObscure,
       maxLines: maxLines ?? 1,
       decoration: InputDecoration(
+        constraints: BoxConstraints(
+          maxHeight: height ?? double.maxFinite,
+          maxWidth: width ?? double.maxFinite,
+        ),
+        contentPadding: EdgeInsets.symmetric(vertical: Dimensions.width10, horizontal: Dimensions.width10),
         labelText: labelText,
         labelStyle: AppTheme.hintText.copyWith(color: borderColor ?? AppTheme.deactivatedText),
         hintText: hintText,
         hintStyle: AppTheme.hintText.copyWith(color: borderColor ?? AppTheme.deactivatedText),
         fillColor: fillColor ?? Colors.white,
         filled: isFilled,
-        contentPadding: EdgeInsets.all(Dimensions.height15),
         prefixIcon: prefixIcon != null ? IconButton(icon: Icon(prefixIcon), color: AppTheme.primary, onPressed: (){
               onTap!();
             },) : null,

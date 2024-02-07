@@ -1,6 +1,8 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/body.dart';
+import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -19,26 +21,56 @@ class YarnPurchaseAdd extends StatefulWidget {
 }
 
 class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
-  String deliveryType = 'Current';
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mahesh Textiles';
-  String yarnType = 'Golden';
-  String status = 'On Going';
-  String dharaOption = '15 days';
-  TextEditingController otherDharaController = TextEditingController();
-
+  bool submitted = false;
   DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 365));
+  String paymentType = 'Current';
+  String myFirm = 'Danish Textiles';
+  String partyName = 'Mehta and Sons Yarn Trades';
+  String yarnName = 'Golden';
+  String yarnType = 'Roto';
+  String status = 'On Going';
+  String dharaOption = '15 days';
+
+
+  TextEditingController lotNumberController = TextEditingController();
+  TextEditingController netWeightController = TextEditingController();
+  TextEditingController boxOrderedController = TextEditingController();
+  TextEditingController denyarController = TextEditingController();
+  TextEditingController rateController = TextEditingController();
+  TextEditingController copsController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    if (widget.yarnPurchaseData != null) {
+      selectedDate = DateFormat('dd-MM-yyyy').parse(widget.yarnPurchaseData!['dealDate']);
+      myFirm = widget.yarnPurchaseData!['myFirm'];
+      partyName = widget.yarnPurchaseData!['partyName'];
+      status = widget.yarnPurchaseData!['status'];
+      lotNumberController.text = widget.yarnPurchaseData!['lotNumber'];
+      netWeightController.text = widget.yarnPurchaseData!['totalNetWeight'];
+      yarnName = widget.yarnPurchaseData!['yarnName'];
+      yarnType = widget.yarnPurchaseData!['yarnType'];
+      boxOrderedController.text = widget.yarnPurchaseData!['boxOrdered'];
+      denyarController.text = widget.yarnPurchaseData!['Deiner'];
+      rateController.text = widget.yarnPurchaseData!['rate'];
+      copsController.text = widget.yarnPurchaseData!['cops'];
+      paymentType = widget.yarnPurchaseData!['paymentType'];
+    }
   }
   @override
   Widget build(BuildContext context) {
+    var errorLotNumber = submitted == true ? _validateLotNumber(lotNumberController.text) : null,
+        errorNetWeight = submitted == true ? _validateNetWeight(netWeightController.text) : null,
+        errorBoxOrdered = submitted == true ? _validateBoxOrdered(boxOrderedController.text) : null,
+        errorDenyar = submitted == true ? _validateDenyar(denyarController.text) : null,
+        errorRate = submitted == true ? _validateRate(rateController.text) : null,
+        errorCops = submitted == true ? _validateCops(copsController.text) : null;
     return CustomDrawer(
         content: CustomBody(
+          title: widget.yarnPurchaseData == null ? 'Create Yarn Purchase Deal' : 'Update Yarn Purchase Deal',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -52,23 +84,37 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        "Deal Details",
-                        style: AppTheme.heading2,
-                      ),
+                      // Deal Details
+                      Text("Deal Details", style: AppTheme.heading2,),
                       Gap(Dimensions.height10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
-                          CustomDropdown(
-                            dropdownItems: ['Danish Textiles', 'SS Textiles', 'Mahesh Textiles and Sons', 'Laxmi Traders'],
-                            selectedValue: myFirm,
-                            onChanged: (newValue) {
-                              setState(() {
-                                myFirm = newValue!;
-                              });
-                            },
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Select Deal Date', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomDropdown(
+                                dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles and Sons', 'Laxmi Traders'],
+                                selectedValue: myFirm,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    myFirm = newValue!;
+                                  });
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -80,42 +126,16 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Select Party', size: Dimensions.font12,),
+                              BigText(text: 'Select Party Name', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              Container(
-                                height: Dimensions.height50,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(Dimensions.radius10),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 1,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: DropdownButton<String>(
-                                    value: partyName,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        partyName = newValue!;
-                                      });
-                                    },
-                                    underline: Container( // Add this line to remove the underline
-                                      height: 0,
-                                      color: Colors.transparent,
-                                    ),
-                                    items: ['Mahesh Textiles', 'Laxmi Traders'].map<DropdownMenuItem<String>>((String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: BigText(text: value, size: Dimensions.font14,),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
+                              CustomDropdown(
+                                dropdownItems: ['SS Textile', 'Nageena Textile', 'Mehta and Sons Yarn Trades', 'Bluesky Cloth Sale', 'Suntex Textiles'],
+                                selectedValue: partyName,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    partyName = newValue!;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -123,53 +143,25 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Select Yarn Type', size: Dimensions.font12,),
+                              BigText(text: 'Status', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              Container(
-                                height: Dimensions.height50,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(Dimensions.radius10),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 1,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: DropdownButton<String>(
-                                    value: yarnType,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        yarnType = newValue!;
-                                      });
-                                    },
-                                    underline: Container( // Add this line to remove the underline
-                                      height: 0,
-                                      color: Colors.transparent,
-                                    ),
-                                    items: ['Golden', 'Bhilosa'].map<DropdownMenuItem<String>>((String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: BigText(text: value, size: Dimensions.font14,),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
+                              CustomDropdown(
+                                dropdownItems: ['On Going', 'Completed'],
+                                selectedValue: status,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    status = newValue!;
+                                  });
+                                },
                               ),
                             ],
                           ),
                         ],
                       ),
-                      Gap(Dimensions.height20),
-                      Gap(Dimensions.height10),
-                      Text(
-                        "Purchase Details",
-                        style: TextStyle(fontSize: Dimensions.font18, fontWeight: FontWeight.bold),
-                      ),
+                      Gap(Dimensions.height30),
+
+                      // Purchase Details
+                      Text("Purchase Details", style: AppTheme.heading2,),
                       Gap(Dimensions.height10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -180,79 +172,52 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Lot Number', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              AppTextField(
+                              CustomTextField(
+                                controller: lotNumberController,
                                 hintText: "Enter Lot Number",
-                                isSuffixIcon: false,
-                                textInputType: TextInputType.number,
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
+                                errorText: errorLotNumber.toString() != 'null' ? errorLotNumber.toString() : '',
                               ),
                             ],
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select Delivery Type', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              Container(
-                                height: Dimensions.height50,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(Dimensions.radius10),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 1,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: DropdownButton<String>(
-                                    value: deliveryType,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        deliveryType = newValue!;
-                                      });
-                                    },
-                                    underline: Container( // Add this line to remove the underline
-                                      height: 0,
-                                      color: Colors.transparent,
-                                    ),
-                                    items: ['Current', 'Dhara'].map<DropdownMenuItem<String>>((String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: BigText(text: value, size: Dimensions.font14,),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Gap(Dimensions.height20),
-                      if (deliveryType == 'Current')
-                        _buildCurrentFields()
-                      else
-                        _buildDharaFields(),
-                      Gap(Dimensions.height20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               BigText(text: 'Net Weight', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              AppTextField(
+                              CustomTextField(
+                                controller: netWeightController,
                                 hintText: "Enter Net Weight",
-                                isSuffixIcon: false,
-                                textInputType: TextInputType.number,
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
+                                errorText: errorNetWeight.toString() != 'null' ? errorNetWeight.toString() : '',
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                      Gap(Dimensions.height20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomDropdown(
+                                dropdownItems: ['Bhilosa', 'Golden', 'Silver'],
+                                selectedValue: yarnName,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    yarnName = newValue!;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -260,13 +225,16 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Box Ordered', size: Dimensions.font12,),
+                              BigText(text: 'Select Yarn Type', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              AppTextField(
-                                hintText: "Enter Box Ordered",
-                                isSuffixIcon: false,
-                                textInputType: TextInputType.number,
-                                width: MediaQuery.of(context).size.width/2.65,
+                              CustomDropdown(
+                                dropdownItems: ['Roto', 'Zero', 'dZero'],
+                                selectedValue: yarnType,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    yarnType = newValue!;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -280,66 +248,115 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Denyar', size: Dimensions.font12,),
+                              BigText(text: 'Box Ordered', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              AppTextField(
-                                hintText: "Enter Denyar",
-                                isSuffixIcon: false,
-                                textInputType: TextInputType.number,
+                              CustomTextField(
+                                controller: boxOrderedController,
+                                hintText: "Enter Box Ordered",
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                              ),
+                                errorText: errorBoxOrdered.toString() != 'null' ? errorBoxOrdered.toString() : '',
+                              )
                             ],
                           ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Status', size: Dimensions.font12,),
+                              BigText(text: 'Denyar', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              Container(
-                                height: Dimensions.height50,
+                              CustomTextField(
+                                controller: denyarController,
+                                hintText: "Enter Denyar",
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(Dimensions.radius10),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 1,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: DropdownButton<String>(
-                                    value: status,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        status = newValue!;
-                                      });
-                                    },
-                                    underline: Container( // Add this line to remove the underline
-                                      height: 0,
-                                      color: Colors.transparent,
-                                    ),
-                                    items: ['On Going', 'Completed'].map<DropdownMenuItem<String>>((String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: BigText(text: value, size: Dimensions.font14,),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
+                                errorText: errorDenyar.toString() != 'null' ? errorDenyar.toString() : '',
+                              )
                             ],
                           ),
                         ],
                       ),
                       Gap(Dimensions.height20),
-                      ElevatedButton(
-                        onPressed: () {},
-                        child: const Text('Save'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Rate', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomTextField(
+                                controller: rateController,
+                                hintText: "Enter Rate",
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
+                                width: MediaQuery.of(context).size.width/2.65,
+                                errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
+                              )
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Cops', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomTextField(
+                                controller: copsController,
+                                hintText: "Enter Cops",
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
+                                width: MediaQuery.of(context).size.width/2.65,
+                                errorText: errorCops.toString() != 'null' ? errorCops.toString() : '',
+                              )
+                            ],
+                          ),
+                        ],
                       ),
+                      Gap(Dimensions.height20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Select Delivery Type', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomDropdown(
+                                dropdownItems: ['Current', 'Dhara'],
+                                selectedValue: paymentType,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    paymentType = newValue!;
+                                  });
+                                },
+                              )
+                            ],
+                          ),
+                          if (paymentType == 'Current')
+                            _buildCurrentFields()
+                          else
+                            _buildDharaFields(),
+                        ],
+                      ),
+                      if (paymentType == 'Dhara' && dharaOption == 'Other')
+                        _buildOtherDharaField(),
+                      Gap(Dimensions.height20),
+                      CustomElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            submitted = true;
+                          });
+                          if (_isFormValid()) {
+                            Navigator.of(context).pushReplacementNamed(AppRoutes.yarnTypeList);
+                          }
+                        },
+                        buttonText: 'Save',
+                      )
                     ],
                   ),
                 ),
@@ -355,48 +372,13 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BigText(text: 'Select Current Payment Date', size: Dimensions.font12,),
+        BigText(text: 'Select Due Date', size: Dimensions.font12,),
         Gap(Dimensions.height10/2),
-        GestureDetector(
-          onTap: (){
-            showDatePicker(context: context, firstDate: firstDate, lastDate: lastDate);
-          },
-          child: Container(
-            height: Dimensions.height50,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Dimensions.radius10),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(Dimensions.height10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    DateFormat('dd/MM/yyyy').format(selectedDate),
-                    style: TextStyle(fontSize: Dimensions.font14,
-                        color: Theme.of(context).disabledColor),
-                  ),
-                  Padding(
-                      padding: EdgeInsets.zero,
-                      child: Icon(
-                        Icons.calendar_month,
-                        color: AppTheme.black,
-                        size: Dimensions.font20,
-                      )),
-                ],
-              ),
-            ),
-          ),
-        ),
+        CustomDatePicker(
+          selectedDate: selectedDate,
+          firstDate: firstDate,
+          lastDate: lastDate
+        )
       ],
     );
   }
@@ -406,95 +388,90 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BigText(text: 'Select Dhara', size: Dimensions.font12,),
+        BigText(text: 'Select Dhara Options', size: Dimensions.font12,),
         Gap(Dimensions.height10/2),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Radio(
-              value: '15 days',
-              groupValue: dharaOption,
-              onChanged: (value) {
-                setState(() {
-                  dharaOption = value.toString();
-                });
-              },
-            ),
-            const Text('15 days'),
-            Radio(
-              value: '40 days',
-              groupValue: dharaOption,
-              onChanged: (value) {
-                setState(() {
-                  dharaOption = value.toString();
-                });
-              },
-            ),
-            const Text('40 days'),
-            Radio(
-              value: 'Other',
-              groupValue: dharaOption,
-              onChanged: (value) {
-                setState(() {
-                  dharaOption = value.toString();
-                });
-              },
-            ),
-            const Text('Other'),
-          ],
+        CustomDropdown(
+          dropdownItems: ['15 days', '40 days', 'Other'],
+          selectedValue: dharaOption,
+          onChanged: (newValue) {
+            setState(() {
+              dharaOption = newValue!;
+            });
+          },
         ),
-        // Input field for "Other" option
-        if (dharaOption == 'Other')
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BigText(text: 'Select Other Date', size: Dimensions.font12,),
-              Gap(Dimensions.height10/2),
-              GestureDetector(
-                onTap: (){
-                  showDatePicker(context: context, firstDate: firstDate, lastDate: lastDate);
-                },
-                child: Container(
-                  height: Dimensions.height50,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Dimensions.radius10),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(Dimensions.height10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          DateFormat('dd/MM/yyyy').format(selectedDate),
-                          style: TextStyle(fontSize: Dimensions.font14,
-                              color: Theme.of(context).disabledColor),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.zero,
-                            child: Icon(
-                              Icons.calendar_month,
-                              color: AppTheme.black,
-                              size: Dimensions.font20,
-                            )),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Gap(Dimensions.height20),
-            ],
-          ),
       ],
     );
   }
+
+  Widget _buildOtherDharaField() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Gap(Dimensions.height20),
+        BigText(text: 'Select Due Date', size: Dimensions.font12,),
+        Gap(Dimensions.height10/2),
+        CustomDatePicker(
+          width: MediaQuery.of(context).size.width,
+          selectedDate: selectedDate,
+          firstDate: firstDate,
+          lastDate: lastDate
+        )
+      ],
+    );
+  }
+
+  String? _validateLotNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Lot Number is required';
+    }
+    return null;
+  }
+
+  String? _validateNetWeight(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Net Weight is required';
+    }
+    return null;
+  }
+
+  String? _validateBoxOrdered(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Box Ordered is required';
+    }
+    return null;
+  }
+
+  String? _validateDenyar(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Denyar is required';
+    }
+    return null;
+  }
+
+  String? _validateRate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Rate is required';
+    }
+    return null;
+  }
+
+  String? _validateCops(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Cops is required';
+    }
+    return null;
+  }
+
+  bool _isFormValid() {
+    String lotNumberError = _validateLotNumber(lotNumberController.text) ?? '';
+    String netWeightError = _validateNetWeight(netWeightController.text) ?? '';
+    String boxOrderedError = _validateBoxOrdered(boxOrderedController.text) ?? '';
+    String denyarError = _validateDenyar(denyarController.text) ?? '';
+    String rateError = _validateRate(rateController.text) ?? '';
+    String copsError = _validateCops(copsController.text) ?? '';
+
+    return lotNumberError.isEmpty && netWeightError.isEmpty && boxOrderedError.isEmpty && denyarError.isEmpty && rateError.isEmpty && copsError.isEmpty && paymentType == 'Current' ? true : false;
+  }
+
 }

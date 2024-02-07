@@ -28,24 +28,28 @@ class CustomDropdown extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Dimensions.radius10),
         color: Colors.white,
-        border: Border.all(color: AppTheme.primary, width: 0.5),
+        border: Border.all(color: AppTheme.black, width: 0.5),
       ),
-      child: DropdownButton<String>(
-        padding: EdgeInsets.symmetric(horizontal: Dimensions.width10/2, vertical: Dimensions.height10/2),
-        alignment: Alignment.center,
-        isExpanded: true,
-        value: selectedValue,
-        onChanged: onChanged,
-        underline: Container(
-          height: 0,
-          color: Colors.transparent,
+      child: Center(
+        child: DropdownButton<String>(
+          dropdownColor: AppTheme.white,
+          padding: EdgeInsets.symmetric(horizontal: Dimensions.height10/2, vertical: Dimensions.height10/2),
+          alignment: Alignment.center,
+          isExpanded: true,
+          isDense: true,
+          value: selectedValue,
+          onChanged: onChanged,
+          underline: Container(
+            height: 0,
+            color: Colors.transparent,
+          ),
+          items: dropdownItems.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: BigText(text: value, size: Dimensions.font14,),
+            );
+          }).toList(),
         ),
-        items: dropdownItems.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: BigText(text: value, size: Dimensions.font14,),
-          );
-        }).toList(),
       ),
     );
   }

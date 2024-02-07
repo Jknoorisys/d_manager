@@ -59,7 +59,7 @@ class _FirmAddState extends State<FirmAdd> {
         errorGroupCode = submitted == true ? _validateGroupCode(groupCodeController.text) : null;
     return CustomDrawer(
         content: CustomBody(
-          title: S.of(context).addFirm,
+          title: widget.firmData == null ? S.of(context).addFirm : S.of(context).editFirm,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -306,6 +306,6 @@ class _FirmAddState extends State<FirmAdd> {
     String accountNumberError = _validateAccountNumber(accountNumberController.text) ?? '';
     String groupCodeError = _validateGroupCode(groupCodeController.text) ?? '';
 
-    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && groupCodeError.isEmpty;
+    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && groupCodeError.isEmpty ? true : false;
   }
 }

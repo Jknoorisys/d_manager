@@ -54,7 +54,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Dimensions.radius10),
           color: Colors.white,
-          border: Border.all(color: AppTheme.primary, width: 0.5),
+          border: Border.all(color: AppTheme.black, width: 0.5),
         ),
         child: Padding(
           padding: EdgeInsets.all(Dimensions.height10),
