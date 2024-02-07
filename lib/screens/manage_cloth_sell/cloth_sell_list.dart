@@ -39,7 +39,8 @@ class _ClothSellListState extends State<ClothSellList> {
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
-        content: CustomBody(
+        content:
+        CustomBody(
           title: S.of(context).clothSellList,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),

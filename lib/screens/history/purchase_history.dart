@@ -8,7 +8,6 @@ import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import '../widgets/body.dart';
 import '../widgets/drawer/zoom_drawer.dart';
-import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 class PurchaseHistory extends StatefulWidget {
   const PurchaseHistory({super.key});
@@ -29,7 +28,6 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
   ];
   List<Map<String, dynamic>> filteredPartyList = [];
-
   @override
   void initState() {
     super.initState();
