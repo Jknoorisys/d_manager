@@ -7,6 +7,8 @@ import 'package:d_manager/screens/dashboard/dashboard.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_add.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_list.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_view.dart';
+import 'package:d_manager/screens/manage_history/purchase_history.dart';
+import 'package:d_manager/screens/manage_history/sell_history.dart';
 import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_list.dart';
@@ -20,14 +22,12 @@ import 'package:d_manager/screens/manage_yarn_purchase/manage_delivery_details/d
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_add.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_list.dart';
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
+import 'package:d_manager/screens/reminders/cloth_sell/payment_to_be_received.dart';
+import 'package:d_manager/screens/reminders/cloth_sell/thans_to_be_delivered.dart';
+import 'package:d_manager/screens/reminders/yarn_purchase/box_to_be_received.dart';
+import 'package:d_manager/screens/reminders/yarn_purchase/payment_due_date.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
-import '../screens/history/purchase_history.dart';
-import '../screens/history/sell_history.dart';
-import '../screens/reminders/cloth_sell/payment_to_be_received.dart';
-import '../screens/reminders/cloth_sell/thans_to_be_delivered.dart';
-import '../screens/reminders/yarn_purchase/box_to_be_received.dart';
-import '../screens/reminders/yarn_purchase/payment_due_date.dart';
 
 class AppRoutes {
   static const String splashScreen = '/';
@@ -166,11 +166,15 @@ class AppRoutes {
       return ClothSellView(clothSellData: clothSellData);
     },
 
-    //Manage Reminders
+    //Manage Purchase Reminders
     boxToBeReceived: (context) => const BoxToBeReceived(),
     paymentDueDate: (context) => const PaymentDueDate(),
+
+    // Manage Cloth Sell Reminders
     thansToBeDelivered: (context) => const ThansToBeDelivered(),
     paymentToBeReceived: (context) => const PaymentToBeReceived(),
+
+    // Manage History
     purchaseHistory: (context) => const PurchaseHistory(),
     sellHistory: (context) => const SellHistory(),
   };

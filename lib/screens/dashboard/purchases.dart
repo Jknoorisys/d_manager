@@ -1,5 +1,6 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
@@ -177,7 +178,9 @@ class _PurchasesState extends State<Purchases> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     CustomElevatedButton(
-                      onPressed: (){},
+                      onPressed: (){
+                        Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': yarnPurchaseList[index]});
+                      },
                       buttonText: 'View Details',
                       isBackgroundGradient: false,
                       backgroundColor: AppTheme.primary,

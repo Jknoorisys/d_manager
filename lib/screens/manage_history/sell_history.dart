@@ -1,3 +1,5 @@
+
+import 'package:d_manager/constants/routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
@@ -6,39 +8,39 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
+
 import '../widgets/body.dart';
 import '../widgets/drawer/zoom_drawer.dart';
-import 'package:d_manager/screens/widgets/text_field.dart';
-class PurchaseHistory extends StatefulWidget {
-  const PurchaseHistory({super.key});
+import '../widgets/text_field.dart';
+
+class SellHistory extends StatefulWidget {
+  const SellHistory({super.key});
 
   @override
-  State<PurchaseHistory> createState() => _PurchaseHistoryState();
+  State<SellHistory> createState() => _SellHistoryState();
 }
 
-class _PurchaseHistoryState extends State<PurchaseHistory> {
+class _SellHistoryState extends State<SellHistory> {
   final searchController = TextEditingController();
-  List<Map<String, dynamic>> purchaseHistory = [
-    {'no': 1, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Mehta and Sons Yarn Traders', 'yarnName':'Golden', 'yarnType':'Roto', 'lotNumber':'25', 'paymentType':'Dhara', 'boxReceived':'300', 'rate':'22.20', 'netWeight':'4990', 'billAmount':'25,00,000', 'GST12%':'12%', 'dueDate':'2024-01-29', 'paidDate':'2024-01-25', 'amountPaid' : '25,00,000', 'differenceAmount':'300','paymentMethod':'Cheque', 'cops' : '4000', 'diener':'34', 'billReceived':'Yes',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Tulsi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rahun Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'SK Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Diamond Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+  List<Map<String, dynamic>> sellHistory = [
+    {'no': 1, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Kalantri Cloth Traders', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
+    {'no': 2, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Pooja Cloth Agency', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
+    {'no': 3, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Harshad Textile', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
+    {'no': 4, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Veenapani Cloths', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
+    {'no': 5, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Aneesa Tex', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
+    {'no': 6, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Sarika Textiles', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
   ];
-  List<Map<String, dynamic>> filteredPartyList = [];
+  List<Map<String, dynamic>> filteredSellHistoryList = [];
   @override
   void initState() {
     super.initState();
-    filteredPartyList = purchaseHistory;
+    filteredSellHistoryList = sellHistory;
   }
   @override
   Widget build(BuildContext context) {
-    return
-      CustomDrawer(
+    return CustomDrawer(
         content: CustomBody(
-            title: S.of(context).purchaseHistory,
+            title: S.of(context).sellHistory,
             content:
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),
@@ -60,12 +62,12 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                             onSuffixTap: () {
                               searchController.clear();
                               setState(() {
-                                filteredPartyList = purchaseHistory;
+                                filteredSellHistoryList = sellHistory;
                               });
                             },
                             onChanged: (value) {
                               setState(() {
-                                filteredPartyList = purchaseHistory
+                                filteredSellHistoryList = sellHistory
                                     .where((firm) =>
                                 firm['partyName']
                                     .toLowerCase()
@@ -84,7 +86,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                   AppTheme.divider,
                   Expanded(
                     child: ListView.builder(
-                      itemCount: filteredPartyList.length,
+                      itemCount: filteredSellHistoryList.length,
                       itemBuilder: (context, index) {
                         return CustomAccordion(
                           titleChild: Column(
@@ -101,23 +103,23 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                           CircleAvatar(
                                             backgroundColor: AppTheme.secondary,
                                             radius: Dimensions.height20,
-                                            child: BigText(text: filteredPartyList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                                            child: BigText(text: filteredSellHistoryList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
                                           ),
                                           SizedBox(width: Dimensions.height10),
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
-                                              BigText(text: filteredPartyList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                                              BigText(text: filteredSellHistoryList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
                                               Row(
                                                 children: [
                                                   CircleAvatar(
                                                     backgroundColor: AppTheme.black,
                                                     radius: Dimensions.height10,
-                                                    child: BigText(text: filteredPartyList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                    child: BigText(text: filteredSellHistoryList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                                   ),
                                                   SizedBox(width: Dimensions.width10),
-                                                  SmallText(text: filteredPartyList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                                  SmallText(text: filteredSellHistoryList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
                                                 ],
                                               ),
                                             ],
@@ -138,61 +140,61 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Deal Date', filteredPartyList[index]['dealDate']),
+                                  _buildInfoColumn('Deal Date', filteredSellHistoryList[index]['dealDate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Name', filteredPartyList[index]['yarnName']),
+                                  _buildInfoColumn('Cloth Quality', filteredSellHistoryList[index]['clothQuality']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Type', filteredPartyList[index]['yarnType']),
+                                  _buildInfoColumn('Invoice Date', filteredSellHistoryList[index]['invoiceDate']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Lot Number', filteredPartyList[index]['lotNumber']),
+                                  _buildInfoColumn('Invoice Number', filteredSellHistoryList[index]['invoiceNumber']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Type', filteredPartyList[index]['paymentType']),
+                                  _buildInfoColumn('Bale Number', filteredSellHistoryList[index]['baleNumber']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Received', filteredPartyList[index]['boxReceived']),
+                                  _buildInfoColumn('Than', filteredSellHistoryList[index]['than']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Rate', filteredPartyList[index]['rate']),
+                                  _buildInfoColumn('Meter', filteredSellHistoryList[index]['meter']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Net Weight', filteredPartyList[index]['netWeight']),
+                                  _buildInfoColumn('Rate', filteredSellHistoryList[index]['rate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill Amount', filteredPartyList[index]['billAmount']),
+                                  _buildInfoColumn('GST', filteredSellHistoryList[index]['gst']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('GST 12%', filteredPartyList[index]['GST12%']),
+                                  _buildInfoColumn('Invoice Amount', filteredSellHistoryList[index]['invoiceAmount']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Due Date', filteredPartyList[index]['dueDate']),
+                                  _buildInfoColumn('Payment Type', filteredSellHistoryList[index]['paymentType']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Paid Date', filteredPartyList[index]['paidDate']),
+                                  _buildInfoColumn('Additional Discount', filteredSellHistoryList[index]['additionalDiscount']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Amount Paid', filteredPartyList[index]['amountPaid']),
+                                  _buildInfoColumn('Due Date', filteredSellHistoryList[index]['dueDate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Difference Amount', filteredPartyList[index]['differenceAmount']),
+                                  _buildInfoColumn('Difference Amount', filteredSellHistoryList[index]['differenceAmount']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Method', filteredPartyList[index]['paymentMethod']),
+                                  _buildInfoColumn('Payment Method', filteredSellHistoryList[index]['paymentMethod']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Cops', filteredPartyList[index]['cops']),
+                                  _buildInfoColumn('Transport Details', filteredSellHistoryList[index]['transportDetails']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Diener', filteredPartyList[index]['diener']),
+                                  _buildInfoColumn('Payment Received Date', filteredSellHistoryList[index]['paymentReceivedDate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill received', filteredPartyList[index]['billReceived']),
+                                  _buildInfoColumn('Reason(Notes)', filteredSellHistoryList[index]['reason']),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
@@ -210,7 +212,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          BigText(text: 'Box Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: 'Invoice Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                           RichText(
                                             text: TextSpan(
                                               style: TextStyle(
@@ -219,7 +221,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                               children: [
-                                                TextSpan(text: filteredPartyList[index]['boxReceived'],),
+                                                TextSpan(text: filteredSellHistoryList[index]['invoiceAmount'],),
                                               ],
                                             ),
                                           ),
@@ -239,8 +241,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          BigText(text: 'Bill Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '${filteredPartyList[index]['billAmount']}',color: AppTheme.primary, size: Dimensions.font18)
+                                          BigText(text: 'Payment Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: '${filteredSellHistoryList[index]['paymentReceived']}',color: AppTheme.primary, size: Dimensions.font18)
                                         ],
                                       )
                                   ),
@@ -251,7 +253,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   CustomElevatedButton(
-                                    onPressed: (){},
+                                    onPressed: (){
+                                      // Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': filteredSellHistoryList[index]});
+                                    },
                                     buttonText: 'View Details',
                                     isBackgroundGradient: false,
                                     backgroundColor: AppTheme.primary,
