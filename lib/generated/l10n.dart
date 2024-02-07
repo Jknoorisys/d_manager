@@ -520,20 +520,11 @@ class S {
     );
   }
 
-  /// `Manage Cloth Sell Deal``
+  /// `Manage Cloth Sell Deal`
   String get manageClothSellDeal {
     return Intl.message(
       'Manage Cloth Sell Deal',
       name: 'manageClothSellDeal',
-      desc: '',
-      args: [],
-    );
-  }
-  /// `View Cloth Sell Deal Details``
-  String get viewClothSellDealDetails {
-    return Intl.message(
-      'Deal Details',
-      name: 'viewSellDealDetails',
       desc: '',
       args: [],
     );
@@ -904,6 +895,16 @@ class S {
     return Intl.message(
       'Yarn Purchase Deal Details',
       name: 'yarnPurchaseDealDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cloth Sell Deal Details`
+  String get viewSellDealDetails {
+    return Intl.message(
+      'Cloth Sell Deal Details',
+      name: 'viewSellDealDetails',
       desc: '',
       args: [],
     );

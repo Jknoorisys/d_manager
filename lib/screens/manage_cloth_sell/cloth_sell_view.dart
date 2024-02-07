@@ -1,5 +1,5 @@
+import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
-import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/constants/app_theme.dart';
@@ -8,6 +8,8 @@ import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import '../widgets/buttons.dart';
+
 class ClothSellView extends StatefulWidget {
   final Map<String, dynamic>? clothSellData;
   const ClothSellView({Key? key, this.clothSellData}) : super(key: key);
@@ -17,136 +19,398 @@ class ClothSellView extends StatefulWidget {
 
 class _ClothSellViewState extends State<ClothSellView> {
   List<Map<String, dynamic>> unFilteredClothSellList = [
-    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'Ongoing'},
+    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'20.10', 'status': 'Ongoing'},
   ];
+
+  List<Map<String, dynamic>> invoiceDataList = [
+    {'no': 1,
+      'invoiceDate': '2024-01-25',
+      'invoiceNumber': '24-25_1',
+      'rate': '20.10',
+      'baleNumber': '1-10',
+      'than': '80',
+      'meter': '191.90',
+      'clothQuality': '5-kilo',
+      'gst': '12%',
+      'invoiceAmount': '10,80,000',
+      'paymentType': 'Current',
+      'additionalDiscount': '1000',
+      'paymentReceived': 'Yes',
+      'paymentAmountReceived': '10,00,000',
+      'differenceInAmount': '3000',
+      'paymentMethod': 'Chque',
+      'dueDate': '2024-01-29',
+      'paymentReceivedDate': '2024-01-27',
+      'reason': 'XYZ',
+      'viewPDF': 'sample.pdf',
+      'status': 'On Going'
+    },
+    {'no': 2,
+      'invoiceDate': '2024-01-25',
+      'invoiceNumber': '24-25_1',
+      'rate': '20.10',
+      'baleNumber': '1-10',
+      'than': '80',
+      'meter': '191.90',
+      'clothQuality': '5-kilo',
+      'gst': '12%',
+      'invoiceAmount': '10,80,000',
+      'paymentType': 'Current',
+      'additionalDiscount': '1000',
+      'paymentReceived': 'Yes',
+      'paymentAmountReceived': '10,00,000',
+      'differenceInAmount': '3000',
+      'paymentMethod': 'Chque',
+      'dueDate': '2024-01-29',
+      'paymentReceivedDate': '2024-01-27',
+      'reason': 'XYZ',
+      'viewPDF': 'sample.pdf',
+      'status': 'On Going'
+    },
+  ];
+
+  List<Map<String, dynamic>> invoicesList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    invoicesList = invoiceDataList;
+  }
 
   @override
   Widget build(BuildContext context) {
     Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
-
-    return CustomBody(
-      title: S.of(context).viewClothSellDealDetails,
-      content: Padding(
-        padding: EdgeInsets.all(Dimensions.height15),
-        child: Column(
-          children: [
-            SizedBox(height: Dimensions.height10),
-            CustomAccordionWithoutExpanded(
-              titleChild: Column(
+    return CustomDrawer(
+        content: CustomBody(
+          title: S.of(context).viewSellDealDetails,
+          content: Padding(
+            padding: EdgeInsets.all(Dimensions.height15),
+            child: SingleChildScrollView(
+              child: Column(
                 children: [
+                  SizedBox(height: Dimensions.height10),
+                  CustomAccordionWithoutExpanded(
+                    titleChild: Column(
+                      children: [
+                        Row(
+                          children: [
+                            SizedBox(height: Dimensions.height10),
+                            Row(
+                              children: [
+                                SizedBox(width: Dimensions.width10),
+                                CircleAvatar(
+                                  backgroundColor: AppTheme.secondary,
+                                  radius: Dimensions.height20,
+                                  child: BigText(text: clothSellData['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                                ),
+                                SizedBox(width: Dimensions.height10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    BigText(text: clothSellData['partyName'], color: AppTheme.primary, size: Dimensions.font16),
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: AppTheme.black,
+                                          radius: Dimensions.height10,
+                                          child: BigText(text: clothSellData['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                        ),
+                                        SizedBox(width: Dimensions.width10),
+                                        SmallText(text: clothSellData['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: Dimensions.height10),
+                          ],
+                        ),
+                        SizedBox(height: Dimensions.height10),
+                        AppTheme.divider,
+                        SizedBox(height: Dimensions.height10),
+                        Row(
+                          children: [
+                            _buildInfoColumn('Deal Date', clothSellData['dealDate']),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Cloth Quality', clothSellData['clothQuality']),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Rate', clothSellData['rate']),
+                          ],
+                        ),
+                      ],
+                    ),
+                    contentChild: Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildInfoColumn('Total Than', clothSellData['totalThan']),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Than Delivered', clothSellData['thanDelivered']),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Than Remaining', clothSellData['thanRemaining']),
+                          ],
+                        ),
+                        SizedBox(height: Dimensions.height10),
+                        Row(
+                          children: [
+                            _buildInfoColumn('Status', clothSellData['status']),
+                          ],
+                        ),
+                        SizedBox(height: Dimensions.height10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  // Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': clothSellData});
+                                },
+                                icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellData});
+                                },
+                                icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  // setState(() {
+                                  //   unFilteredClothSellList.removeAt(index);
+                                  // });
+                                },
+                                icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
+                            ),
+                            GFCheckbox(
+                              size: Dimensions.height20,
+                              type: GFCheckboxType.custom,
+                              inactiveBgColor: AppTheme.nearlyWhite,
+                              inactiveBorderColor: AppTheme.primary,
+                              customBgColor: AppTheme.primary,
+                              activeBorderColor: AppTheme.primary,
+                              onChanged: (value) {
+                                setState(() {
+                                  clothSellData['status'] = value == true ? 'Completed' : 'Ongoing';
+                                });
+                              },
+                              value: clothSellData['status'] == 'Completed' ? true : false,
+                              inactiveIcon: null,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: Dimensions.height10),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(height: Dimensions.height10),
-                      Row(
-                        children: [
-                          SizedBox(width: Dimensions.width10),
-                          CircleAvatar(
-                            backgroundColor: AppTheme.secondary,
-                            radius: Dimensions.height20,
-                            child: BigText(text: clothSellData['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
-                          ),
-                          SizedBox(width: Dimensions.height10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              BigText(text: clothSellData['partyName'], color: AppTheme.primary, size: Dimensions.font16),
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: AppTheme.black,
-                                    radius: Dimensions.height10,
-                                    child: BigText(text: clothSellData['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                  ),
-                                  SizedBox(width: Dimensions.width10),
-                                  SmallText(text: clothSellData['myFirm'], color: AppTheme.black, size: Dimensions.font12),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                      Text('Invoice List', style: AppTheme.heading2),
+                      CustomIconButton(
+                          radius: Dimensions.radius10,
+                          backgroundColor: AppTheme.primary,
+                          iconColor: AppTheme.white,
+                          iconData: Icons.add,
+                          onPressed: () {
+                            //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd);
+                          }
                       ),
-                      SizedBox(height: Dimensions.height10),
                     ],
                   ),
                   SizedBox(height: Dimensions.height10),
                   AppTheme.divider,
                   SizedBox(height: Dimensions.height10),
-                  Row(
-                    children: [
-                      _buildInfoColumn('Deal Date', clothSellData['dealDate']),
-                      SizedBox(width: Dimensions.width20),
-                      _buildInfoColumn('Cloth Quality', clothSellData['clothQuality']),
-                      SizedBox(width: Dimensions.width20),
-                      _buildInfoColumn('Rate', clothSellData['totalThan']),
-                    ],
-                  ),
-                ],
-              ),
-              contentChild: Column(
-                children: [
-                  Row(
-                    children: [
-                      _buildInfoColumn('Total Than', clothSellData['thanDelivered']),
-                      SizedBox(width: Dimensions.width20),
-                      _buildInfoColumn('Than Delivered', clothSellData['thanRemaining']),
-                      SizedBox(width: Dimensions.width20),
-                      _buildInfoColumn('Than Remaining', clothSellData['rate']),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  Row(
-                    children: [
-                      _buildInfoColumn('Status', clothSellData['status']),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            // Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': clothSellData});
-                          },
-                          icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellData});
-                          },
-                          icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            // setState(() {
-                            //   unFilteredClothSellList.removeAt(index);
-                            // });
-                          },
-                          icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                      ),
-                      GFCheckbox(
-                        size: Dimensions.height20,
-                        type: GFCheckboxType.custom,
-                        inactiveBgColor: AppTheme.nearlyWhite,
-                        inactiveBorderColor: AppTheme.primary,
-                        customBgColor: AppTheme.primary,
-                        activeBorderColor: AppTheme.primary,
-                        onChanged: (value) {
-                          setState(() {
-                            clothSellData['status'] = value == true ? 'Completed' : 'Ongoing';
-                          });
-                        },
-                        value: clothSellData['status'] == 'Completed' ? true : false,
-                        inactiveIcon: null,
-                      ),
-                    ],
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 1.5,
+                    child: ListView.builder(
+                      itemCount: invoicesList.length,
+                      itemBuilder: (context, index) {
+                        return CustomAccordion(
+                          titleChild: Row(
+                            children: [
+                              _buildInfoColumn('Invoice Date', invoiceDataList[index]['invoiceDate']),
+                              SizedBox(width: Dimensions.width20),
+                              _buildInfoColumn('Invoice Number', invoiceDataList[index]['invoiceNumber']),
+                              SizedBox(width: Dimensions.width20),
+                              _buildInfoColumn('Rate', invoiceDataList[index]['rate']),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              AppTheme.divider,
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Bale Number', invoiceDataList[index]['baleNumber']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Than', invoiceDataList[index]['than']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Meter', invoiceDataList[index]['meter']),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Cloth Quality', invoiceDataList[index]['clothQuality']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('GST', invoiceDataList[index]['gst']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Invoice Amount', invoiceDataList[index]['invoiceAmount']),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Payment Type', invoiceDataList[index]['paymentType']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Additional Discount', invoiceDataList[index]['additionalDiscount']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Payment Received', invoiceDataList[index]['paymentReceived']),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Payment Amount Received', invoiceDataList[index]['paymentAmountReceived']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Difference in Amount', invoiceDataList[index]['differenceInAmount']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Payment Method', invoiceDataList[index]['paymentMethod']),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Due Date', invoiceDataList[index]['dueDate']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Payment Received Date', invoiceDataList[index]['paymentReceivedDate']),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Reason', invoiceDataList[index]['reason']),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('View PDF', 'viewPDF'),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Status', 'status'),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('', ''),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              // Row(
+                              //   children: [
+                              //     Container(
+                              //         width: MediaQuery.of(context).size.width/2.65,
+                              //         height: Dimensions.height40*2,
+                              //         padding: EdgeInsets.all(Dimensions.height10),
+                              //         decoration: BoxDecoration(
+                              //           color: AppTheme.white,
+                              //           borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                              //           border: Border.all(color: AppTheme.primary),
+                              //         ),
+                              //         child: Column(
+                              //           crossAxisAlignment: CrossAxisAlignment.start,
+                              //           children: [
+                              //             BigText(text: 'Total Net Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                              //             RichText(
+                              //               text: TextSpan(
+                              //                 style: TextStyle(
+                              //                   color: AppTheme.primary,
+                              //                   fontSize: Dimensions.font18,
+                              //                   fontWeight: FontWeight.bold,
+                              //                 ),
+                              //                 children: [
+                              //                   TextSpan(
+                              //                     text: unfilteredDeliveryDetailList[index]['netWeight'],
+                              //                   ),
+                              //                   TextSpan(
+                              //                     text: ' kg',
+                              //                     style: TextStyle(
+                              //                       fontSize: Dimensions.font12,
+                              //                     ),
+                              //                   ),
+                              //                 ],
+                              //               ),
+                              //             ),
+                              //             BigText(text: 'Gross Weight ${widget.yarnPurchaseData!['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                              //           ],
+                              //         )
+                              //     ),
+                              //     SizedBox(width: Dimensions.width20),
+                              //     Container(
+                              //         width: MediaQuery.of(context).size.width/2.65,
+                              //         height: Dimensions.height40*2,
+                              //         padding: EdgeInsets.all(Dimensions.height10),
+                              //         decoration: BoxDecoration(
+                              //           color: AppTheme.white,
+                              //           borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                              //           border: Border.all(color: AppTheme.primary),
+                              //         ),
+                              //         child: Column(
+                              //           crossAxisAlignment: CrossAxisAlignment.start,
+                              //           children: [
+                              //             BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                              //             BigText(text: '₹ ${widget.yarnPurchaseData!['rate']}',color: AppTheme.primary, size: Dimensions.font18)
+                              //           ],
+                              //         )
+                              //     ),
+                              //   ],
+                              // ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList[index]});
+                                    },
+                                    icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd, arguments: {'yarnPurchaseData': unfilteredDeliveryDetailList[index]});
+                                    },
+                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        //unfilteredDeliveryDetailList.removeAt(index);
+                                      });
+                                    },
+                                    icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
+                                  ),
+                                  // GFCheckbox(
+                                  //   size: Dimensions.height20,
+                                  //   type: GFCheckboxType.custom,
+                                  //   inactiveBgColor: AppTheme.nearlyWhite,
+                                  //   inactiveBorderColor: AppTheme.primary,
+                                  //   customBgColor: AppTheme.primary,
+                                  //   activeBorderColor: AppTheme.primary,
+                                  //   onChanged: (value) {
+                                  //     setState(() {
+                                  //      // unfilteredDeliveryDetailList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                  //     });
+                                  //   },
+                                  //   value: unfilteredDeliveryDetailList[index]['status'] == 'Completed' ? true : false,
+                                  //   inactiveIcon: null,
+                                  // ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        )
     );
   }
 
