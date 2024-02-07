@@ -28,6 +28,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addHammal": MessageLookupByLibrary.simpleMessage("Add Hammal"),
         "addParty": MessageLookupByLibrary.simpleMessage("Add Party"),
         "addTransport": MessageLookupByLibrary.simpleMessage("Add Transport"),
+        "addTransportDetail":
+            MessageLookupByLibrary.simpleMessage("Add Transport Detail"),
         "addYarnType": MessageLookupByLibrary.simpleMessage("Add Yarn Type"),
         "allowingToPasteText":
             MessageLookupByLibrary.simpleMessage("Allowing to paste \$text"),
@@ -40,6 +42,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "clothQualityList":
             MessageLookupByLibrary.simpleMessage("Cloth Quality List"),
         "clothSell": MessageLookupByLibrary.simpleMessage("Cloth Sell"),
+        "clothSellDealDetails":
+            MessageLookupByLibrary.simpleMessage("Cloth Sell Deal Details"),
         "clothSellList":
             MessageLookupByLibrary.simpleMessage("Cloth Sell List"),
         "clothSells": MessageLookupByLibrary.simpleMessage("Cloth Sells"),

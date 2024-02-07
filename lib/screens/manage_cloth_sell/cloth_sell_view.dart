@@ -1,3 +1,4 @@
+import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/generated/l10n.dart';
@@ -8,8 +9,6 @@ import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import '../widgets/buttons.dart';
-
 class ClothSellView extends StatefulWidget {
   final Map<String, dynamic>? clothSellData;
   const ClothSellView({Key? key, this.clothSellData}) : super(key: key);
@@ -82,19 +81,17 @@ class _ClothSellViewState extends State<ClothSellView> {
     Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
     return CustomDrawer(
         content: CustomBody(
-          title: S.of(context).viewSellDealDetails,
+          title: S.of(context).clothSellDealDetails,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: Dimensions.height10),
                   CustomAccordionWithoutExpanded(
                     titleChild: Column(
                       children: [
                         Row(
                           children: [
-                            SizedBox(height: Dimensions.height10),
                             Row(
                               children: [
                                 SizedBox(width: Dimensions.width10),
@@ -124,10 +121,8 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: Dimensions.height10),
                           ],
                         ),
-                        SizedBox(height: Dimensions.height10),
                         AppTheme.divider,
                         SizedBox(height: Dimensions.height10),
                         Row(
@@ -213,7 +208,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd);
+                            //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd)
                           }
                       ),
                     ],

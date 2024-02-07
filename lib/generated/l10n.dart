@@ -900,16 +900,6 @@ class S {
     );
   }
 
-  /// `Cloth Sell Deal Details`
-  String get viewSellDealDetails {
-    return Intl.message(
-      'Cloth Sell Deal Details',
-      name: 'viewSellDealDetails',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Search Delivery Details`
   String get searchDeliveryDetails {
     return Intl.message(
@@ -925,6 +915,26 @@ class S {
     return Intl.message(
       'Delivery Detail',
       name: 'deliveryDetail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Transport Detail`
+  String get addTransportDetail {
+    return Intl.message(
+      'Add Transport Detail',
+      name: 'addTransportDetail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cloth Sell Deal Details`
+  String get clothSellDealDetails {
+    return Intl.message(
+      'Cloth Sell Deal Details',
+      name: 'clothSellDealDetails',
       desc: '',
       args: [],
     );
