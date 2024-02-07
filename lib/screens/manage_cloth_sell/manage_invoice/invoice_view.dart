@@ -1,3 +1,4 @@
+import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
@@ -149,7 +150,12 @@ class _InvoiceViewState extends State<InvoiceView> {
                             iconColor: AppTheme.white,
                             iconData: Icons.add,
                             onPressed: () {
-                              //Navigator.of(context).pushNamed(AppRoutes.invoiceAdd);
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return const TransportDetailAdd();
+                                },
+                              );
                             }
                         ),
                       ],
