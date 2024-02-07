@@ -87,9 +87,9 @@ class _ClothSellViewState extends State<ClothSellView> {
     return CustomDrawer(
         content: CustomBody(
           title: S.of(context).clothSellDealDetails,
-          content: Padding(
-            padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
-            child: SingleChildScrollView(
+          content: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
               child: Column(
                 children: [
                   CustomAccordionWithoutExpanded(
