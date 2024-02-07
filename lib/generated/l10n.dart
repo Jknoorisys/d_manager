@@ -520,11 +520,20 @@ class S {
     );
   }
 
-  /// `Manage Cloth Sell Deal`
+  /// `Manage Cloth Sell Deal``
   String get manageClothSellDeal {
     return Intl.message(
       'Manage Cloth Sell Deal',
       name: 'manageClothSellDeal',
+      desc: '',
+      args: [],
+    );
+  }
+  /// `View Cloth Sell Deal Details``
+  String get viewClothSellDealDetails {
+    return Intl.message(
+      'Deal Details',
+      name: 'viewSellDealDetails',
       desc: '',
       args: [],
     );
