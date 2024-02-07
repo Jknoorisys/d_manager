@@ -1,3 +1,4 @@
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -172,7 +173,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            //Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd)
+                            Navigator.of(context).pushNamed(AppRoutes.invoiceAdd);
                           }
                       ),
                     ],
