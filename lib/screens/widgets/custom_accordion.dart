@@ -22,7 +22,8 @@ class CustomAccordion extends StatelessWidget {
           elevation: 5,
           surfaceTintColor: AppTheme.white,
           shadowColor: AppTheme.grey.withOpacity(0.2),
-          child: GFAccordion(
+          child:
+          GFAccordion(
             expandedTitleBackgroundColor: AppTheme.white,
             contentBackgroundColor: AppTheme.white,
             collapsedIcon: Container(
@@ -52,3 +53,40 @@ class CustomAccordion extends StatelessWidget {
     );
   }
 }
+
+class CustomAccordionWithoutExpanded extends StatelessWidget {
+  final Widget titleChild;
+  final Widget contentChild;
+
+  const CustomAccordionWithoutExpanded({
+    Key? key,
+    required this.titleChild,
+    required this.contentChild,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Card(
+          color: AppTheme.white,
+          elevation: 5,
+          surfaceTintColor: AppTheme.white,
+          shadowColor: AppTheme.grey.withOpacity(0.2),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                titleChild, // Title child
+                SizedBox(height: 8), // Adjust spacing as needed
+                contentChild, // Content child
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+

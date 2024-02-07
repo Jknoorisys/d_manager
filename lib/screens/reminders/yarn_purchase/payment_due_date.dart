@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-
 import '../../../generated/l10n.dart';
 import '../../widgets/body.dart';
 import '../../widgets/drawer/zoom_drawer.dart';
-
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 

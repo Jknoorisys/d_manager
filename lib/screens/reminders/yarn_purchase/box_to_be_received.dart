@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../../../generated/l10n.dart';
 import '../../widgets/body.dart';
 import '../../widgets/drawer/zoom_drawer.dart';
-
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
@@ -108,7 +106,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    BigText(text: 'Box Count', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                    BigText(text: 'Gross Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                     RichText(
                                       text: TextSpan(
                                         style: TextStyle(
@@ -118,12 +116,18 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                                         ),
                                         children: [
                                           TextSpan(
-                                            text: boxToBeReceived[index]['boxCount'],
+                                            text: boxToBeReceived[index]['grossWeight'],
+                                          ),
+                                          TextSpan(
+                                            text: ' kg',
+                                            style: TextStyle(
+                                              fontSize: Dimensions.font12,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    BigText(text: 'Gross Weight  ${boxToBeReceived[index]['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                    BigText(text: 'Box Count ${boxToBeReceived[index]['boxCount']}', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                   ],
                                 )
                             ),
