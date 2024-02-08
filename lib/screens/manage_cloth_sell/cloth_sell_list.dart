@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
+import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
@@ -9,6 +10,8 @@ import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
@@ -31,6 +34,11 @@ class _ClothSellListState extends State<ClothSellList> {
 
   List<Map<String, dynamic>> clothSellList = [];
 
+  String myFirm = 'Danish Textiles';
+  String partyName = 'Mahesh Textiles';
+  String clothQuality = '5 - Kilo';
+  String status = 'On Going';
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +50,12 @@ class _ClothSellListState extends State<ClothSellList> {
         content:
         CustomBody(
           title: S.of(context).clothSellList,
+          filterButton: GestureDetector(
+            onTap: () {
+              _showBottomSheet(context);
+            },
+            child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+          ),
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -53,7 +67,7 @@ class _ClothSellListState extends State<ClothSellList> {
                       child: CustomTextField(
                           isFilled: false,
                           controller: searchController,
-                          hintText: S.of(context).searchFirm,
+                          hintText: 'Search here...',
                           prefixIcon: Icons.search,
                           suffixIcon: Icons.close,
                           borderRadius: Dimensions.radius10,
@@ -232,4 +246,110 @@ class _ClothSellListState extends State<ClothSellList> {
       ),
     );
   }
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: AppTheme.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(Dimensions.radius20),
+          topRight: Radius.circular(Dimensions.radius20),
+        ),
+      ),
+      elevation: 10,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.all(Dimensions.height20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles', 'Laxmi Traders'],
+                        selectedValue: myFirm,
+                        onChanged: (newValue) {
+                          setState(() {
+                            myFirm = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select Party Name', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: const ['Mahesh Textiles', 'Tulsi Textiles', 'Laxmi Traders', 'Mahalaxmi Textiles', 'Veenapani Textiles'],
+                        selectedValue: partyName,
+                        onChanged: (newValue) {
+                          setState(() {
+                            partyName = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Gap(Dimensions.height20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['5 - Kilo', '6 - Kilo', '5/200'],
+                        selectedValue: clothQuality,
+                        onChanged: (newValue) {
+                          setState(() {
+                            clothQuality = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Status', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['On Going', 'Completed'],
+                        selectedValue: status,
+                        onChanged: (newValue) {
+                          setState(() {
+                            status = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 }

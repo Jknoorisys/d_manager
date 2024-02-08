@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
+import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
@@ -9,6 +10,8 @@ import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
@@ -31,6 +34,12 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
 
   List<Map<String, dynamic>> yarnPurchaseList = [];
 
+  String myFirm = 'Danish Textiles';
+  String partyName = 'Mehta and Sons Yarn Trades';
+  String yarnName = 'Golden';
+  String yarnType = 'Roto';
+  String status = 'On Going';
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +50,12 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     return CustomDrawer(
         content: CustomBody(
           title: S.of(context).yarnPurchasesList,
+          filterButton: GestureDetector(
+            onTap: () {
+              _showBottomSheet(context);
+            },
+            child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+          ),
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child:
@@ -53,7 +68,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                       child: CustomTextField(
                           isFilled: false,
                           controller: searchController,
-                          hintText: S.of(context).searchFirm,
+                          hintText: 'Search here...',
                           prefixIcon: Icons.search,
                           suffixIcon: Icons.close,
                           borderRadius: Dimensions.radius10,
@@ -304,6 +319,110 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
           BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
+    );
+  }
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: AppTheme.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(Dimensions.radius20),
+          topRight: Radius.circular(Dimensions.radius20),
+        ),
+      ),
+      elevation: 10,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.all(Dimensions.height20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles and Sons', 'Laxmi Traders'],
+                        selectedValue: myFirm,
+                        onChanged: (newValue) {
+                          setState(() {
+                            myFirm = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select Party Name', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['SS Textile', 'Nageena Textile', 'Mehta and Sons Yarn Trades', 'Bluesky Cloth Sale', 'Suntex Textiles'],
+                        selectedValue: partyName,
+                        onChanged: (newValue) {
+                          setState(() {
+                            partyName = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Gap(Dimensions.height20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['Bhilosa', 'Golden', 'Silver'],
+                        selectedValue: yarnName,
+                        onChanged: (newValue) {
+                          setState(() {
+                            yarnName = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Status', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: ['On Going', 'Completed'],
+                        selectedValue: status,
+                        onChanged: (newValue) {
+                          setState(() {
+                            status = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }

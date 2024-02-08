@@ -30,7 +30,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   String clothQuality = '5 - Kilo';
   String status = 'On Going';
 
-
   TextEditingController totalThanController = TextEditingController();
   TextEditingController rateController = TextEditingController();
 

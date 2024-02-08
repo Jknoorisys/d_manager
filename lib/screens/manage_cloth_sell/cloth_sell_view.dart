@@ -197,11 +197,9 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 billReceived = newValue!;
                               });
                             },
-                            width: Dimensions.height30 * 3,
                           ),
                         ],
                       ),
-                      SizedBox(width: Dimensions.width20),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +214,6 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 paymentPaid = newValue!;
                               });
                             },
-                            width: Dimensions.height30 * 3,
                           ),
                         ],
                       ),

@@ -1,17 +1,17 @@
-
-import 'package:d_manager/constants/routes.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/screens/widgets/body.dart';
+import 'package:d_manager/screens/widgets/custom_dropdown.dart';
+import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
-import '../../../generated/l10n.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
-
-import '../widgets/body.dart';
-import '../widgets/drawer/zoom_drawer.dart';
-import '../widgets/text_field.dart';
 
 class SellHistory extends StatefulWidget {
   const SellHistory({super.key});
@@ -31,6 +31,13 @@ class _SellHistoryState extends State<SellHistory> {
     {'no': 6, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Sarika Textiles', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
   ];
   List<Map<String, dynamic>> filteredSellHistoryList = [];
+
+  String myFirm = 'Danish Textiles';
+  String partyName = 'Mahesh Textiles';
+  String clothQuality = '5 - Kilo';
+  DateTime selectedDate = DateTime.now();
+  DateTime firstDate = DateTime.now();
+  DateTime lastDate = DateTime.now().add(const Duration(days: 30));
   @override
   void initState() {
     super.initState();
@@ -41,8 +48,20 @@ class _SellHistoryState extends State<SellHistory> {
     return CustomDrawer(
         content: CustomBody(
             title: S.of(context).sellHistory,
-            content:
-            Padding(
+            filterButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Icon(Icons.print, color: AppTheme.black),
+                SizedBox(width: Dimensions.width20),
+                GestureDetector(
+                  onTap: () {
+                    _showBottomSheet(context);
+                  },
+                  child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+                ),
+              ],
+            ),
+            content: Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:
               Column(
@@ -91,7 +110,7 @@ class _SellHistoryState extends State<SellHistory> {
                         return CustomAccordion(
                           titleChild: Column(
                             children: [
-                              Container(
+                              SizedBox(
                                 width: MediaQuery.of(context).size.width,
                                 child: Row(
                                   children: [
@@ -285,6 +304,147 @@ class _SellHistoryState extends State<SellHistory> {
           BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
+    );
+  }
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: AppTheme.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(Dimensions.radius20),
+          topRight: Radius.circular(Dimensions.radius20),
+        ),
+      ),
+      elevation: 10,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.all(Dimensions.height20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: const ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles', 'Laxmi Traders'],
+                        selectedValue: myFirm,
+                        onChanged: (newValue) {
+                          setState(() {
+                            myFirm = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select Party Name', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: const ['Mahesh Textiles', 'Tulsi Textiles', 'Laxmi Traders', 'Mahalaxmi Textiles', 'Veenapani Textiles'],
+                        selectedValue: partyName,
+                        onChanged: (newValue) {
+                          setState(() {
+                            partyName = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Gap(Dimensions.height20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      CustomDropdown(
+                        dropdownItems: const ['5 - Kilo', '6 - Kilo', '5/200'],
+                        selectedValue: clothQuality,
+                        onChanged: (newValue) {
+                          setState(() {
+                            clothQuality = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BigText(text: 'Filter by Date', size: Dimensions.font12,),
+                      Gap(Dimensions.height10/2),
+                      GestureDetector(
+                        onTap: () async {
+                          DateTime? pickedDate = (
+                              await showDateRangePicker(
+                                initialEntryMode: DatePickerEntryMode.input,
+                                helpText: S.of(context).selectDate,
+                                context: context,
+                                firstDate: firstDate,
+                                lastDate: lastDate,
+                              )
+                          ) as DateTime?;
+
+                          if (pickedDate != null && pickedDate != firstDate) {
+                            setState(() {
+                              firstDate = pickedDate;
+                            });
+                          }
+                        },
+                        child: Container(
+                          height: Dimensions.height50,
+                          width: MediaQuery.of(context).size.width/2.65,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(Dimensions.radius10),
+                            color: Colors.white,
+                            border: Border.all(color: AppTheme.black, width: 0.5),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(Dimensions.height10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: BigText(text: '${DateFormat('dd/MM/yyyy').format(firstDate)} to ${DateFormat('dd/MM/yyyy').format(lastDate)}', size: Dimensions.font12,)),
+                                Padding(
+                                  padding: EdgeInsets.zero,
+                                  child: Icon(
+                                    Icons.calendar_month,
+                                    color: Colors.black,
+                                    size: Dimensions.iconSize20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }
