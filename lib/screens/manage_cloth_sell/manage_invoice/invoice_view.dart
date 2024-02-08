@@ -1,3 +1,4 @@
+import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
@@ -5,14 +6,8 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gap/gap.dart';
-import '../../../generated/l10n.dart';
 import '../../widgets/buttons.dart';
-import '../../widgets/custom_datepicker.dart';
-import '../../widgets/text_field.dart';
 import '../../widgets/texts.dart';
-import 'package:intl/intl.dart';
-
 class InvoiceView extends StatefulWidget {
   final Map<String, dynamic>? invoiceData;
   const InvoiceView({Key? key, this.invoiceData}) : super(key: key);
@@ -22,18 +17,20 @@ class InvoiceView extends StatefulWidget {
 }
 
 class _InvoiceViewState extends State<InvoiceView> {
-  List<DeliveryDetails> deliveryDetailsList = [];
+  //
+  List<DeliveryDetails> transportDetails = [];
 
   DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 365));
-  TextEditingController transportNameController = TextEditingController();
-  TextEditingController hammalNameController = TextEditingController();
 
-  void _addDeliveryDetails(
+  String transportName = 'Dharma Transport';
+  String hammalName = 'Prakash';
+
+  void _addTransportDetails(
       String deliveryDate, String transportName, String hammalName) {
     setState(() {
-      deliveryDetailsList.add(
+      transportDetails.add(
         DeliveryDetails(
           deliveryDate: deliveryDate,
           transportName: transportName,
@@ -45,151 +42,8 @@ class _InvoiceViewState extends State<InvoiceView> {
 
   void _deleteDeliveryDetails(int index) {
     setState(() {
-      deliveryDetailsList.removeAt(index);
+      transportDetails.removeAt(index);
     });
-  }
-
-  void _showAddDeliveryDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SingleChildScrollView(
-            child: AlertDialog(
-              alignment: Alignment.center,
-              backgroundColor: AppTheme.white,
-              elevation: 10,
-              surfaceTintColor: AppTheme.white,
-              shadowColor: AppTheme.primary.withOpacity(0.5),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    S.of(context).addTransportDetail,
-                    style: AppTheme.heading2,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: AppTheme.primary),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(
-                        text: 'Select Delivery Date',
-                        size: Dimensions.font12,
-                        color: AppTheme.black,
-                        weight: FontWeight.bold,
-                      ),
-                      Gap(Dimensions.height10 / 2),
-                      CustomDatePicker(
-                        selectedDate: selectedDate,
-                        firstDate: firstDate,
-                        lastDate: lastDate,
-                        width: Dimensions.screenWidth,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height15),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(
-                        text: 'Transport Name',
-                        size: Dimensions.font12,
-                        color: AppTheme.black,
-                        weight: FontWeight.bold,
-                      ),
-                      Gap(Dimensions.height10 / 2),
-                      TextField(
-                        controller: transportNameController,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          hintText: 'Enter Transport Name',
-                          hintStyle:TextStyle(color: AppTheme.grey,fontSize: 10),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(Dimensions.radius10),
-                            borderSide: BorderSide(
-                                color: AppTheme.black,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: AppTheme.black,
-                            )
-                          ),
-                          contentPadding: EdgeInsets.symmetric(vertical: Dimensions.height15, horizontal: Dimensions.width15),
-                        ),
-                      ),
-                      // CustomDropdown(
-                      //   dropdownItems: const ['Dharma Transport', 'Kamal Carrier', 'Yadav Brothers India', 'Kamdhenu Cargo Carriers'],
-                      //   selectedValue: transportName,
-                      //   width: Dimensions.screenWidth,
-                      //   onChanged: (newValue) {
-                      //     setState(() {
-                      //       transportName = newValue!;
-                      //     });
-                      //   },
-                      // ),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height15),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(
-                        text: 'Hammal Name',
-                        size: Dimensions.font12,
-                        color: AppTheme.black,
-                        weight: FontWeight.bold,
-                      ),
-                      Gap(Dimensions.height10 / 2),
-                      CustomTextFieldForDialog(
-                        controller: hammalNameController,
-                        keyboardType: TextInputType.text,
-                        hintText: 'Enter Hammal Name',
-                      ),
-
-                      // CustomDropdown(
-                      //   width: Dimensions.screenWidth,
-                      //   dropdownItems: const ['Kamlesh', 'Sami Khan', 'Prakash', 'Rajesh'],
-                      //   selectedValue: hammalName,
-                      //   onChanged: (newValue) {
-                      //     setState(() {
-                      //       hammalName = newValue!;
-                      //     });
-                      //   },
-                      // ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                CustomElevatedButton(
-                  onPressed: () {
-                    //Navigator.of(context).pop();
-                    _addDeliveryDetails(
-                      DateFormat('dd-MM-yyyy').format(selectedDate),
-                      transportNameController.text,
-                      hammalNameController.text,
-                    );
-                    Navigator.of(context).pop();
-                  },
-                  buttonText: "Submit",
-                )
-              ],
-            ),
-          );
-        });
   }
 
   @override
@@ -200,9 +54,9 @@ class _InvoiceViewState extends State<InvoiceView> {
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              const Icon(Icons.remove_red_eye, color: AppTheme.black),
+              SizedBox(width: Dimensions.width25),
               const Icon(Icons.print, color: AppTheme.black),
-              SizedBox(width: Dimensions.width20),
-              const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
             ],
           ),
         content: SingleChildScrollView(
@@ -294,7 +148,7 @@ class _InvoiceViewState extends State<InvoiceView> {
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Status', 'status'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('', ''),
+                          _buildInfoColumn('GST Portal', 'abc'),
                         ],
                       ),
                     ],
@@ -315,14 +169,14 @@ class _InvoiceViewState extends State<InvoiceView> {
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            _showAddDeliveryDialog(context);
-                            // showDialog(
-                            //   context: context,
-                            //   builder: (BuildContext context) {
-                            //     return _showAddDeliveryDialog(context);
-                            //     //return DeliveryListScreen();
-                            //   },
-                            // );
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return TransportDetailAdd(
+                                    addDeliveryDetails: _addTransportDetails
+                                );
+                              },
+                            );
                           }),
                     ],
                   ),
@@ -330,10 +184,17 @@ class _InvoiceViewState extends State<InvoiceView> {
                 SizedBox(height: Dimensions.height10),
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 1.5,
-                  child: ListView.builder(
-                      itemCount: deliveryDetailsList.length,
+                  child:transportDetails.isEmpty?
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset("assets/images/icons/nodata.png",height: 200,width: 200,),
+                    ],
+                  )
+                      : ListView.builder(
+                      itemCount: transportDetails.length,
                       itemBuilder: (context, index) {
-                        final delivery = deliveryDetailsList[index];
+                        final delivery = transportDetails[index];
                         return CustomAccordionWithoutExpanded(
                           titleChild: Column(
                             children: [
@@ -357,21 +218,20 @@ class _InvoiceViewState extends State<InvoiceView> {
                           ),
                           contentChild: Column(
                             children: [
-                              AppTheme.divider,
-                              SizedBox(height: Dimensions.height10),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      //Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': invoiceDataList[index]});
-                                    },
-                                    icon: const Icon(Icons.visibility_outlined,
-                                        color: AppTheme.primary),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
                                       //Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return TransportDetailAdd(
+                                              addDeliveryDetails: _addTransportDetails
+                                          );
+                                        },
+                                      );
                                     },
                                     icon: const Icon(Icons.edit_outlined,
                                         color: AppTheme.primary),
