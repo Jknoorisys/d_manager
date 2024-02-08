@@ -3,10 +3,15 @@ const String appVersion = '1.0.0';
 const String baseUrl = 'https://dm.techtrial.work';
 
 // Auth URLS
-const String loginUrl = '/api/login';
-const String forgotPasswordUrl = '/api/forgot-password';
-const String resetPasswordUrl = '/api/change-password'; // same as set new password
-const String verifyOtpUrl = '/api/confirm-otp';
-const String resendOtpUrl = '/api/forgot-password';
-const String changePasswordUrl = '/api/change-new-password';
-const String logoutUrl = '/api/logout';
+const String loginUrl = '$baseUrl/api/login';
+const String forgotPasswordUrl = '$baseUrl/api/forgot-password';
+const String resetPasswordUrl = '$baseUrl/api/change-password'; // same as set new password
+const String verifyOtpUrl = '$baseUrl/api/confirm-otp';
+const String resendOtpUrl = '$baseUrl/api/forgot-password';
+const String changePasswordUrl = '$baseUrl/api/change-new-password';
+const String logoutUrl = '$baseUrl/api/logout';
+
+// Manage Masters
+
+// Manage Sell Deals
+
