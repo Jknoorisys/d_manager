@@ -260,6 +260,7 @@ class _SellHistoryState extends State<SellHistory> {
                                     isBackgroundGradient: false,
                                     backgroundColor: AppTheme.primary,
                                     textSize: Dimensions.font14,
+                                    visualDensity: VisualDensity.compact,
                                   ),
                                 ],
                               )

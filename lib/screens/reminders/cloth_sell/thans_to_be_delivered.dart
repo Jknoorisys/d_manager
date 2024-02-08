@@ -103,6 +103,7 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                               isBackgroundGradient: false,
                               backgroundColor: AppTheme.primary,
                               textSize: Dimensions.font14,
+                              visualDensity: VisualDensity.compact,
                             ),
                           ],
                         )

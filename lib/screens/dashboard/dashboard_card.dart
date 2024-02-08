@@ -53,6 +53,7 @@ class _DashboardCardState extends State<DashboardCard> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
+                            visualDensity: VisualDensity.comfortable,
                           ),
                           onPressed: () async {
                             DateTime? pickedDate = (

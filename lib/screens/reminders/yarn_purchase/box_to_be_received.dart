@@ -163,6 +163,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                               isBackgroundGradient: false,
                               backgroundColor: AppTheme.primary,
                               textSize: Dimensions.font14,
+                              visualDensity: VisualDensity.compact,
                             ),
                           ],
                         )

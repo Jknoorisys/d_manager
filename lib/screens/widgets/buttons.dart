@@ -104,8 +104,8 @@ class CustomElevatedButton extends StatelessWidget {
   final double? iconSize;
   final bool? isBackgroundGradient;
   final Color? backgroundColor;
-
   final Color? color;
+  final VisualDensity? visualDensity;
 
   const CustomElevatedButton({
     super.key,
@@ -118,7 +118,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.isBackgroundGradient = true,
     this.color,
     this.backgroundColor,
-    this.image,
+    this.image, this.visualDensity,
   });
 
   @override
@@ -134,6 +134,7 @@ class CustomElevatedButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
+          visualDensity: visualDensity ?? VisualDensity.standard,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -259,6 +259,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                     isBackgroundGradient: false,
                                     backgroundColor: AppTheme.primary,
                                     textSize: Dimensions.font14,
+                                    visualDensity: VisualDensity.compact,
                                   ),
                                 ],
                               )

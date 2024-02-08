@@ -185,6 +185,7 @@ class _PurchasesState extends State<Purchases> {
                       isBackgroundGradient: false,
                       backgroundColor: AppTheme.primary,
                       textSize: Dimensions.font14,
+                      visualDensity: VisualDensity.compact,
                     ),
                   ],
                 )
