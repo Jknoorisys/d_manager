@@ -3,6 +3,10 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import 'package:flutter/material.dart';
+import 'package:d_manager/constants/app_theme.dart';
+import 'package:d_manager/constants/dimension.dart';
+
 class AppTextField extends StatelessWidget {
   final String? hintText;
   final String? labelText;
@@ -208,4 +212,43 @@ class CustomTextField extends StatelessWidget {
     );
   }
 }
+
+class CustomTextFieldForDialog extends StatelessWidget {
+  final TextEditingController controller;
+  final TextInputType keyboardType;
+  final String hintText;
+
+  const CustomTextFieldForDialog({
+    Key? key,
+    required this.controller,
+    required this.keyboardType,
+    required this.hintText,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(color: AppTheme.grey, fontSize: 10),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Dimensions.radius10),
+          borderSide: BorderSide(color: AppTheme.black,width: 0.5,),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppTheme.black,width: 0.5,),
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: Dimensions.height15,
+          horizontal: Dimensions.width15,
+        ),
+      ),
+    );
+  }
+}
+
+
+
 

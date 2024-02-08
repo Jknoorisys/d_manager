@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../constants/routes.dart';
 import '../../../generated/l10n.dart';
+import '../../manage_yarn_purchase/yarn_purchase_view.dart';
 import '../../widgets/body.dart';
 import '../../widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/constants/app_theme.dart';
@@ -155,15 +157,18 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            CustomElevatedButton(
-                              onPressed: (){
-                                //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': boxToBeReceived[index]});
-                              },
-                              buttonText: 'View Details',
-                              isBackgroundGradient: false,
-                              backgroundColor: AppTheme.primary,
-                              textSize: Dimensions.font14,
-                            ),
+                            // CustomElevatedButton(
+                            //   onPressed: (){
+                            //     //Navigator.pushNamed(context, AppRoutes.yarnPurchaseViewFromReminder);
+                            //     //Navigator.of(context).pushNamed(AppRoutes.boxToBeReceived);
+                            //     Navigator.push(context,
+                            //         MaterialPageRoute(builder: (context) =>YarnPurchaseView()));
+                            //   },
+                            //   buttonText: 'View Details',
+                            //   isBackgroundGradient: false,
+                            //   backgroundColor: AppTheme.primary,
+                            //   textSize: Dimensions.font14,
+                            // ),
                           ],
                         )
                       ],

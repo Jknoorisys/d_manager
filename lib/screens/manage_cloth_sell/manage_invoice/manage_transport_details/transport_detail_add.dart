@@ -11,8 +11,7 @@ import 'package:intl/intl.dart';
 
 class TransportDetailAdd extends StatefulWidget {
   final Map<String, dynamic>? transportDetailData;
-  const TransportDetailAdd({Key? key, this.transportDetailData}) : super(key: key);
-
+  const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
   @override
   _TransportDetailAddState createState() => _TransportDetailAddState();
 }
@@ -33,7 +32,8 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
   }
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return
+      AlertDialog(
       backgroundColor: AppTheme.white,
       elevation: 10,
       surfaceTintColor: AppTheme.white,
@@ -60,7 +60,7 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BigText(text: 'Select Transport Date', size: Dimensions.font12,),
+              BigText(text: 'Select Delivery Date', size: Dimensions.font12,),
               Gap(Dimensions.height10/2),
               CustomDatePicker(
                 selectedDate: selectedDate,
@@ -120,5 +120,5 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       ],
     );
   }
-  
 }
+

@@ -84,6 +84,7 @@ class AppRoutes {
 
   // Reminder screens
   static const String boxToBeReceived = '/box-to-be-received';
+  static const String yarnPurchaseViewFromReminder = '/yar-purchase-view-from-reminder';
   static const String paymentDueDate = '/payment-due-date';
   static const String thansToBeDelivered = '/thans-to-be-delivered';
   static const String paymentToBeReceived = '/payment-to-be-received';
@@ -195,5 +196,7 @@ class AppRoutes {
     // Manage History
     purchaseHistory: (context) => const PurchaseHistory(),
     sellHistory: (context) => const SellHistory(),
+
+    yarnPurchaseViewFromReminder: (context) => const YarnPurchaseView(),
   };
 }

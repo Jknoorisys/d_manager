@@ -92,18 +92,17 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                     contentChild:
                     Column(
                       children: [
-
                         SizedBox(height: Dimensions.height15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            CustomElevatedButton(
-                              onPressed: (){},
-                              buttonText: 'View Details',
-                              isBackgroundGradient: false,
-                              backgroundColor: AppTheme.primary,
-                              textSize: Dimensions.font14,
-                            ),
+                            // CustomElevatedButton(
+                            //   onPressed: (){},
+                            //   buttonText: 'View Details',
+                            //   isBackgroundGradient: false,
+                            //   backgroundColor: AppTheme.primary,
+                            //   textSize: Dimensions.font14,
+                            // ),
                           ],
                         )
                       ],
