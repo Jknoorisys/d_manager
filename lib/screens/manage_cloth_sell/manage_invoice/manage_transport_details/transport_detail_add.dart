@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
-import '../../../widgets/text_field.dart';
-
 class TransportDetailAdd extends StatefulWidget {
   final Map<String, dynamic>? transportDetailData;
   const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
@@ -31,21 +29,6 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
     if (widget.transportDetailData != null) {
       selectedDate = DateFormat('dd-MM-yyyy').parse(widget.transportDetailData!['transportDate']);
     }
-  }
-  TextEditingController transportNameController = TextEditingController();
-  TextEditingController hammalNameController = TextEditingController();
-  List<DeliveryDetails> transportDetails = [];
-  void _addDeliveryDetails(
-      String deliveryDate, String transportName, String hammalName) {
-    setState(() {
-      transportDetails.add(
-        DeliveryDetails(
-          deliveryDate: deliveryDate,
-          transportName: transportName,
-          hammalName: hammalName,
-        ),
-      );
-    });
   }
   @override
   Widget build(BuildContext context) {
@@ -88,18 +71,6 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             ],
           ),
           SizedBox(height: Dimensions.height15),
-          // CustomTextField(
-          //   controller: transportNameController,
-          //   labelText: S.of(context).transportName,
-          //   keyboardType: TextInputType.text,
-          //   borderColor: AppTheme.primary,
-          // ),
-          // CustomTextField(
-          //   controller: hammalNameController,
-          //   labelText: S.of(context).hammal,
-          //   keyboardType: TextInputType.text,
-          //   borderColor: AppTheme.primary,
-          // ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,12 +113,6 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       actions: [
         CustomElevatedButton(
           onPressed: () {
-            //Navigator.of(context).pop();
-            _addDeliveryDetails(
-              DateFormat('dd-MM-yyyy').format(selectedDate),
-              transportNameController.text,
-              hammalNameController.text,
-            );
             Navigator.of(context).pop();
           },
           buttonText: "Submit",
@@ -156,14 +121,4 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
     );
   }
 }
-class DeliveryDetails {
-  String deliveryDate;
-  String transportName;
-  String hammalName;
 
-  DeliveryDetails({
-    required this.deliveryDate,
-    required this.transportName,
-    required this.hammalName,
-  });
-}

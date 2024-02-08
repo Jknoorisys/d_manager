@@ -5,9 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:gap/gap.dart';
 import '../../../constants/routes.dart';
+import '../../../generated/l10n.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/custom_datepicker.dart';
+import '../../widgets/text_field.dart';
 import '../../widgets/texts.dart';
+import 'package:intl/intl.dart';
 
 class InvoiceView extends StatefulWidget {
   final Map<String, dynamic>? invoiceData;
@@ -18,12 +23,18 @@ class InvoiceView extends StatefulWidget {
 }
 
 class _InvoiceViewState extends State<InvoiceView> {
-  List<DeliveryDetails> transportDetails = [];
+  List<DeliveryDetails> deliveryDetailsList = [];
 
-  void _addTransportDetails(
+  DateTime selectedDate = DateTime.now();
+  DateTime firstDate = DateTime.now();
+  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
+  TextEditingController transportNameController = TextEditingController();
+  TextEditingController hammalNameController = TextEditingController();
+
+  void _addDeliveryDetails(
       String deliveryDate, String transportName, String hammalName) {
     setState(() {
-      transportDetails.add(
+      deliveryDetailsList.add(
         DeliveryDetails(
           deliveryDate: deliveryDate,
           transportName: transportName,
@@ -35,8 +46,148 @@ class _InvoiceViewState extends State<InvoiceView> {
 
   void _deleteDeliveryDetails(int index) {
     setState(() {
-      transportDetails.removeAt(index);
+      deliveryDetailsList.removeAt(index);
     });
+  }
+
+  void _showAddDeliveryDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: AppTheme.white,
+            elevation: 10,
+            surfaceTintColor: AppTheme.white,
+            shadowColor: AppTheme.primary.withOpacity(0.5),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  S.of(context).addTransportDetail,
+                  style: AppTheme.heading2,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppTheme.primary),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BigText(
+                      text: 'Select Delivery Date',
+                      size: Dimensions.font12,
+                      color: AppTheme.black,
+                      weight: FontWeight.bold,
+                    ),
+                    Gap(Dimensions.height10 / 2),
+                    CustomDatePicker(
+                      selectedDate: selectedDate,
+                      firstDate: firstDate,
+                      lastDate: lastDate,
+                      width: Dimensions.screenWidth,
+                    ),
+                  ],
+                ),
+                SizedBox(height: Dimensions.height15),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BigText(
+                      text: 'Transport Name',
+                      size: Dimensions.font12,
+                      color: AppTheme.black,
+                      weight: FontWeight.bold,
+                    ),
+                    Gap(Dimensions.height10 / 2),
+                    TextField(
+                      controller: transportNameController,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        hintText: 'Enter Transport Name',
+                        hintStyle:TextStyle(color: AppTheme.grey,fontSize: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Dimensions.radius10),
+                          borderSide: BorderSide(
+                              color: AppTheme.black,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: AppTheme.black,
+                          )
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: Dimensions.height15, horizontal: Dimensions.width15),
+                      ),
+                    ),
+                    // CustomDropdown(
+                    //   dropdownItems: const ['Dharma Transport', 'Kamal Carrier', 'Yadav Brothers India', 'Kamdhenu Cargo Carriers'],
+                    //   selectedValue: transportName,
+                    //   width: Dimensions.screenWidth,
+                    //   onChanged: (newValue) {
+                    //     setState(() {
+                    //       transportName = newValue!;
+                    //     });
+                    //   },
+                    // ),
+                  ],
+                ),
+                SizedBox(height: Dimensions.height15),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BigText(
+                      text: 'Hammal Name',
+                      size: Dimensions.font12,
+                      color: AppTheme.black,
+                      weight: FontWeight.bold,
+                    ),
+                    Gap(Dimensions.height10 / 2),
+                    CustomTextFieldForDialog(
+                      controller: hammalNameController,
+                      keyboardType: TextInputType.text,
+                      hintText: 'Enter Hammal Name',
+                    ),
+
+                    // CustomDropdown(
+                    //   width: Dimensions.screenWidth,
+                    //   dropdownItems: const ['Kamlesh', 'Sami Khan', 'Prakash', 'Rajesh'],
+                    //   selectedValue: hammalName,
+                    //   onChanged: (newValue) {
+                    //     setState(() {
+                    //       hammalName = newValue!;
+                    //     });
+                    //   },
+                    // ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              CustomElevatedButton(
+                onPressed: () {
+                  //Navigator.of(context).pop();
+                  _addDeliveryDetails(
+                    DateFormat('dd-MM-yyyy').format(selectedDate),
+                    transportNameController.text,
+                    hammalNameController.text,
+                  );
+                  Navigator.of(context).pop();
+                },
+                buttonText: "Submit",
+              )
+            ],
+          );
+        });
   }
 
   @override
@@ -153,25 +304,85 @@ class _InvoiceViewState extends State<InvoiceView> {
                         iconColor: AppTheme.white,
                         iconData: Icons.add,
                         onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return TransportDetailAdd(
-                                addDeliveryDetails: _addTransportDetails,
-                              );
-                              //return DeliveryListScreen();
-                            },
-                          );
-                        }
-                      ),
-                    ],
-                  ),
+                          _showAddDeliveryDialog(context);
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (BuildContext context) {
+                          //     return _showAddDeliveryDialog(context);
+                          //     //return DeliveryListScreen();
+                          //   },
+                          // );
+                        }),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: Dimensions.height10),
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 1.5,
+                child: ListView.builder(
+                    itemCount: deliveryDetailsList.length,
+                    itemBuilder: (context, index) {
+                      final delivery = deliveryDetailsList[index];
+                      return CustomAccordionWithoutExpanded(
+                        titleChild: Column(
+                          children: [
+                            Row(
+                              children: [
+                                _buildInfoColumn(
+                                    'Delivery Date', delivery.deliveryDate),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn(
+                                    'Hammal Name', delivery.hammalName),
+                              ],
+                            ),
+                            SizedBox(height: Dimensions.height20),
+                            Row(
+                              children: [
+                                _buildInfoColumn(
+                                    'Transport Name', delivery.transportName),
+                              ],
+                            ),
+                          ],
+                        ),
+                        contentChild: Column(
+                          children: [
+                            AppTheme.divider,
+                            SizedBox(height: Dimensions.height10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    //Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': invoiceDataList[index]});
+                                  },
+                                  icon: const Icon(Icons.visibility_outlined,
+                                      color: AppTheme.primary),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    //Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
+                                  },
+                                  icon: const Icon(Icons.edit_outlined,
+                                      color: AppTheme.primary),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    _deleteDeliveryDetails(index);
+                                  },
+                                  icon: const Icon(Icons.delete_outline,
+                                      color: AppTheme.primary),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+              ),
+            ],
           ),
-        )
-      ),
+        ),
+      )),
     );
   }
 
