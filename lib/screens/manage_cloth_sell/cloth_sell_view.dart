@@ -75,7 +75,6 @@ class _ClothSellViewState extends State<ClothSellView> {
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
 
-
   @override
   void initState() {
     super.initState();
