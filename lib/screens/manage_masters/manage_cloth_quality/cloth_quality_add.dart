@@ -28,51 +28,54 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
   @override
   Widget build(BuildContext context) {
     var errorClothQualityName = submitted == true ? _validateClothQualityName(clothQualityController.text) : null;
-    return AlertDialog(
-      backgroundColor: AppTheme.white,
-      elevation: 10,
-      surfaceTintColor: AppTheme.white,
-      shadowColor: AppTheme.primary.withOpacity(0.5),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            S.of(context).addClothQuality,
-            style: AppTheme.heading2,
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, color: AppTheme.primary),
+    return SingleChildScrollView(
+      child: AlertDialog(
+        alignment: Alignment.center,
+        backgroundColor: AppTheme.white,
+        elevation: 10,
+        surfaceTintColor: AppTheme.white,
+        shadowColor: AppTheme.primary.withOpacity(0.5),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              S.of(context).addClothQuality,
+              style: AppTheme.heading2,
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: AppTheme.primary),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomTextField(
+              controller: clothQualityController,
+              labelText: "Enter Cloth Quality",
+              keyboardType: TextInputType.name,
+              borderRadius: Dimensions.radius10,
+              errorText: errorClothQualityName.toString() != 'null' ? errorClothQualityName.toString() : '',
+            ),
+          ],
+        ),
+        actions: [
+          CustomElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              setState(() {
+                submitted = true;
+              });
+              if (_isFormValid()) {
+                Navigator.of(context).pop();
+              }
             },
-          ),
+            buttonText: "Submit",
+          )
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomTextField(
-            controller: clothQualityController,
-            labelText: "Enter Cloth Quality",
-            keyboardType: TextInputType.name,
-            borderRadius: Dimensions.radius10,
-            errorText: errorClothQualityName.toString() != 'null' ? errorClothQualityName.toString() : '',
-          ),
-        ],
-      ),
-      actions: [
-        CustomElevatedButton(
-          onPressed: () {
-            setState(() {
-              submitted = true;
-            });
-            if (_isFormValid()) {
-              Navigator.of(context).pop();
-            }
-          },
-          buttonText: "Submit",
-        )
-      ],
     );
   }
 

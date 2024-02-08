@@ -30,59 +30,62 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
   Widget build(BuildContext context) {
     var errorYarnName = submitted == true ? _validateYarnName(yarnNameController.text) : null;
     var errorYarnType = submitted == true ? _validateYarnType(yarnTypeController.text) : null;
-    return AlertDialog(
-      backgroundColor: AppTheme.white,
-      elevation: 10,
-      surfaceTintColor: AppTheme.white,
-      shadowColor: AppTheme.primary.withOpacity(0.5),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            S.of(context).addYarnType,
-            style: AppTheme.heading2,
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, color: AppTheme.primary),
+    return SingleChildScrollView(
+      child: AlertDialog(
+        alignment: Alignment.center,
+        backgroundColor: AppTheme.white,
+        elevation: 10,
+        surfaceTintColor: AppTheme.white,
+        shadowColor: AppTheme.primary.withOpacity(0.5),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              S.of(context).addYarnType,
+              style: AppTheme.heading2,
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: AppTheme.primary),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomTextField(
+              controller: yarnNameController,
+              labelText: "Enter Yarn Name",
+              keyboardType: TextInputType.name,
+              borderRadius: Dimensions.radius10,
+              errorText: errorYarnName.toString() != 'null' ? errorYarnName.toString() : '',
+            ),
+            SizedBox(height: Dimensions.height15),
+            CustomTextField(
+              controller: yarnTypeController,
+              labelText: "Enter Yarn Type",
+              keyboardType: TextInputType.name,
+              borderRadius: Dimensions.radius10,
+              errorText: errorYarnType.toString() != 'null' ? errorYarnType.toString() : '',
+            ),
+          ],
+        ),
+        actions: [
+          CustomElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              setState(() {
+                submitted = true;
+              });
+              if (_isFormValid()) {
+                Navigator.of(context).pop();
+              }
             },
-          ),
+            buttonText: "Submit",
+          )
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomTextField(
-            controller: yarnNameController,
-            labelText: "Enter Yarn Name",
-            keyboardType: TextInputType.name,
-            borderRadius: Dimensions.radius10,
-            errorText: errorYarnName.toString() != 'null' ? errorYarnName.toString() : '',
-          ),
-          SizedBox(height: Dimensions.height15),
-          CustomTextField(
-            controller: yarnTypeController,
-            labelText: "Enter Yarn Type",
-            keyboardType: TextInputType.name,
-            borderRadius: Dimensions.radius10,
-            errorText: errorYarnType.toString() != 'null' ? errorYarnType.toString() : '',
-          ),
-        ],
-      ),
-      actions: [
-        CustomElevatedButton(
-          onPressed: () {
-            setState(() {
-              submitted = true;
-            });
-            if (_isFormValid()) {
-              Navigator.of(context).pop();
-            }
-          },
-          buttonText: "Submit",
-        )
-      ],
     );
   }
 
