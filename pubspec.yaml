@@ -45,6 +45,10 @@ dependencies:
   getwidget: ^4.0.0
   flutter_svg: ^2.0.9
   file_picker: ^6.1.1
+  http: ^1.2.0
+  dio: ^5.4.0
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.4
 
 dev_dependencies:
   flutter_test:

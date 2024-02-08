@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'generated/l10n.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   initializeDateFormatting('en');
   runApp(const MyApp());
 }

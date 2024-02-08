@@ -489,15 +489,6 @@ class S {
       args: [],
     );
   }
-  /// `Transport Name`
-  String get transportName {
-    return Intl.message(
-      'Transport Name',
-      name: 'transportName',
-      desc: '',
-      args: [],
-    );
-  }
 
   /// `Hammal`
   String get hammal {
