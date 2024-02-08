@@ -11,7 +11,9 @@ import 'package:intl/intl.dart';
 
 class TransportDetailAdd extends StatefulWidget {
   final Map<String, dynamic>? transportDetailData;
-  const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
+  final void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails;
+  //const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
+  const TransportDetailAdd({Key? key, required this.addDeliveryDetails, this.transportDetailData}) : super(key: key);
   @override
   _TransportDetailAddState createState() => _TransportDetailAddState();
 }
@@ -113,6 +115,11 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       actions: [
         CustomElevatedButton(
           onPressed: () {
+            widget.addDeliveryDetails(
+              DateFormat('dd-MM-yyyy').format(selectedDate),
+              transportName,
+              hammalName,
+            );
             Navigator.of(context).pop();
           },
           buttonText: "Submit",
