@@ -15,7 +15,6 @@ class AuthServices {
         "device_type": deviceType,
         "device_token": await fcmServices.getFCMToken() ?? "",
       };
-
       Response response = await dio.post(loginUrl, data: body);
       if (response.statusCode == 200) {
        print("Log In - ${response.data}");

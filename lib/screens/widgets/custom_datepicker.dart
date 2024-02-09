@@ -61,7 +61,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              BigText(text: DateFormat('dd/MM/yyyy').format(selectedDate), size: Dimensions.font14,),
+              BigText(text: DateFormat('yyyy-MM-dd').format(selectedDate), size: Dimensions.font14,),
               Padding(
                 padding: EdgeInsets.zero,
                 child: Icon(

@@ -1,3 +1,4 @@
+import 'package:d_manager/api/manage_sell_deals.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
@@ -9,11 +10,15 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:intl/intl.dart';
+
+import '../../models/sell_deal_list_model.dart';
 
 class ClothSellList extends StatefulWidget {
   const ClothSellList({Key? key}) : super(key: key);
@@ -23,16 +28,14 @@ class ClothSellList extends StatefulWidget {
 }
 
 class _ClothSellListState extends State<ClothSellList> {
+  final dio = Dio();
+  SellDealDetails sellDealDetails = SellDealDetails();
   final searchController = TextEditingController();
-  List<Map<String, dynamic>> unFilteredClothSellList = [
-    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 2, 'dealDate': '2024-01-26','myFirm': 'Danish Textiles','partyName': 'Tulsi Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 3, 'dealDate': '2024-01-27','myFirm': 'Danish Textiles','partyName': 'Laxmi Traders','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 4, 'dealDate': '2024-01-28','myFirm': 'Danish Textiles','partyName': 'Mahalaxmi Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 5, 'dealDate': '2024-01-29','myFirm': 'Danish Textiles','partyName': 'Veenapani Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-  ];
-
-  List<Map<String, dynamic>> clothSellList = [];
+  // List<Map<String, dynamic>> unFilteredClothSellList = [
+  //   {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
+  // ];
+  SellDealListModel? sellDealListModel;
+  List<SellListData> clothSellList = [];
 
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
@@ -42,7 +45,15 @@ class _ClothSellListState extends State<ClothSellList> {
   @override
   void initState() {
     super.initState();
-    clothSellList = unFilteredClothSellList;
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    try {
+      await getSellDealList();
+    } catch (e) {
+      print("Error during initialization: $e");
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -75,17 +86,16 @@ class _ClothSellListState extends State<ClothSellList> {
                           onSuffixTap: () {
                             searchController.clear();
                             setState(() {
-                              clothSellList = unFilteredClothSellList;
+                              clothSellList;
                             });
                           },
                           onChanged: (value) {
                             setState(() {
-                              clothSellList = unFilteredClothSellList
-                                  .where((firm) =>
-                              firm['partyName']
+                              clothSellList
+                                  .where((firm) => firm.partyName!
                                   .toLowerCase()
                                   .contains(value.toLowerCase()) ||
-                                  firm['myFirm']
+                                  firm.firmName!
                                       .toLowerCase()
                                       .contains(value.toLowerCase()))
                                   .toList();
@@ -124,23 +134,23 @@ class _ClothSellListState extends State<ClothSellList> {
                                     CircleAvatar(
                                       backgroundColor: AppTheme.secondary,
                                       radius: Dimensions.height20,
-                                      child: BigText(text: clothSellList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                                      child: BigText(text: clothSellList[index].firmName![0], color: AppTheme.primary, size: Dimensions.font18),
                                     ),
                                     SizedBox(width: Dimensions.height10),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        BigText(text: clothSellList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16),
+                                        BigText(text: clothSellList[index].firmName!, color: AppTheme.primary, size: Dimensions.font16),
                                         Row(
                                           children: [
                                             CircleAvatar(
                                               backgroundColor: AppTheme.black,
                                               radius: Dimensions.height10,
-                                              child: BigText(text: clothSellList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                              child: BigText(text: clothSellList[index].firmId![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                             ),
                                             SizedBox(width: Dimensions.width10),
-                                            SmallText(text: clothSellList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                            SmallText(text: clothSellList[index].firmId!, color: AppTheme.black, size: Dimensions.font12),
                                           ],
                                         ),
                                       ],
@@ -155,11 +165,11 @@ class _ClothSellListState extends State<ClothSellList> {
                             SizedBox(height: Dimensions.height10),
                             Row(
                               children: [
-                                _buildInfoColumn('Deal Date', clothSellList[index]['dealDate']),
+                                _buildInfoColumn('Deal Date', clothSellList[index].sellDate!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Cloth Quality', clothSellList[index]['clothQuality']),
+                                _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Total Than', clothSellList[index]['totalThan']),
+                                _buildInfoColumn('Total Than', clothSellList[index].totalThan!),
                               ],
                             ),
                           ],
@@ -168,17 +178,17 @@ class _ClothSellListState extends State<ClothSellList> {
                           children: [
                             Row(
                               children: [
-                                _buildInfoColumn('Than Delivered', clothSellList[index]['thanDelivered']),
+                                _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Than Remaining', clothSellList[index]['thanRemaining']),
+                                _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Rate', clothSellList[index]['rate']),
+                                _buildInfoColumn('Rate', clothSellList[index].rate!),
                               ],
                             ),
                             SizedBox(height: Dimensions.height10),
                             Row(
                               children: [
-                                _buildInfoColumn('Status', clothSellList[index]['status']),
+                                _buildInfoColumn('Status', clothSellList[index].dealStatus!),
                               ],
                             ),
                             SizedBox(height: Dimensions.height10),
@@ -214,10 +224,10 @@ class _ClothSellListState extends State<ClothSellList> {
                                   activeBorderColor: AppTheme.primary,
                                   onChanged: (value) {
                                     setState(() {
-                                      clothSellList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                      clothSellList[index].dealStatus = value == true ? 'Completed' : 'On Going';
                                     });
                                   },
-                                  value: clothSellList[index]['status'] == 'Completed' ? true : false,
+                                  value: clothSellList[index].dealStatus == 'Completed' ? true : false,
                                   inactiveIcon: null,
                                 ),
                               ],
@@ -352,4 +362,13 @@ class _ClothSellListState extends State<ClothSellList> {
     );
   }
 
+    Future<SellDealListModel?> getSellDealList() async {
+      SellDealListModel? model = await sellDealDetails.sellDealListApi();
+      print("model=== $model");
+      if (model?.success == true) {
+        print(model!.message!);
+      }else{
+        print(model?.message!);
+      }
+    }
 }
