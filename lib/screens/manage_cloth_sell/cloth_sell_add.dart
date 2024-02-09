@@ -12,6 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
+import '../../api/manage_sell_deals.dart';
+import '../../models/create_sell_deal_model.dart';
+
 class ClothSellAdd extends StatefulWidget {
   final Map<String, dynamic>? clothSellData;
   const ClothSellAdd({Key? key, this.clothSellData}) : super(key: key);
@@ -22,7 +25,6 @@ class ClothSellAdd extends StatefulWidget {
 
 class _ClothSellAddState extends State<ClothSellAdd> {
   bool submitted = false;
-  DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 365));
   String myFirm = 'Danish Textiles';
@@ -32,23 +34,75 @@ class _ClothSellAddState extends State<ClothSellAdd> {
 
   TextEditingController totalThanController = TextEditingController();
   TextEditingController rateController = TextEditingController();
+  SellDealDetails sellDealDetails = SellDealDetails();
+  DateTime selectedDate = DateTime.now();
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.clothSellData != null) {
-      selectedDate = DateFormat('dd-MM-yyyy').parse(widget.clothSellData!['dealDate']);
-      myFirm = widget.clothSellData!['myFirm'];
-      partyName = widget.clothSellData!['partyName'];
-      status = widget.clothSellData!['status'];
-      totalThanController.text = widget.clothSellData!['totalThan'];
-      clothQuality = widget.clothSellData!['clothQuality'];
+  Future<CreateSellDealModel?> NewSellDeal(
+      String UserID,
+      DateTime sellDate,
+      String firmID,
+      String partyID,
+      String qualityID,
+      String totalThan,
+      String rate) async {
+    String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
+    CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
+        UserID,
+        formattedSellDate,
+        firmID,
+        partyID,
+        qualityID,
+        totalThan,
+        rate
+    );
+    print("model=== $model");
+    if (model?.success == true) {
+     print(model!.message!);
+    }else{
+      print(model?.message!);
     }
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   if (widget.clothSellData != null) {
+  //     selectedDate = DateFormat('dd-MM-yyyy').parse(widget.clothSellData!['dealDate']);
+  //     myFirm = widget.clothSellData!['myFirm'];
+  //     partyName = widget.clothSellData!['partyName'];
+  //     status = widget.clothSellData!['status'];
+  //     totalThanController.text = widget.clothSellData!['totalThan'];
+  //     clothQuality = widget.clothSellData!['clothQuality'];
+  //   }
+  // }
+
+  void handleDateChanged(DateTime newDate) {
+    setState(() {
+      selectedDate = newDate;
+    });
+  }
+
+  void handleMyFirmChanged(String? newValue) {
+    setState(() {
+      myFirm = newValue!;
+    });
+  }
+
+  Future<void> _handleCreateSellDeal()async{
+    var errorTotalThan = submitted == true ? _validateTotalThan(totalThanController.text) : null,
+        errorRate = submitted == true ? _validateRate(rateController.text) : null;
+    NewSellDeal(
+      '1',
+      selectedDate,
+      '1',
+      '1',
+      '1',
+      totalThanController.text ?? errorTotalThan!,
+      rateController.text ?? errorRate!,
+    );
   }
   @override
   Widget build(BuildContext context) {
-    var errorTotalThan = submitted == true ? _validateTotalThan(totalThanController.text) : null,
-        errorRate = submitted == true ? _validateRate(rateController.text) : null;
     return CustomDrawer(
         content: CustomBody(
           title: widget.clothSellData == null ? 'Create Cloth Sell Deal' : 'Update Cloth Sell Deal',
@@ -77,7 +131,8 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                             children: [
                               BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
+                              //CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
+                              CustomDatePicker(selectedDate: DateTime.parse(selectedDate.toString()), firstDate: firstDate, lastDate: lastDate),
                             ],
                           ),
                           Column(
@@ -89,11 +144,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               CustomDropdown(
                                 dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles', 'Laxmi Traders'],
                                 selectedValue: myFirm,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    myFirm = newValue!;
-                                  });
-                                },
+                                onChanged: handleMyFirmChanged,
                               ),
                             ],
                           ),
@@ -155,7 +206,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
+                                // errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
                               ),
                             ],
                           ),
@@ -171,7 +222,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
+                                //errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
                               )
                             ],
                           ),
@@ -198,12 +249,13 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                       Gap(Dimensions.height20),
                       CustomElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            submitted = true;
-                          });
-                          if (_isFormValid()) {
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellList);
-                          }
+                          _handleCreateSellDeal();
+                          // setState(() {
+                          //   submitted = true;
+                          // });
+                          // if (_isFormValid()) {
+                          //   Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellList);
+                          // }
                         },
                         buttonText: 'Save',
                       )

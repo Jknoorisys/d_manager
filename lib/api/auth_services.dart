@@ -13,7 +13,6 @@ class AuthServices {
         "email": email,
         "password": password,
       };
-
       Response response = await dio.post(loginUrl, data: body);
       if (response.statusCode == 200) {
        print("Log In - ${response.data}");
