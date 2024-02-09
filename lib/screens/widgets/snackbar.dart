@@ -29,6 +29,7 @@ class CustomSnackbar {
       icon: icon != null ? Icon(icon, color: iconColor ?? AppTheme.primary, size: Dimensions.height45,) : null,
       shouldIconPulse: shouldIconPulse,
       padding: EdgeInsets.all(Dimensions.height20),
+      isDismissible: true,
     );
   }
 }

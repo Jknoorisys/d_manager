@@ -12,7 +12,7 @@ class LoginModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['success'] = success;
     data['message'] = message;
     if (this.data != null) {
@@ -34,15 +34,18 @@ class Data {
   String? fcmToken;
 
   Data(
-      {this.userId,
-        this.userName,
-        this.userEmail,
-        this.profilePic,
-        this.isSocial,
-        this.socialId,
-        this.deviceType,
-        this.deviceToken,
-        this.fcmToken});
+    {
+      this.userId,
+      this.userName,
+      this.userEmail,
+      this.profilePic,
+      this.isSocial,
+      this.socialId,
+      this.deviceType,
+      this.deviceToken,
+      this.fcmToken
+    }
+  );
 
   Data.fromJson(Map<String, dynamic> json) {
     userId = json['user_id'];
@@ -57,7 +60,7 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['user_id'] = userId;
     data['user_name'] = userName;
     data['email'] = userEmail;

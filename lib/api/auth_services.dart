@@ -12,8 +12,6 @@ class AuthServices {
       Map<String, dynamic> body = {
         "email": email,
         "password": password,
-        "device_type": deviceType,
-        "device_token": await fcmServices.getFCMToken() ?? "",
       };
 
       Response response = await dio.post(loginUrl, data: body);

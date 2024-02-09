@@ -1,7 +1,9 @@
+import 'package:d_manager/api/auth_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/models/login_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
@@ -21,6 +23,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool submitted = false;
   bool isChecked = false;
   bool _obscureText = true;
+
+  bool isLoading = false;
+  AuthServices authServices = AuthServices();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Login with Google Button
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+                    _login(emailController.text, passwordController.text);
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primary),
@@ -193,6 +205,15 @@ class _LoginScreenState extends State<LoginScreen> {
     String passwordError = _validatePassword(passwordController.text) ?? '';
 
     return emailError.isEmpty && passwordError.isEmpty;
+  }
+
+  Future<void> _login(String email, String password) async {
+    LoginModel? loginModel = await authServices.login(email, password);
+    if (loginModel != null) {
+      print(loginModel.data!.toJson());
+    } else {
+      print('Login Failed');
+    }
   }
 }
 
