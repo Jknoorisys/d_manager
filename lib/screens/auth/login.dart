@@ -3,9 +3,11 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/login_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -131,17 +133,30 @@ class _LoginScreenState extends State<LoginScreen> {
                       submitted = true;
                     });
                     if (_isFormValid()) {
-                      Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+                      if (HelperFunctions.checkInternet() == false) {
+                        CustomApiSnackbar.show(
+                          context,
+                          'Warning',
+                          'No internet connection',
+                          mode: SnackbarMode.warning,
+                        );
+                      } else {
+                        setState(() {
+                          isLoading = !isLoading;
+                        });
+                        _login(emailController.text, passwordController.text);
+                      }
                     }
                   },
                   buttonText: S.of(context).login,
+                  loading: isLoading ? const CircularProgressIndicator(color: Colors.white) : null,
                 ),
                 SizedBox(height: Dimensions.height20),
 
                 // Login with Google Button
                 OutlinedButton(
                   onPressed: () {
-                    _login(emailController.text, passwordController.text);
+                    Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primary),
@@ -194,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return S.of(context).passwordIsRequired;
     }
 
-    if (value.length < 6) {
+    if (value.length < 3) {
       return S.of(context).passwordMustBeAtLeast6Characters;
     }
     return null;
@@ -210,9 +225,35 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login(String email, String password) async {
     LoginModel? loginModel = await authServices.login(email, password);
     if (loginModel != null) {
-      print(loginModel.data!.toJson());
+      if (loginModel.success == true) {
+        await HelperFunctions.setApiKey(loginModel.data!.apiKey.toString());
+        await HelperFunctions.setUserID(loginModel.data!.userId.toString());
+        await HelperFunctions.setUserEmail(loginModel.data!.userEmail.toString());
+        await HelperFunctions.setUserName(loginModel.data!.userName.toString());
+        await HelperFunctions.setLoginStatus(true);
+        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          loginModel.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
     } else {
-      print('Login Failed');
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        loginModel!.message.toString(),
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

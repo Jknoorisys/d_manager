@@ -103,7 +103,11 @@ class AppRoutes {
       final String? emailAddress = args?['emailAddress'];
       return PinCodeVerificationScreen(emailAddress: emailAddress);
     },
-    setNewPassword: (context) => const SetNewPasswordScreen(),
+    setNewPassword: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final String? email = args?['email'];
+      return SetNewPasswordScreen(email: email.toString());
+    },
     dashboard: (context) => const DashboardScreen(),
     settings: (context) => const ChangePasswordScreen(),
 

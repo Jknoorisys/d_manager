@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'package:d_manager/api/auth_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/forget_password_model.dart';
+import 'package:d_manager/models/verify_otp_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 class PinCodeVerificationScreen extends StatefulWidget {
@@ -19,13 +24,18 @@ class PinCodeVerificationScreen extends StatefulWidget {
 }
 
 class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
-  TextEditingController textEditingController = TextEditingController();
+  TextEditingController otpController = TextEditingController();
 
   StreamController<ErrorAnimationType>? errorController;
 
   bool hasError = false;
   String currentText = "";
   final formKey = GlobalKey<FormState>();
+
+  bool isLoading = false;
+
+  bool invalidOtp = false;
+  AuthServices authServices = AuthServices();
 
   @override
   void initState() {
@@ -34,18 +44,17 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
   }
 
   snackBar(String? message) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message!),
-        duration: const Duration(seconds: 2),
-      ),
+    return CustomApiSnackbar.show(
+      context,
+      'Error',
+      message.toString(),
+      mode: SnackbarMode.error,
     );
   }
 
   @override
   void dispose() {
     errorController!.close();
-
     super.dispose();
   }
 
@@ -151,7 +160,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                       animationDuration: const Duration(milliseconds: 300),
                       enableActiveFill: false,
                       errorAnimationController: errorController,
-                      controller: textEditingController,
+                      controller: otpController,
                       keyboardType: TextInputType.number,
                       boxShadows: const [
                         BoxShadow(
@@ -181,7 +190,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dimensions.width30),
                   child: Text(
-                    hasError ? S.of(context).pleaseFillUpAllTheCellsProperly : "",
+                    hasError ? S.of(context).invalidOtp : "",
                     style: TextStyle(
                       color: Colors.red.shade800,
                       fontSize: Dimensions.font14,
@@ -199,7 +208,21 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                       style: TextStyle(color: Colors.black54, fontSize: Dimensions.font14),
                     ),
                     TextButton(
-                      onPressed: () => snackBar(S.of(context).otpResend),
+                      onPressed: () {
+                        if (HelperFunctions.checkInternet() == false) {
+                          CustomApiSnackbar.show(
+                            context,
+                            'Warning',
+                            'No internet connection',
+                            mode: SnackbarMode.warning,
+                          );
+                        } else {
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+                          _resendOtp(widget.emailAddress.toString());
+                        }
+                      },
                       child: Text(
                         S.of(context).resend,
                         style: TextStyle(
@@ -220,7 +243,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                     onPressed: () {
                       formKey.currentState!.validate();
                       // conditions for validating
-                      if (currentText.length != 4 || currentText != "4130") {
+                      if (currentText.length != 4 ) {
                         errorController!.add(ErrorAnimationType
                             .shake); // Triggering error shake animation
                         setState(() => hasError = true);
@@ -228,10 +251,20 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                         setState(
                               () {
                             hasError = false;
-                            Navigator.pushReplacementNamed(
-                              context,
-                              AppRoutes.setNewPassword,
-                            );
+                            Navigator.pushReplacementNamed(context, AppRoutes.setNewPassword, arguments: {'email': widget.emailAddress});
+                            // if (HelperFunctions.checkInternet() == false) {
+                            //   CustomApiSnackbar.show(
+                            //     context,
+                            //     'Warning',
+                            //     'No internet connection',
+                            //     mode: SnackbarMode.warning,
+                            //   );
+                            // } else {
+                            //   setState(() {
+                            //     isLoading = !isLoading;
+                            //   });
+                            //   _verifyOtp(otpController.text as int, widget.emailAddress.toString());
+                            // }
                           },
                         );
                       }
@@ -240,38 +273,108 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                 ),
 
                 // clear and set buttons
-                SizedBox(
-                  height: Dimensions.height10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Flexible(
-                      child: TextButton(
-                        child: Text(S.of(context).clear),
-                        onPressed: () {
-                          textEditingController.clear();
-                        },
-                      ),
-                    ),
-                    Flexible(
-                      child: TextButton(
-                        child: Text(S.of(context).setText),
-                        onPressed: () {
-                          setState(() {
-                            textEditingController.text = "4130";
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                )
+                // SizedBox(
+                //   height: Dimensions.height10,
+                // ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: <Widget>[
+                //     Flexible(
+                //       child: TextButton(
+                //         child: Text(S.of(context).clear),
+                //         onPressed: () {
+                //           otpController.clear();
+                //         },
+                //       ),
+                //     ),
+                //     Flexible(
+                //       child: TextButton(
+                //         child: Text(S.of(context).setText),
+                //         onPressed: () {
+                //           setState(() {
+                //             otpController.text = "4130";
+                //           });
+                //         },
+                //       ),
+                //     ),
+                //   ],
+                // )
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _verifyOtp(int otp, String email) async {
+    VerifyOtpModel verifyOtpModel = await authServices.verifyOtp(email, otp);
+    if (verifyOtpModel != null) {
+      if (verifyOtpModel.success == true && verifyOtpModel.otpVerified == "1") {
+        invalidOtp = true;
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          verifyOtpModel.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.pushReplacementNamed(context, AppRoutes.setNewPassword, arguments: {'email': email});
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          verifyOtpModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        verifyOtpModel!.message.toString(),
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _resendOtp(String email) async {
+    ForgetPasswordModel forgetPasswordModel = await authServices.forgotPassword(email);
+    if (forgetPasswordModel != null) {
+      if (forgetPasswordModel.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          forgetPasswordModel.message.toString(),
+          mode: SnackbarMode.success,
+        );
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          forgetPasswordModel.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        forgetPasswordModel!.message.toString(),
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
 

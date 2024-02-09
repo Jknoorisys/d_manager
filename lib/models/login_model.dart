@@ -24,10 +24,12 @@ class LoginModel {
 
 class Data {
   int? userId;
+  String? apiKey;
   String? userName;
   String? userEmail;
   String? profilePic;
   bool? isSocial;
+  String? socialType;
   String? socialId;
   String? deviceType;
   String? deviceToken;
@@ -36,11 +38,13 @@ class Data {
   Data(
     {
       this.userId,
+      this.apiKey,
       this.userName,
       this.userEmail,
       this.profilePic,
       this.isSocial,
       this.socialId,
+      this.socialType,
       this.deviceType,
       this.deviceToken,
       this.fcmToken
@@ -49,11 +53,13 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     userId = json['user_id'];
+    apiKey = json['X-API-Key'];
     userName = json['user_name'];
     userEmail = json['email'];
     profilePic = json['profile_pic'];
     isSocial = json['is_social'];
     socialId = json['social_id'];
+    socialType = json['social_type'];
     deviceType = json['device_type'];
     deviceToken = json['device_token'];
     fcmToken = json['fcm_token'];
@@ -62,11 +68,13 @@ class Data {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['user_id'] = userId;
+    data['X-API-Key'] = apiKey;
     data['user_name'] = userName;
     data['email'] = userEmail;
     data['profile_pic'] = profilePic;
     data['is_social'] = isSocial;
     data['social_id'] = socialId;
+    data['social_type'] = socialType;
     data['device_type'] = deviceType;
     data['device_token'] = deviceToken;
     data['fcm_token'] = fcmToken;

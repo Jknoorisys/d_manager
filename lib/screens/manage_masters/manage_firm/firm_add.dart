@@ -1,7 +1,9 @@
+import 'package:d_manager/api/manage_firm_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/models/add_firm_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -28,6 +30,24 @@ class _FirmAddState extends State<FirmAdd> {
   final TextEditingController accountNumberController = TextEditingController();
   final TextEditingController groupCodeController = TextEditingController();
   bool submitted = false;
+
+  bool isLoading = false;
+  ManageFirmServices manageFirmServices = ManageFirmServices();
+
+  @override
+  void dispose() {
+    partyNameController.dispose();
+    firmNameController.dispose();
+    addressController.dispose();
+    gstNumberController.dispose();
+    phoneNumberController.dispose();
+    accountHolderNameController.dispose();
+    bankNameController.dispose();
+    ifscCodeController.dispose();
+    accountNumberController.dispose();
+    groupCodeController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -75,7 +95,7 @@ class _FirmAddState extends State<FirmAdd> {
                     children: [
                       // Party Details
                       Text(
-                        "Party Details",
+                        "Firm Details",
                         style: AppTheme.heading2,
                       ),
                       Gap(Dimensions.height10),
@@ -307,5 +327,9 @@ class _FirmAddState extends State<FirmAdd> {
     String groupCodeError = _validateGroupCode(groupCodeController.text) ?? '';
 
     return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && groupCodeError.isEmpty ? true : false;
+  }
+
+  Future<void> _addFirm(Map<String, dynamic> body) async {
+    AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body);
   }
 }

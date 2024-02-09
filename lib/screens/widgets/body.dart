@@ -33,6 +33,12 @@ class CustomBody extends StatelessWidget {
           },
           icon: FaIcon(FontAwesomeIcons.barsStaggered, color: AppTheme.primary, size: Dimensions.iconSize24),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: FaIcon(FontAwesomeIcons.bell, color: AppTheme.primary, size: Dimensions.iconSize24),
+          ),
+        ],
         title: isAppBarTitle == true ? Image.asset(AppImages.appLogoHorizontal, width: Dimensions.width50*5, height: Dimensions.height50*5,) : null,
         centerTitle: true,
       ),

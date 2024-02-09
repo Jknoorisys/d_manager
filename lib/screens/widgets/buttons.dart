@@ -106,6 +106,7 @@ class CustomElevatedButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? color;
   final VisualDensity? visualDensity;
+  final CircularProgressIndicator? loading;
 
   const CustomElevatedButton({
     super.key,
@@ -118,7 +119,9 @@ class CustomElevatedButton extends StatelessWidget {
     this.isBackgroundGradient = true,
     this.color,
     this.backgroundColor,
-    this.image, this.visualDensity,
+    this.image,
+    this.visualDensity,
+    this.loading,
   });
 
   @override
@@ -143,6 +146,8 @@ class CustomElevatedButton extends StatelessWidget {
             if (icon != null) SizedBox(width: Dimensions.height10),
             if (image != null) image!,
             if (image != null) SizedBox(width: Dimensions.height10),
+            if (loading != null) loading!,
+            if (loading != null) SizedBox(width: Dimensions.height10),
             BigText(
               text: buttonText ?? '',
                 size: textSize ?? Dimensions.font16,

@@ -939,6 +939,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Invalid OTP`
+  String get invalidOtp {
+    return Intl.message(
+      'Invalid OTP',
+      name: 'invalidOtp',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

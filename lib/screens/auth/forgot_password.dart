@@ -1,9 +1,13 @@
+import 'package:d_manager/api/auth_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/forget_password_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/get_utils/get_utils.dart';
@@ -16,6 +20,14 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController emailController = TextEditingController();
   bool submitted = false;
+  bool isLoading = false;
+  AuthServices authServices = AuthServices();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +96,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         submitted = true;
                       });
                       if (_isFormValid()) {
-                        Navigator.of(context).pushNamed(AppRoutes.forgotPasswordCode, arguments: {'emailAddress': emailController.text});
+                        if (HelperFunctions.checkInternet() == false) {
+                          CustomApiSnackbar.show(
+                            context,
+                            'Warning',
+                            'No internet connection',
+                            mode: SnackbarMode.warning,
+                          );
+                        } else {
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+                          _forgotPassword(emailController.text);
+                        }
                       }
                     },
                     buttonText: S.of(context).sendCode,
+                  loading: isLoading ? const CircularProgressIndicator(color: Colors.white) : null,
                 ),
               ],
             ),
@@ -112,5 +137,37 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     String emailError = _validateEmail(emailController.text) ?? '';
 
     return emailError.isEmpty;
+  }
+
+  Future<void> _forgotPassword(String email) async {
+    Map<String, dynamic> body = {
+      "email": email,
+    };
+    ForgetPasswordModel? forgetPasswordModel = await authServices.forgotPassword(email);
+    if (forgetPasswordModel != null) {
+      if (forgetPasswordModel.success == true) {
+        Navigator.of(context).pushNamed(AppRoutes.forgotPasswordCode, arguments: {'emailAddress': email});
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          forgetPasswordModel.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+      setState(() {
+        isLoading = false;
+      });
+    } else{
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        forgetPasswordModel.message.toString(),
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

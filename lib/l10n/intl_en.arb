@@ -87,5 +87,6 @@
   "searchDeliveryDetails": "Search Delivery Details",
   "deliveryDetail": "Delivery Detail",
   "addTransportDetail": "Add Transport Detail",
-  "clothSellDealDetails": "Cloth Sell Deal Details"
+  "clothSellDealDetails": "Cloth Sell Deal Details",
+  "invalidOtp": "Invalid OTP"
 }

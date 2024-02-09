@@ -7,7 +7,6 @@ class HelperFunctions {
 
   static late SharedPreferences pref;
 
-
   static Future init() async {
     pref = await SharedPreferences.getInstance();
   }
@@ -17,8 +16,8 @@ class HelperFunctions {
   }
 
   static bool getLoginStatus()  {
-    bool? email = pref.getBool('LoginStatus');
-    return email ?? false;
+    bool? status = pref.getBool('LoginStatus');
+    return status ?? false;
   }
 
   static Future<bool> setUserID(String id) async {
@@ -37,6 +36,24 @@ class HelperFunctions {
   static String getUserEmail() {
     String? email = pref.getString('UserEmail');
     return email ?? '';
+  }
+
+  static Future<bool> setUserName(String userName) async {
+    return pref.setString("UserName", userName);
+  }
+
+  static String getUserName() {
+    String? userName = pref.getString('UserName');
+    return userName ?? '';
+  }
+
+  static Future<bool> setApiKey(String apiKey) async {
+    return pref.setString("ApiKey", apiKey);
+  }
+
+  static String getApiKey() {
+    String? apiKey = pref.getString('ApiKey');
+    return apiKey ?? '';
   }
 
   static Future<bool> setLanguage(String lang) async {

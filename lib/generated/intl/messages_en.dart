@@ -81,6 +81,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hammal": MessageLookupByLibrary.simpleMessage("Hammal"),
         "hammalList": MessageLookupByLibrary.simpleMessage("Hammal List"),
         "invalidEmail": MessageLookupByLibrary.simpleMessage("Invalid Email"),
+        "invalidOtp": MessageLookupByLibrary.simpleMessage("Invalid OTP"),
         "login": MessageLookupByLibrary.simpleMessage("Login"),
         "loginWithGoogle":
             MessageLookupByLibrary.simpleMessage("Login with Google"),

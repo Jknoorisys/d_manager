@@ -25,19 +25,19 @@ class SellDealDetails{
         "total_than": totalThan,
         "rate": rate,
       };
-      Response response = await dio.post(createSellDeal, data: body,
-        options: Options(
-          headers: {
-            "X-API-Key":"NYS03223"
-          },
-        ),);
-      if (response.statusCode == 200)
-      {
-        return CreateSellDealModel.fromJson(response.data);
-      }
-      else {
-        return CreateSellDealModel.fromJson(response.data);
-      }
+      // Response response = await dio.post(createSellDeal, data: body,
+      //   options: Options(
+      //     headers: {
+      //       "X-API-Key":"NYS03223"
+      //     },
+      //   ),);
+      // if (response.statusCode == 200)
+      // {
+      //   return CreateSellDealModel.fromJson(response.data);
+      // }
+      // else {
+      //   return CreateSellDealModel.fromJson(response.data);
+      // }
     }catch(e){
       print(e.toString());
     }
@@ -46,19 +46,19 @@ class SellDealDetails{
   Future<SellDealListModel?> sellDealListApi()async{
     try{
       Map<String, dynamic> body = {};
-      Response response = await dio.post(sellDealList, data: body,
-        options: Options(
-          headers: {
-            "X-API-Key":"NYS03223"
-          },
-        ),);
-      if (response.statusCode == 200)
-      {
-        return SellDealListModel.fromJson(response.data);
-      }
-      else {
-        return SellDealListModel.fromJson(response.data);
-      }
+      // Response response = await dio.post(sellDealList, data: body,
+      //   options: Options(
+      //     headers: {
+      //       "X-API-Key":"NYS03223"
+      //     },
+      //   ),);
+      // if (response.statusCode == 200)
+      // {
+      //   return SellDealListModel.fromJson(response.data);
+      // }
+      // else {
+      //   return SellDealListModel.fromJson(response.data);
+      // }
     }catch(e){
       print(e.toString());
     }

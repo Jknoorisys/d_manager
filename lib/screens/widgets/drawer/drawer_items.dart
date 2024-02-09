@@ -3,6 +3,7 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
@@ -40,10 +41,9 @@ class DrawerItems extends StatelessWidget {
                       backgroundImage: const AssetImage(AppImages.userImage),
                     ),
                     SizedBox(height: Dimensions.height10),
-                    SmallText(text: 'John Doe', color: AppTheme.secondaryLight, size: Dimensions.font14),
+                    SmallText(text: HelperFunctions.getUserName(), color: AppTheme.secondaryLight, size: Dimensions.font14),
                     SizedBox(height: Dimensions.height10/2),
-                    SmallText(text: 'john@gmail.com', color: AppTheme.secondaryLight, size: Dimensions.font14),
-
+                    SmallText(text: HelperFunctions.getUserEmail(), color: AppTheme.secondaryLight, size: Dimensions.font14),
                   ],
                 ),
               ),
@@ -135,11 +135,12 @@ class DrawerItems extends StatelessWidget {
 
               // Change Password
               buildTitle(S.of(context).settings, Icons.settings, () {
-                Navigator.of(context).pushNamed(AppRoutes.settings);
+                Navigator.of(context).pushReplacementNamed(AppRoutes.settings);
               }),
 
               // Logout
               buildTitle(S.of(context).logout, Icons.logout, () {
+                HelperFunctions.setLoginStatus(false);
                 Navigator.of(context).pushReplacementNamed(AppRoutes.login);
               }),
             ],

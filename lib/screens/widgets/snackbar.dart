@@ -33,3 +33,65 @@ class CustomSnackbar {
     );
   }
 }
+
+enum SnackbarMode { success, error, warning }
+class CustomApiSnackbar {
+  static void show(BuildContext context, String title, String message, {SnackbarMode mode = SnackbarMode.success}) {
+    Color backgroundColor;
+    IconData icon;
+
+    // Determine background color and icon based on the mode
+    switch (mode) {
+      case SnackbarMode.success:
+        backgroundColor = Colors.green;
+        icon = Icons.check_circle;
+        break;
+      case SnackbarMode.error:
+        backgroundColor = Colors.red;
+        icon = Icons.error;
+        break;
+      case SnackbarMode.warning:
+        backgroundColor = Colors.amber;
+        icon = Icons.warning;
+        break;
+    }
+
+    // Create the custom snackbar
+    final snackbar = SnackBar(
+      showCloseIcon: true,
+      closeIconColor: AppTheme.white,
+      backgroundColor: backgroundColor,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Dimensions.radius10),
+      ),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(icon, color: AppTheme.white, size: Dimensions.height40,),
+          SizedBox(width: Dimensions.width20),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTheme.subtitle.copyWith(color: AppTheme.white),
+                ),
+                SizedBox(height: Dimensions.height10/5),
+                Text(
+                  message,
+                  style: AppTheme.caption.copyWith(color: AppTheme.white),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Show the snackbar
+    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  }
+}

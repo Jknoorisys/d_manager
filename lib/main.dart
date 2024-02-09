@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'generated/l10n.dart';
+import 'helpers/helper_functions.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await HelperFunctions.init();
   initializeDateFormatting('en');
   runApp(const MyApp());
 }
