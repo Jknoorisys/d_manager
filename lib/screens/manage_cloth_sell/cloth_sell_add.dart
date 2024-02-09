@@ -13,7 +13,8 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 import '../../api/manage_sell_deals.dart';
-import '../../models/create_sell_deal_model.dart';
+import '../../models/sell_models/create_sell_deal_model.dart';
+import '../widgets/loader.dart';
 
 class ClothSellAdd extends StatefulWidget {
   final Map<String, dynamic>? clothSellData;
@@ -37,69 +38,17 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
 
-  Future<CreateSellDealModel?> NewSellDeal(
-      String UserID,
-      DateTime sellDate,
-      String firmID,
-      String partyID,
-      String qualityID,
-      String totalThan,
-      String rate) async {
-    String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
-    CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
-        UserID,
-        formattedSellDate,
-        firmID,
-        partyID,
-        qualityID,
-        totalThan,
-        rate
-    );
-    print("model=== $model");
-    if (model?.success == true) {
-     print(model!.message!);
-    }else{
-      print(model?.message!);
-    }
-  }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   if (widget.clothSellData != null) {
-  //     selectedDate = DateFormat('dd-MM-yyyy').parse(widget.clothSellData!['dealDate']);
-  //     myFirm = widget.clothSellData!['myFirm'];
-  //     partyName = widget.clothSellData!['partyName'];
-  //     status = widget.clothSellData!['status'];
-  //     totalThanController.text = widget.clothSellData!['totalThan'];
-  //     clothQuality = widget.clothSellData!['clothQuality'];
-  //   }
-  // }
 
   void handleDateChanged(DateTime newDate) {
     setState(() {
       selectedDate = newDate;
     });
   }
-
   void handleMyFirmChanged(String? newValue) {
     setState(() {
       myFirm = newValue!;
     });
-  }
-
-  Future<void> _handleCreateSellDeal()async{
-    var errorTotalThan = submitted == true ? _validateTotalThan(totalThanController.text) : null,
-        errorRate = submitted == true ? _validateRate(rateController.text) : null;
-    NewSellDeal(
-      '1',
-      selectedDate,
-      '1',
-      '1',
-      '1',
-      totalThanController.text ?? errorTotalThan!,
-      rateController.text ?? errorRate!,
-    );
   }
   @override
   Widget build(BuildContext context) {
@@ -288,5 +237,79 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     String rateError = _validateRate(rateController.text) ?? '';
 
     return totalThanError.isEmpty && rateError.isEmpty ? true : false;
+  }
+  Future<void> NewSellDeal(
+      BuildContext context,
+      String UserID,
+      DateTime sellDate,
+      String firmID,
+      String partyID,
+      String qualityID,
+      String totalThan,
+      String rate,
+      ) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return CustomLoader(
+          body: Container(), // Pass an empty container as body for now
+          message: "Loading... Please wait",
+        );
+      },
+    );
+
+    try {
+      String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
+      CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
+        UserID,
+        formattedSellDate,
+        firmID,
+        partyID,
+        qualityID,
+        totalThan,
+        rate,
+      );
+      if (model?.success == true) {
+        Navigator.of(context).pop(); // Close the loading dialog
+        Navigator.of(context).pushNamed(AppRoutes.clothSellList);
+      } else {
+        Navigator.of(context).pop(); // Close the loading dialog
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+      Navigator.of(context).pop(); // Close the loading dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text("An error occurred. Please try again later."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+  Future<void> _handleCreateSellDeal()async{
+    var errorTotalThan = submitted == true ? _validateTotalThan(totalThanController.text) : null,
+        errorRate = submitted == true ? _validateRate(rateController.text) : null;
+    NewSellDeal(
+      context,
+      '1',
+      selectedDate,
+      '1',
+      '1',
+      '1',
+      totalThanController.text ?? errorTotalThan!,
+      rateController.text ?? errorRate!,
+    );
   }
 }

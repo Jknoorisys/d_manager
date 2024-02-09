@@ -31,6 +31,9 @@ import 'package:d_manager/screens/reminders/yarn_purchase/payment_due_date.dart'
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../models/sell_models/get_sell_deal_model.dart';
+import '../models/sell_models/sell_deal_list_model.dart';
+
 class AppRoutes {
   static const String splashScreen = '/';
 
@@ -167,11 +170,13 @@ class AppRoutes {
       final Map<String, dynamic>? clothSellData = args?['clothSellData'];
       return ClothSellAdd(clothSellData: clothSellData);
     },
-    clothSellView: (context) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? clothSellData = args?['clothSellData'];
-      return ClothSellView(clothSellData: clothSellData);
-    },
+    // clothSellView: (context) {
+    //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    //   final Map<String, dynamic>? clothSellData = args?['clothSellData'];
+    //   return ClothSellView();
+    //   //clothSellData: clothSellData
+    // },
+
 
     // Manage Invoices
     invoiceAdd: (context) {
@@ -198,5 +203,6 @@ class AppRoutes {
     sellHistory: (context) => const SellHistory(),
 
     yarnPurchaseViewFromReminder: (context) => const YarnPurchaseView(),
+    // clothSellView: (context) => const ClothSellView(),
   };
 }

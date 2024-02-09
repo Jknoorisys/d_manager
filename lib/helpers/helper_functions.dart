@@ -11,7 +11,6 @@ class HelperFunctions {
   static Future init() async {
     pref = await SharedPreferences.getInstance();
   }
-
   static setLoginStatus(bool status) async {
     pref.setBool("LoginStatus", status);
   }

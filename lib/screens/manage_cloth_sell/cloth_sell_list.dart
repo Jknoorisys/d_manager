@@ -1,6 +1,7 @@
 import 'package:d_manager/api/manage_sell_deals.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -17,8 +18,10 @@ import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/sell_deal_list_model.dart';
+import '../../models/sell_models/sell_deal_list_model.dart';
+import 'cloth_sell_view.dart';
 
 class ClothSellList extends StatefulWidget {
   const ClothSellList({Key? key}) : super(key: key);
@@ -28,7 +31,6 @@ class ClothSellList extends StatefulWidget {
 }
 
 class _ClothSellListState extends State<ClothSellList> {
-  final dio = Dio();
   SellDealDetails sellDealDetails = SellDealDetails();
   final searchController = TextEditingController();
   // List<Map<String, dynamic>> unFilteredClothSellList = [
@@ -41,6 +43,8 @@ class _ClothSellListState extends State<ClothSellList> {
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
   String status = 'On Going';
+
+  HelperFunctions helperFunctions = HelperFunctions();
 
   @override
   void initState() {
@@ -119,7 +123,8 @@ class _ClothSellListState extends State<ClothSellList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: ListView.builder(
+                  child: sellDealListModel == null? Center(child: CircularProgressIndicator(color: AppTheme.black,)):
+                  ListView.builder(
                     itemCount: clothSellList.length,
                     itemBuilder: (context, index) {
                       return CustomAccordion(
@@ -134,23 +139,23 @@ class _ClothSellListState extends State<ClothSellList> {
                                     CircleAvatar(
                                       backgroundColor: AppTheme.secondary,
                                       radius: Dimensions.height20,
-                                      child: BigText(text: clothSellList[index].firmName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                      child: BigText(text: sellDealListModel!.data![index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
                                     ),
                                     SizedBox(width: Dimensions.height10),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        BigText(text: clothSellList[index].firmName!, color: AppTheme.primary, size: Dimensions.font16),
+                                        BigText(text: sellDealListModel!.data![index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
                                         Row(
                                           children: [
                                             CircleAvatar(
                                               backgroundColor: AppTheme.black,
                                               radius: Dimensions.height10,
-                                              child: BigText(text: clothSellList[index].firmId![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                              child: BigText(text: sellDealListModel!.data![index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                             ),
                                             SizedBox(width: Dimensions.width10),
-                                            SmallText(text: clothSellList[index].firmId!, color: AppTheme.black, size: Dimensions.font12),
+                                            SmallText(text: sellDealListModel!.data![index].firmName!, color: AppTheme.black, size: Dimensions.font12),
                                           ],
                                         ),
                                       ],
@@ -165,11 +170,11 @@ class _ClothSellListState extends State<ClothSellList> {
                             SizedBox(height: Dimensions.height10),
                             Row(
                               children: [
-                                _buildInfoColumn('Deal Date', clothSellList[index].sellDate!),
+                                _buildInfoColumn('Deal Date', sellDealListModel!.data![index].sellDate!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!),
+                                _buildInfoColumn('Cloth Quality', sellDealListModel!.data![index].qualityName!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Total Than', clothSellList[index].totalThan!),
+                                _buildInfoColumn('Total Than', sellDealListModel!.data![index].totalThan!),
                               ],
                             ),
                           ],
@@ -178,17 +183,17 @@ class _ClothSellListState extends State<ClothSellList> {
                           children: [
                             Row(
                               children: [
-                                _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!),
+                                _buildInfoColumn('Than Delivered', sellDealListModel!.data![index].thanDelivered!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!),
+                                _buildInfoColumn('Than Remaining', sellDealListModel!.data![index].thanRemaining!),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Rate', clothSellList[index].rate!),
+                                _buildInfoColumn('Rate', sellDealListModel!.data![index].rate!),
                               ],
                             ),
                             SizedBox(height: Dimensions.height10),
                             Row(
                               children: [
-                                _buildInfoColumn('Status', clothSellList[index].dealStatus!),
+                                _buildInfoColumn('Status', sellDealListModel!.data![index].dealStatus!),
                               ],
                             ),
                             SizedBox(height: Dimensions.height10),
@@ -197,20 +202,22 @@ class _ClothSellListState extends State<ClothSellList> {
                               children: [
                                 IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': clothSellList[index]});
+                                     //Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': sellDealListModel});
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView( sellID: sellDealListModel!.data![index].sellId!)));
+                                      //Navigator.of(context).pushNamed(AppRoutes.clothSellView);
                                     },
                                     icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
                                 ),
                                 IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': sellDealListModel!.data![index]});
                                     },
                                     icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                 ),
                                 IconButton(
                                     onPressed: () {
                                       setState(() {
-                                        clothSellList.removeAt(index);
+                                        sellDealListModel!.data!.removeAt(index);
                                       });
                                     },
                                     icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
@@ -224,10 +231,10 @@ class _ClothSellListState extends State<ClothSellList> {
                                   activeBorderColor: AppTheme.primary,
                                   onChanged: (value) {
                                     setState(() {
-                                      clothSellList[index].dealStatus = value == true ? 'Completed' : 'On Going';
+                                      sellDealListModel!.data![index].dealStatus = value == true ? 'Completed' : 'On Going';
                                     });
                                   },
-                                  value: clothSellList[index].dealStatus == 'Completed' ? true : false,
+                                  value: sellDealListModel!.data![index].dealStatus == 'Completed' ? true : false,
                                   inactiveIcon: null,
                                 ),
                               ],
@@ -364,9 +371,15 @@ class _ClothSellListState extends State<ClothSellList> {
 
     Future<SellDealListModel?> getSellDealList() async {
       SellDealListModel? model = await sellDealDetails.sellDealListApi();
-      print("model=== $model");
+      print("model=== ${model}");
       if (model?.success == true) {
-        print(model!.message!);
+        setState(() {
+          sellDealListModel = model;
+          clothSellList = model!.data ?? [];
+        });
+        print(model!.data?[0].firmName!);
+        print('SellID=== ${model!.data?[0].sellId!}');
+        print(model.message!);
       }else{
         print(model?.message!);
       }
