@@ -12,9 +12,13 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+
+import '../../api/manage_sell_deals.dart';
+import '../../models/sell_models/get_sell_deal_model.dart';
+import '../../models/sell_models/sell_deal_list_model.dart';
 class ClothSellView extends StatefulWidget {
-  final Map<String, dynamic>? clothSellData;
-  const ClothSellView({Key? key, this.clothSellData}) : super(key: key);
+  final int sellID;
+  const ClothSellView({Key? key,required this.sellID }) : super(key: key);
   @override
   _ClothSellViewState createState() => _ClothSellViewState();
 }
@@ -70,7 +74,6 @@ class _ClothSellViewState extends State<ClothSellView> {
       'status': 'On Going'
     },
   ];
-
   List<Map<String, dynamic>> invoicesList = [];
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
@@ -78,19 +81,36 @@ class _ClothSellViewState extends State<ClothSellView> {
   @override
   void initState() {
     super.initState();
+    _initializeData();
     invoicesList = invoiceDataList;
   }
-
+  SellDealDetails sellDealDetails = SellDealDetails();
+  GetSellDealModel? getSellDealModel;
+  Future<void> _initializeData() async {
+    try {
+      setState(() {
+        _isLoading = true; // Set loading state to true before making the API call
+      });
+      await getSellDealData();
+    } catch (e) {
+      print("Error during initialization: $e");
+    }finally {
+      setState(() {
+        _isLoading = false; // Set loading state to false after the API call is completed
+      });
+    }
+  }
+  bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
+    // Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
     return CustomDrawer(
         content: CustomBody(
           title: S.of(context).clothSellDealDetails,
           content: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
-              child: Column(
+              child: _isLoading ? Center(child: CircularProgressIndicator(color: Colors.black)) : Column(
                 children: [
                   CustomAccordionWithoutExpanded(
                     titleChild: Column(
@@ -103,23 +123,23 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 CircleAvatar(
                                   backgroundColor: AppTheme.secondary,
                                   radius: Dimensions.height20,
-                                  child: BigText(text: clothSellData['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                                  child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.primary, size: Dimensions.font18),
                                 ),
                                 SizedBox(width: Dimensions.height10),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    BigText(text: clothSellData['partyName'], color: AppTheme.primary, size: Dimensions.font16),
+                                    BigText(text: getSellDealModel!.data!.firmName!, color: AppTheme.primary, size: Dimensions.font16),
                                     Row(
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: AppTheme.black,
                                           radius: Dimensions.height10,
-                                          child: BigText(text: clothSellData['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                          child: BigText(text: 'a', color: AppTheme.secondaryLight, size: Dimensions.font12),
                                         ),
                                         SizedBox(width: Dimensions.width10),
-                                        SmallText(text: clothSellData['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                        SmallText(text: getSellDealModel!.data!.partyFirm!, color: AppTheme.black, size: Dimensions.font12),
                                       ],
                                     ),
                                   ],
@@ -132,11 +152,11 @@ class _ClothSellViewState extends State<ClothSellView> {
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Deal Date', clothSellData['dealDate']),
+                            _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Cloth Quality', clothSellData['clothQuality']),
+                            _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Rate', clothSellData['rate']),
+                            _buildInfoColumn('Rate', getSellDealModel!.data!.rate!),
                           ],
                         ),
                       ],
@@ -145,17 +165,17 @@ class _ClothSellViewState extends State<ClothSellView> {
                       children: [
                         Row(
                           children: [
-                            _buildInfoColumn('Total Than', clothSellData['totalThan']),
+                            _buildInfoColumn('Total Than', getSellDealModel!.data!.totalThan!),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than Delivered', clothSellData['thanDelivered']),
+                            _buildInfoColumn('Than Delivered', getSellDealModel!.data!.thanDelivered!),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than Remaining', clothSellData['thanRemaining']),
+                            _buildInfoColumn('Than Remaining', getSellDealModel!.data!.thanRemaining!),
                           ],
                         ),
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Status', clothSellData['status']),
+                            _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus!),
                           ],
                         ),
                       ],
@@ -352,7 +372,6 @@ class _ClothSellViewState extends State<ClothSellView> {
         )
     );
   }
-
   Widget _buildInfoColumn(String title, String value) {
     return Expanded(
       child: Column(
@@ -363,6 +382,17 @@ class _ClothSellViewState extends State<ClothSellView> {
         ],
       ),
     );
+  }
+  Future<GetSellDealModel?> getSellDealData() async {
+    GetSellDealModel? model = await sellDealDetails.getSellDealApi(widget.sellID.toString());
+    print("modeloflist=== ${model}");
+    if (model?.success == true) {
+      setState(() {
+        getSellDealModel = model;
+      });
+    }else{
+      print(model?.message!);
+    }
   }
 }
 
