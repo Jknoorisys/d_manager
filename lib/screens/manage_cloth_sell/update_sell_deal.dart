@@ -1,7 +1,10 @@
+
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
+import '../../api/manage_sell_deals.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/constants/routes.dart';
-import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -11,21 +14,17 @@ import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 
-import '../../api/manage_sell_deals.dart';
-import '../../models/sell_models/create_sell_deal_model.dart';
-import '../widgets/loader.dart';
-
-class ClothSellAdd extends StatefulWidget {
-  final Map<String, dynamic>? clothSellData;
-  const ClothSellAdd({Key? key, this.clothSellData}) : super(key: key);
-
+import '../../constants/routes.dart';
+import '../../models/sell_models/update_sell_deal_model.dart';
+class UpdateSellDeal extends StatefulWidget {
+  final int sellID;
+  const UpdateSellDeal({super.key, required this.sellID});
   @override
-  _ClothSellAddState createState() => _ClothSellAddState();
+  State<UpdateSellDeal> createState() => _UpdateSellDealState();
 }
 
-class _ClothSellAddState extends State<ClothSellAdd> {
+class _UpdateSellDealState extends State<UpdateSellDeal> {
   bool submitted = false;
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 365));
@@ -39,8 +38,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
 
-
-
   void handleDateChanged(DateTime newDate) {
     setState(() {
       selectedDate = newDate;
@@ -53,10 +50,9 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   }
   @override
   Widget build(BuildContext context) {
-    return
-      CustomDrawer(
+    return CustomDrawer(
         content: CustomBody(
-          title: widget.clothSellData == null ? 'Create Cloth Sell Deal' : 'Update Cloth Sell Deal',
+          title: 'Update Cloth Sell Deal',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -200,7 +196,8 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                       Gap(Dimensions.height20),
                       CustomElevatedButton(
                         onPressed: () {
-                          _handleCreateSellDeal();
+                          _handleUpdateSellDeal();
+
                           // setState(() {
                           //   submitted = true;
                           // });
@@ -219,30 +216,19 @@ class _ClothSellAddState extends State<ClothSellAdd> {
         )
     );
   }
-
-  String? _validateTotalThan(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Total Than is required';
-    }
-    return null;
+  Future<void> _handleUpdateSellDeal()async{
+    UpdateSellDeal(
+      context,
+      selectedDate,
+      '1',
+      '2',
+      '3',
+      totalThanController.text,
+      rateController.text,
+    );
   }
-
-  String? _validateRate(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Rate is required';
-    }
-    return null;
-  }
-
-  bool _isFormValid() {
-    String totalThanError = _validateTotalThan(totalThanController.text) ?? '';
-    String rateError = _validateRate(rateController.text) ?? '';
-
-    return totalThanError.isEmpty && rateError.isEmpty ? true : false;
-  }
-  Future<void> NewSellDeal(
+  Future<void> UpdateSellDeal(
       BuildContext context,
-      String UserID,
       DateTime sellDate,
       String firmID,
       String partyID,
@@ -250,21 +236,13 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       String totalThan,
       String rate,
       ) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomLoader(
-          body: Container(), // Pass an empty container as body for now
-          message: "Loading... Please wait",
-        );
-      },
-    );
-
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
-      CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
-        UserID,
+      // String userID  =await HelperFunctions.getUserID();
+      //print("USerIDInUpdateScreen==== $userID");
+      UpdateSellDealModel? model = await sellDealDetails.updateSellDealApi(
+        '1',
+        widget.sellID.toString(),
         formattedSellDate,
         firmID,
         partyID,
@@ -273,32 +251,10 @@ class _ClothSellAddState extends State<ClothSellAdd> {
         rate,
       );
       if (model?.success == true) {
-        Navigator.of(context).pop(); // Close the loading dialog
         Navigator.of(context).pushNamed(AppRoutes.clothSellList);
-      } else {
-        Navigator.of(context).pop(); // Close the loading dialog
       }
     } catch (e) {
       print("Error occurred: $e");
-    }
-  }
-
-  Future<void> _handleCreateSellDeal()async{
-    // Validate total than and rate fields
-    bool isFormValid = _isFormValid();
-    if (isFormValid) {
-      NewSellDeal(
-        context,
-        '1',
-        selectedDate,
-        '1',
-        '1',
-        '1',
-        totalThanController.text,
-        rateController.text,
-      );
-    }else{
-      print("Something Went wrong");
     }
   }
 }

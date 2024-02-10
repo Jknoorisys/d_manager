@@ -2,6 +2,7 @@ import 'package:d_manager/api/manage_sell_deals.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/screens/manage_cloth_sell/update_sell_deal.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -11,15 +12,11 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../models/sell_models/sell_deal_list_model.dart';
 import 'cloth_sell_view.dart';
 
@@ -210,7 +207,8 @@ class _ClothSellListState extends State<ClothSellList> {
                                 ),
                                 IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': sellDealListModel!.data![index]});
+                                      // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': sellDealListModel!.data![index]});
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: sellDealListModel!.data![index].sellId!)));
                                     },
                                     icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                 ),
@@ -371,15 +369,11 @@ class _ClothSellListState extends State<ClothSellList> {
 
     Future<SellDealListModel?> getSellDealList() async {
       SellDealListModel? model = await sellDealDetails.sellDealListApi();
-      print("model=== ${model}");
       if (model?.success == true) {
         setState(() {
           sellDealListModel = model;
           clothSellList = model!.data ?? [];
         });
-        print(model!.data?[0].firmName!);
-        print('SellID=== ${model!.data?[0].sellId!}');
-        print(model.message!);
       }else{
         print(model?.message!);
       }
