@@ -380,6 +380,16 @@ class S {
     );
   }
 
+  /// `GST Return Amount`
+  String get gstReturnAmount {
+    return Intl.message(
+      'GST Return',
+      name: 'gst',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Profile`
   String get profile {
     return Intl.message(
@@ -503,8 +513,8 @@ class S {
   /// `Manage Yarn Purchase Deal`
   String get manageYarnPurchaseDeal {
     return Intl.message(
-      'Manage Yarn Purchase Deal',
-      name: 'manageYarnPurchaseDeal',
+      'Yarn Purchase Deal',
+      name: 'YarnPurchaseDeal',
       desc: '',
       args: [],
     );
@@ -523,8 +533,28 @@ class S {
   /// `Manage Cloth Sell Deal`
   String get manageClothSellDeal {
     return Intl.message(
-      'Manage Cloth Sell Deal',
-      name: 'manageClothSellDeal',
+      'Cloth Sell Deal',
+      name: 'ClothSellDeal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage GST Return Amount`
+  String get manageGstReturnAmount {
+    return Intl.message(
+      'GST Return Amount',
+      name: 'gstReturnAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update sell deal`
+  String get updateSellDeal {
+    return Intl.message(
+      'Update Cloth Sell Deal',
+      name: 'updateClothSellDeal',
       desc: '',
       args: [],
     );

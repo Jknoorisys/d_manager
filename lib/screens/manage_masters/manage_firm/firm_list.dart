@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
+import '../../../models/add_firm_model.dart';
+
 class FirmList extends StatefulWidget {
   const FirmList({Key? key}) : super(key: key);
 

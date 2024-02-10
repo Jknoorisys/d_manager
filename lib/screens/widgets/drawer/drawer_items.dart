@@ -8,6 +8,8 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 
+import '../../gst_return/gst_return_amount.dart';
+
 class DrawerItems extends StatelessWidget {
   const DrawerItems({Key? key}) : super(key: key);
 
@@ -53,7 +55,11 @@ class DrawerItems extends StatelessWidget {
               buildTitle(S.of(context).dashboard, Icons.home, () {
                 Navigator.of(context).pushNamed(AppRoutes.dashboard);
               }),
-
+              // Manage GST return amount screen
+              buildTitle(S.of(context).gstReturnAmount, Icons.currency_rupee, () {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GSTReturnAmount(),));
+                //Navigator.of(context).pushNamed(AppRoutes.dashboard);
+              }),
               // Manage Yarn Purchase Deal
               buildTitle(S.of(context).manageYarnPurchaseDeal, Icons.list, () {
                 Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseList);
@@ -63,7 +69,6 @@ class DrawerItems extends StatelessWidget {
               buildTitle(S.of(context).manageClothSellDeal, Icons.edit, () {
                 Navigator.of(context).pushNamed(AppRoutes.clothSellList);
               }),
-
               // Manage Reminders
               ExpansionTile(
                 shape: InputBorder.none,

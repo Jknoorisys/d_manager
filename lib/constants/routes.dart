@@ -6,7 +6,6 @@ import 'package:d_manager/screens/change_password/change_password.dart';
 import 'package:d_manager/screens/dashboard/dashboard.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_add.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_list.dart';
-import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_view.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_add.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_view.dart';
 import 'package:d_manager/screens/manage_history/purchase_history.dart';
@@ -30,9 +29,6 @@ import 'package:d_manager/screens/reminders/yarn_purchase/box_to_be_received.dar
 import 'package:d_manager/screens/reminders/yarn_purchase/payment_due_date.dart';
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../models/sell_models/get_sell_deal_model.dart';
-import '../models/sell_models/sell_deal_list_model.dart';
 
 class AppRoutes {
   static const String splashScreen = '/';
@@ -207,6 +203,5 @@ class AppRoutes {
     sellHistory: (context) => const SellHistory(),
 
     yarnPurchaseViewFromReminder: (context) => const YarnPurchaseView(),
-    // clothSellView: (context) => const ClothSellView(),
   };
 }

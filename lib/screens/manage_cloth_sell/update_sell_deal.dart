@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../constants/routes.dart';
+import '../../generated/l10n.dart';
 import '../../models/sell_models/update_sell_deal_model.dart';
 class UpdateSellDeal extends StatefulWidget {
   final int sellID;
@@ -52,7 +53,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          title: 'Update Cloth Sell Deal',
+          title:S.of(context).manageClothSellDeal,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(

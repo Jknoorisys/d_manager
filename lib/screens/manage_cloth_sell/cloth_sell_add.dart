@@ -242,7 +242,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   }
   Future<void> NewSellDeal(
       BuildContext context,
-      String UserID,
+      String userID,
       DateTime sellDate,
       String firmID,
       String partyID,
@@ -264,7 +264,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
       CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
-        UserID,
+        userID,
         formattedSellDate,
         firmID,
         partyID,
