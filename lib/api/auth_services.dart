@@ -88,5 +88,4 @@ class AuthServices {
       return ResetPasswordModel();
     }
   }
-
 }
