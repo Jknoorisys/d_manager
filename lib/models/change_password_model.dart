@@ -1,10 +1,10 @@
-class ResetPasswordModel {
+class ChangePasswordModel {
   String? status;
   String? message;
 
-  ResetPasswordModel({this.status, this.message});
+  ChangePasswordModel({this.status, this.message});
 
-  ResetPasswordModel.fromJson(Map<String, dynamic> json) {
+  ChangePasswordModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
   }

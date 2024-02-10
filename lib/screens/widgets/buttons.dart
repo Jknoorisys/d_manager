@@ -3,8 +3,6 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:gap/gap.dart';
-
 class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String buttonText;
@@ -106,8 +104,6 @@ class CustomElevatedButton extends StatelessWidget {
   final Color? backgroundColor;
   final Color? color;
   final VisualDensity? visualDensity;
-  final CircularProgressIndicator? loading;
-
   const CustomElevatedButton({
     super.key,
     required this.onPressed,
@@ -121,7 +117,6 @@ class CustomElevatedButton extends StatelessWidget {
     this.backgroundColor,
     this.image,
     this.visualDensity,
-    this.loading,
   });
 
   @override
@@ -146,8 +141,6 @@ class CustomElevatedButton extends StatelessWidget {
             if (icon != null) SizedBox(width: Dimensions.height10),
             if (image != null) image!,
             if (image != null) SizedBox(width: Dimensions.height10),
-            if (loading != null) loading!,
-            if (loading != null) SizedBox(width: Dimensions.height10),
             BigText(
               text: buttonText ?? '',
                 size: textSize ?? Dimensions.font16,

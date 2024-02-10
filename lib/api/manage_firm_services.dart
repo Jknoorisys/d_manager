@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/add_firm_model.dart';
@@ -11,7 +10,7 @@ class ManageFirmServices {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
-      Response response = await post(Uri.parse(loginUrl), body: body, headers: headers);
+      Response response = await post(Uri.parse(addFirmUrl), body: body, headers: headers);
       var data = json.decode(response.body);
       if (response.statusCode == 200) {
         return AddFirmModel.fromJson(data);

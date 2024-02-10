@@ -3,10 +3,12 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/add_firm_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -79,6 +81,7 @@ class _FirmAddState extends State<FirmAdd> {
         errorGroupCode = submitted == true ? _validateGroupCode(groupCodeController.text) : null;
     return CustomDrawer(
         content: CustomBody(
+          isLoading: isLoading,
           title: widget.firmData == null ? S.of(context).addFirm : S.of(context).editFirm,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
@@ -204,7 +207,32 @@ class _FirmAddState extends State<FirmAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+                            if (HelperFunctions.checkInternet() == false) {
+                              CustomApiSnackbar.show(
+                                context,
+                                'Warning',
+                                'No internet connection',
+                                mode: SnackbarMode.warning,
+                              );
+                            } else {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              Map<String, dynamic> body = {
+                                "user_id" : HelperFunctions.getUserID(),
+                                "owner_name": partyNameController.text,
+                                "firm_name": firmNameController.text,
+                                "address": addressController.text,
+                                "gst_number": gstNumberController.text,
+                                "phone_number": phoneNumberController.text,
+                                "account_holder_name": accountHolderNameController.text,
+                                "bank_name": bankNameController.text,
+                                "ifsc_code": ifscCodeController.text,
+                                "account_number": accountNumberController.text,
+                                "groupCode": groupCodeController.text,
+                              };
+                              _addFirm(body);
+                            }
                           }
                         },
                         buttonText: "Submit",
@@ -331,5 +359,31 @@ class _FirmAddState extends State<FirmAdd> {
 
   Future<void> _addFirm(Map<String, dynamic> body) async {
     AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body);
+    if (addFirmModel?.message != null) {
+      if (addFirmModel?.success == true) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addFirmModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

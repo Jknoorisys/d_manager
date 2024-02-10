@@ -42,153 +42,168 @@ class _LoginScreenState extends State<LoginScreen> {
         errorEmail = submitted == true ? _validateEmail(emailController.text) : null;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Container(
-          height: Dimensions.screenHeight,
-          decoration:  const BoxDecoration(
-            gradient: AppTheme.appGradientLight,
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(Dimensions.width25),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo or Header
-                const AnimatedLogo(),
-                SizedBox(height: Dimensions.height20),
-                // Email TextField
-                CustomTextField(
-                  controller: emailController,
-                  labelText: S.of(context).email,
-                  errorText: errorEmail.toString() != 'null' ? errorEmail.toString() : '',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.email,
-                  borderColor: AppTheme.primary,
-                ),
-                SizedBox(height: Dimensions.height20),
-
-                // Password TextField
-                CustomTextField(
-                  controller: passwordController,
-                  isObscure: _obscureText,
-                  labelText: S.of(context).password,
-                  errorText: errorPassword.toString() != 'null' ? errorPassword.toString() : '',
-                  keyboardType: TextInputType.visiblePassword,
-                  prefixIcon: _obscureText ? Icons.visibility : Icons.visibility_off,
-                  borderColor: AppTheme.primary,
-                  onTap: (){
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                ),
-                SizedBox(height: Dimensions.height20),
-
-                // Forget Password
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Container(
+              height: Dimensions.screenHeight,
+              decoration:  const BoxDecoration(
+                gradient: AppTheme.appGradientLight,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(Dimensions.width25),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Remember Me Checkbox
+                    // Logo or Header
+                    const AnimatedLogo(),
+                    SizedBox(height: Dimensions.height20),
+                    // Email TextField
+                    CustomTextField(
+                      controller: emailController,
+                      labelText: S.of(context).email,
+                      errorText: errorEmail.toString() != 'null' ? errorEmail.toString() : '',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email,
+                      borderColor: AppTheme.primary,
+                    ),
+                    SizedBox(height: Dimensions.height20),
+
+                    // Password TextField
+                    CustomTextField(
+                      controller: passwordController,
+                      isObscure: _obscureText,
+                      labelText: S.of(context).password,
+                      errorText: errorPassword.toString() != 'null' ? errorPassword.toString() : '',
+                      keyboardType: TextInputType.visiblePassword,
+                      prefixIcon: _obscureText ? Icons.visibility : Icons.visibility_off,
+                      borderColor: AppTheme.primary,
+                      onTap: (){
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    ),
+                    SizedBox(height: Dimensions.height20),
+
+                    // Forget Password
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GFCheckbox(
-                          size: Dimensions.height20,
-                          type: GFCheckboxType.custom,
-                          inactiveBgColor: Colors.white,
-                          inactiveBorderColor: AppTheme.primary,
-                          activeBorderColor: AppTheme.primary,
-                          customBgColor: AppTheme.primary,
-                          onChanged: (value) {
-                            setState(() {
-                              isChecked = value;
-                            });
-                          },
-                          value: isChecked,
-                          inactiveIcon: null,
+                        // Remember Me Checkbox
+                        Row(
+                          children: [
+                            GFCheckbox(
+                              size: Dimensions.height20,
+                              type: GFCheckboxType.custom,
+                              inactiveBgColor: Colors.white,
+                              inactiveBorderColor: AppTheme.primary,
+                              activeBorderColor: AppTheme.primary,
+                              customBgColor: AppTheme.primary,
+                              onChanged: (value) {
+                                setState(() {
+                                  isChecked = value;
+                                });
+                              },
+                              value: isChecked,
+                              inactiveIcon: null,
+                            ),
+                            Text(S.of(context).rememberMe, style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                        Text(S.of(context).rememberMe, style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(AppRoutes.forgotPassword);
+                          },
+                          child: Text(
+                            S.of(context).forgetPassword,
+                            style: const TextStyle(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushNamed(AppRoutes.forgotPassword);
+                    SizedBox(height: Dimensions.height20),
+                    // Login Button
+                    CustomElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          submitted = true;
+                        });
+                        if (_isFormValid()) {
+                          if (HelperFunctions.checkInternet() == false) {
+                            CustomApiSnackbar.show(
+                              context,
+                              'Warning',
+                              'No internet connection',
+                              mode: SnackbarMode.warning,
+                            );
+                          } else {
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            _login(emailController.text, passwordController.text);
+                          }
+                        }
                       },
-                      child: Text(
-                        S.of(context).forgetPassword,
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
+                      buttonText: S.of(context).login,
+                    ),
+                    SizedBox(height: Dimensions.height20),
+
+                    // Login with Google Button
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.primary),
+                        padding: EdgeInsets.symmetric(vertical: Dimensions.height15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Dimensions.radius30),
                         ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.google,
+                            color: AppTheme.primary,
+                            size: Dimensions.font26,
+                          ),
+                          SizedBox(width: Dimensions.height10),
+                          Text(
+                            S.of(context).loginWithGoogle,
+                            style: TextStyle(
+                              fontSize: Dimensions.font16,
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: Dimensions.height20),
-                // Login Button
-                CustomElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      submitted = true;
-                    });
-                    if (_isFormValid()) {
-                      if (HelperFunctions.checkInternet() == false) {
-                        CustomApiSnackbar.show(
-                          context,
-                          'Warning',
-                          'No internet connection',
-                          mode: SnackbarMode.warning,
-                        );
-                      } else {
-                        setState(() {
-                          isLoading = !isLoading;
-                        });
-                        _login(emailController.text, passwordController.text);
-                      }
-                    }
-                  },
-                  buttonText: S.of(context).login,
-                  loading: isLoading ? const CircularProgressIndicator(color: Colors.white) : null,
-                ),
-                SizedBox(height: Dimensions.height20),
-
-                // Login with Google Button
-                OutlinedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primary),
-                    padding: EdgeInsets.symmetric(vertical: Dimensions.height15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Dimensions.radius30),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FaIcon(
-                        FontAwesomeIcons.google,
-                        color: AppTheme.primary,
-                        size: Dimensions.font26,
-                      ),
-                      SizedBox(width: Dimensions.height10),
-                      Text(
-                        S.of(context).loginWithGoogle,
-                        style: TextStyle(
-                          fontSize: Dimensions.font16,
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: GFLoader(
+                  type: GFLoaderType.circle,
+                  loaderColorOne: AppTheme.primary,
+                  loaderColorTwo: AppTheme.secondary,
+                  loaderColorThree: AppTheme.secondaryLight,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -225,8 +240,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login(String email, String password) async {
     LoginModel? loginModel = await authServices.login(email, password);
     if (loginModel != null) {
-      if (loginModel.success == true) {
-        await HelperFunctions.setApiKey(loginModel.data!.apiKey.toString());
+      if (loginModel.status == 'success') {
+        await HelperFunctions.setApiKey(loginModel.data!.apiKey != null ? loginModel.data!.apiKey.toString() : 'NYS03223');
         await HelperFunctions.setUserID(loginModel.data!.userId.toString());
         await HelperFunctions.setUserEmail(loginModel.data!.userEmail.toString());
         await HelperFunctions.setUserName(loginModel.data!.userName.toString());

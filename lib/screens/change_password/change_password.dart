@@ -1,11 +1,15 @@
+import 'package:d_manager/api/auth_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/change_password_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +28,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _obscureOldPassword = true;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool isLoading = false;
+  AuthServices authServices = AuthServices();
+
+  @override
+  void dispose() {
+    oldPasswordController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +49,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       content: CustomBody(
         isAppBarTitle: false,
         isBackgroundGradient: true,
+        isLoading: isLoading,
         content: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(Dimensions.width25),
@@ -132,7 +147,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       submitted = true;
                     });
                     if (_isFormValid()) {
-                      Navigator.of(context).pushNamed(AppRoutes.dashboard);
+                      if (HelperFunctions.checkInternet() == false) {
+                        CustomApiSnackbar.show(
+                          context,
+                          'Warning',
+                          'No internet connection',
+                          mode: SnackbarMode.warning,
+                        );
+                      } else {
+                        setState(() {
+                          isLoading = !isLoading;
+                        });
+                        _changePassword(HelperFunctions.getUserID(), oldPasswordController.text.trim(), passwordController.text.trim(), confirmPasswordController.text.trim());
+                      }
                     }
                   },
                   buttonText: S.of(context).changePassword,
@@ -188,5 +215,40 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     String oldPasswordError = _validateOldPassword(oldPasswordController.text) ?? '';
 
     return passwordError.isEmpty && confirmPasswordError.isEmpty && oldPasswordError.isEmpty;
+  }
+
+  Future<void> _changePassword(String userId, String oldPassword, String password, String confirmPassword) async {
+    ChangePasswordModel? changePasswordModel = await authServices.changePassword(int.parse(userId), oldPassword, password, confirmPassword);
+    if (changePasswordModel.message != null && changePasswordModel.status != null) {
+      if (changePasswordModel.status == 'success') {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          changePasswordModel.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushNamed(AppRoutes.login);
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          changePasswordModel.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+      setState(() {
+        isLoading = false;
+      });
+    } else{
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
