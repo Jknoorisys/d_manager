@@ -1,17 +1,17 @@
 class ChangePasswordModel {
-  String? status;
+  bool? success;
   String? message;
 
-  ChangePasswordModel({this.status, this.message});
+  ChangePasswordModel({this.success, this.message});
 
   ChangePasswordModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
+    success = json['success'];
     message = json['message'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
+    data['success'] = success;
     data['message'] = message;
     return data;
   }

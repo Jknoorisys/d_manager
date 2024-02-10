@@ -21,4 +21,27 @@ class ManageFirmServices {
       return null;
     }
   }
+
+  Future<AddFirmModel?> firmList(int pageNo, String search) async {
+    try {
+      Map<String, String> body = {
+        "user_id" : HelperFunctions.getUserID(),
+        "page_no": pageNo.toString(),
+        "search": search,
+      };
+
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      Response response = await post(Uri.parse(firmListUrl), body: body, headers: headers);
+      var data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return AddFirmModel.fromJson(data);
+      } else {
+        return AddFirmModel.fromJson(data);
+      }
+    } catch (e) {
+      return null;
+    }
+  }
 }

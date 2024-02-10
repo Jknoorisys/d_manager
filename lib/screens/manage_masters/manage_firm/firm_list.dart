@@ -32,6 +32,11 @@ class _FirmListState extends State<FirmList> {
 
   List<Map<String, dynamic>> filteredFirmList = [];
 
+  final ScrollController _scrollController = ScrollController();
+  List<Firm> firms = [];
+  int currentPage = 1;
+  int pageSize = 10;
+
   @override
   void initState() {
     super.initState();

@@ -326,7 +326,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
   Future<void> _verifyOtp(String otp, String email) async {
     VerifyOtpModel verifyOtpModel = await authServices.verifyOtp(email, otp);
     if (verifyOtpModel != null) {
-      if (verifyOtpModel.status == 'success' && verifyOtpModel.otpVerified == "1") {
+      if (verifyOtpModel.success == true && verifyOtpModel.otpVerified == "1") {
         CustomApiSnackbar.show(
           context,
           'Success',
@@ -360,8 +360,8 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
 
   Future<void> _resendOtp(String email) async {
     ForgetPasswordModel forgetPasswordModel = await authServices.forgotPassword(email);
-    if (forgetPasswordModel.message != null && forgetPasswordModel.status != null) {
-      if (forgetPasswordModel.status == 'success') {
+    if (forgetPasswordModel.message != null) {
+      if (forgetPasswordModel.success == true) {
         CustomApiSnackbar.show(
           context,
           'Success',

@@ -1,13 +1,13 @@
 class VerifyOtpModel {
-  String? status;
+  bool? success;
   String? otpVerified;
   String? email;
   String? message;
 
-  VerifyOtpModel({this.status, this.otpVerified, this.email, this.message});
+  VerifyOtpModel({this.success, this.otpVerified, this.email, this.message});
 
   VerifyOtpModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
+    success = json['success'];
     otpVerified = json['otp_verified'];
     email = json['email'];
     message = json['message'];
@@ -15,7 +15,7 @@ class VerifyOtpModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
+    data['success'] = success;
     data['otp_verified'] = otpVerified;
     data['email'] = email;
     data['message'] = message;

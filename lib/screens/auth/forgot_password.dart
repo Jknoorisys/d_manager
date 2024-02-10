@@ -161,8 +161,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       "email": email,
     };
     ForgetPasswordModel? forgetPasswordModel = await authServices.forgotPassword(email);
-    if (forgetPasswordModel.message != null && forgetPasswordModel.status != null) {
-      if (forgetPasswordModel.status == 'success') {
+    if (forgetPasswordModel.message != null) {
+      if (forgetPasswordModel.success == true) {
         CustomApiSnackbar.show(
           context,
           'Success',

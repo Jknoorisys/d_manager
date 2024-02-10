@@ -240,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login(String email, String password) async {
     LoginModel? loginModel = await authServices.login(email, password);
     if (loginModel != null) {
-      if (loginModel.status == 'success') {
+      if (loginModel.success == true) {
         await HelperFunctions.setApiKey(loginModel.data!.apiKey != null ? loginModel.data!.apiKey.toString() : 'NYS03223');
         await HelperFunctions.setUserID(loginModel.data!.userId.toString());
         await HelperFunctions.setUserEmail(loginModel.data!.userEmail.toString());

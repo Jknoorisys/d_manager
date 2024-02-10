@@ -12,8 +12,10 @@ const String changePasswordUrl = '$baseUrl/api/change-password';
 
 // Manage Masters
 const String addFirmUrl = '$baseUrl/api/add-firm';
-const String firmList = '$baseUrl/api/firm-list';
-const String getFirm = '$baseUrl/api/get-firm';
+const String firmListUrl = '$baseUrl/api/firm-list';
+const String getFirmUrl = '$baseUrl/api/get-firm';
+const String updateFirmUrl = '$baseUrl/api/update-firm';
+const String changeFirmStatus = '$baseUrl/api/update-firm-status';
 
 
 

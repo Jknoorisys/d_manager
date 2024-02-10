@@ -158,7 +158,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         setState(() {
                           isLoading = !isLoading;
                         });
-                        _changePassword(HelperFunctions.getUserID(), oldPasswordController.text.trim(), passwordController.text.trim(), confirmPasswordController.text.trim());
+                        _changePassword(oldPasswordController.text.trim(), passwordController.text.trim(), confirmPasswordController.text.trim());
                       }
                     }
                   },
@@ -217,10 +217,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return passwordError.isEmpty && confirmPasswordError.isEmpty && oldPasswordError.isEmpty;
   }
 
-  Future<void> _changePassword(String userId, String oldPassword, String password, String confirmPassword) async {
-    ChangePasswordModel? changePasswordModel = await authServices.changePassword(int.parse(userId), oldPassword, password, confirmPassword);
-    if (changePasswordModel.message != null && changePasswordModel.status != null) {
-      if (changePasswordModel.status == 'success') {
+  Future<void> _changePassword(String oldPassword, String password, String confirmPassword) async {
+    ChangePasswordModel? changePasswordModel = await authServices.changePassword(oldPassword, password, confirmPassword);
+    if (changePasswordModel.message != null) {
+      if (changePasswordModel.success == true) {
         CustomApiSnackbar.show(
           context,
           'Success',

@@ -88,17 +88,17 @@ class AuthServices {
     }
   }
 
-  Future<ChangePasswordModel> changePassword(int userId, String oldPassword, String password, String confirmPassword) async {
+  Future<ChangePasswordModel> changePassword(String oldPassword, String password, String confirmPassword) async {
     try {
       Map<String, dynamic> body = {
-        "user_id": userId,
+        "user_id": HelperFunctions.getUserID(),
         "password": oldPassword,
         "new_password": password,
         "new_confirm_password": confirmPassword,
       };
 
       Map<String, String> headers = {
-        "X-API-Key": HelperFunctions.getApiKey() ?? 'NYS03223',
+        "X-API-Key": HelperFunctions.getApiKey(),
       };
 
       Response response = await post(Uri.parse(changePasswordUrl), body: body, headers: headers);

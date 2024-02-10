@@ -205,8 +205,8 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
 
   Future<void> _resetPassword(String email, String password, String confirmPassword) async {
     ResetPasswordModel? resetPasswordModel = await authServices.resetPassword(email, password, confirmPassword);
-    if (resetPasswordModel.message != null && resetPasswordModel.status != null) {
-      if (resetPasswordModel.status == 'success') {
+    if (resetPasswordModel.message != null) {
+      if (resetPasswordModel.success == true) {
         CustomApiSnackbar.show(
           context,
           'Success',
