@@ -13,8 +13,10 @@ const String logoutUrl = '$baseUrl/api/logout';
 
 // Manage Masters
 
+
 // Manage Sell Deals
 const String createSellDeal = '$baseUrl/api/add-sell-deal';
 const String sellDealList = '$baseUrl/api/cloth-sell-deal';
 const String getSellDeal = '$baseUrl/api/get-sell-deal';
+const String updateSellDeal = '$baseUrl/api/update-sell-deal';
 

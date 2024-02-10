@@ -22,7 +22,6 @@ class HelperFunctions {
   static Future<bool> setUserID(String id) async {
     return pref.setString("UserID", id);
   }
-
   static String getUserID() {
     String? id = pref.getString('UserID');
     return id ?? '';

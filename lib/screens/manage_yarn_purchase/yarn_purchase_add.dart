@@ -470,8 +470,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     String denyarError = _validateDenyar(denyarController.text) ?? '';
     String rateError = _validateRate(rateController.text) ?? '';
     String copsError = _validateCops(copsController.text) ?? '';
-
     return lotNumberError.isEmpty && netWeightError.isEmpty && boxOrderedError.isEmpty && denyarError.isEmpty && rateError.isEmpty && copsError.isEmpty ? true : false;
   }
-
 }
