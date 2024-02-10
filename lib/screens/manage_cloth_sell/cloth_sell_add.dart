@@ -282,7 +282,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       print("Error occurred: $e");
     }
   }
-
   Future<void> _handleCreateSellDeal()async{
     // Validate total than and rate fields
     bool isFormValid = _isFormValid();

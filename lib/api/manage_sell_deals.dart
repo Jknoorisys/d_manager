@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../constants/constants.dart';
+import '../helpers/helper_functions.dart';
 import '../models/sell_models/create_sell_deal_model.dart';
 import '../models/sell_models/get_sell_deal_model.dart';
 import '../models/sell_models/sell_deal_list_model.dart';
@@ -15,7 +16,8 @@ class SellDealDetails{
       String qualityID,
       String totalThan,
       String rate)async{
-    // String userID = await HelperFunctions.getUserID();
+     String userID = await HelperFunctions.getUserID();
+     print("userID===== $userID");
     try{
       Map<String, dynamic> body = {
         "user_id": userID,
