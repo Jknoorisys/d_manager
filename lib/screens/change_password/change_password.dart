@@ -227,7 +227,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           changePasswordModel.message.toString(),
           mode: SnackbarMode.success,
         );
-        Navigator.of(context).pushNamed(AppRoutes.login);
+        HelperFunctions.setLoginStatus(false);
+        Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
       } else {
         CustomApiSnackbar.show(
           context,

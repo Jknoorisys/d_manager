@@ -148,7 +148,7 @@ class DrawerItems extends StatelessWidget {
               // Logout
               buildTitle(S.of(context).logout, Icons.logout, () {
                 HelperFunctions.setLoginStatus(false);
-                Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+                Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
               }),
             ],
           ),

@@ -5,6 +5,7 @@ import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 
 class DashboardCard extends StatefulWidget {
   final String? title;
@@ -19,8 +20,8 @@ class DashboardCard extends StatefulWidget {
 
 class _DashboardCardState extends State<DashboardCard> {
   DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
+  DateTime firstDate = DateTime(2000);
+  DateTime lastDate = DateTime(2050);
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +62,10 @@ class _DashboardCardState extends State<DashboardCard> {
                                 initialEntryMode: DatePickerEntryMode.input,
                                 helpText: S.of(context).selectDate,
                                 context: context,
+                                initialDateRange: DateTimeRange(
+                                  start: DateTime.now(),
+                                  end: DateTime.now().add(const Duration(days: 7)),
+                                ),
                                 firstDate: firstDate,
                                 lastDate: lastDate,
                               )
@@ -141,7 +146,7 @@ class _DashboardCardState extends State<DashboardCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                              Text(widget.date ?? "31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                              Text(widget.date ?? DateFormat('dd-MM-yyyy').format(DateTime.now()), style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                             ],
                           )
                         ],

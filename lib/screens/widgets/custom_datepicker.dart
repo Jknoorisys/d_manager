@@ -1,21 +1,18 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final DateTime selectedDate;
-  final DateTime firstDate;
-  final DateTime lastDate;
 
   final double? height;
   final double? width;
 
   CustomDatePicker({
-    required this.selectedDate,
-    required this.firstDate,
-    required this.lastDate, this.height, this.width,
+    required this.selectedDate,this.height, this.width,
   });
 
   @override
@@ -37,9 +34,10 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
           context: context,
+          helpText: S.of(context).selectDate,
           initialDate: selectedDate,
-          firstDate: widget.firstDate,
-          lastDate: widget.lastDate,
+          firstDate:  DateTime(2000),
+          lastDate: DateTime(2050),
         );
 
         if (pickedDate != null && pickedDate != selectedDate) {

@@ -18,7 +18,7 @@ const String updateFirmUrl = '$baseUrl/api/update-firm';
 const String updateFirmStatusUrl = '$baseUrl/api/update-firm-status';
 
 const String addPartyUrl = '$baseUrl/api/add-party';
-const String partyListUrl = '$baseUrl/api/my-party';
+const String partyListUrl = '$baseUrl/api/party';
 const String getPartyUrl = '$baseUrl/api/get-party';
 const String updatePartyUrl = '$baseUrl/api/update-party';
 const String updatePartyStatusUrl = '$baseUrl/api/update-party-status';
@@ -27,7 +27,13 @@ const String addClothQualityUrl = '$baseUrl/api/add-quality';
 const String clothQualityListUrl = '$baseUrl/api/cloth-quality';
 const String getClothQualityUrl = '$baseUrl/api/get-quality';
 const String updateClothQualityUrl = '$baseUrl/api/update-quality';
-const String updateClothQualityStatusUrl = '$baseUrl/api/update-cloth-status';
+const String updateClothQualityStatusUrl = '$baseUrl/api/update-quality-status';
+
+const String addYarnUrl = '$baseUrl/api/add-yarn';
+const String yarnListUrl = '$baseUrl/api/yarn';
+const String getYarnUrl = '$baseUrl/api/get-yarn';
+const String updateYarnUrl = '$baseUrl/api/update-yarn';
+const String updateYarnStatusUrl = '$baseUrl/api/update-yarn-status';
 
 
 // Manage Sell Deals

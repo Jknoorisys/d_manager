@@ -246,6 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await HelperFunctions.setUserID(loginModel.data!.userId.toString());
         await HelperFunctions.setUserEmail(loginModel.data!.userEmail.toString());
         await HelperFunctions.setUserName(loginModel.data!.userName.toString());
+        await HelperFunctions.setUserImage(loginModel.data!.profilePic.toString());
         await HelperFunctions.setLoginStatus(true);
         Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
       }  else {

@@ -23,8 +23,6 @@ class InvoiceAdd extends StatefulWidget {
 class _InvoiceAddState extends State<InvoiceAdd> {
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
   bool isPaymentReceived = false;
@@ -75,8 +73,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                               Gap(Dimensions.height10/2),
                               CustomDatePicker(
                                 selectedDate: selectedDate,
-                                firstDate: firstDate,
-                                lastDate: lastDate
                               )
                             ],
                           ),
@@ -273,8 +269,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                             Gap(Dimensions.height10/2),
                             CustomDatePicker(
                               selectedDate: selectedDate,
-                              firstDate: firstDate,
-                              lastDate: lastDate,
                               width: MediaQuery.of(context).size.width,
                             )
                           ],
@@ -379,8 +373,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
         Gap(Dimensions.height10/2),
         CustomDatePicker(
           selectedDate: selectedDate,
-          firstDate: firstDate,
-          lastDate: lastDate,
         )
       ],
     );
@@ -417,8 +409,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
         CustomDatePicker(
             width: MediaQuery.of(context).size.width,
             selectedDate: selectedDate,
-            firstDate: firstDate,
-            lastDate: lastDate
         )
       ],
     );

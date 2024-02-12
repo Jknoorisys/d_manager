@@ -1,6 +1,3 @@
-
-import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../../api/manage_sell_deals.dart';
 import 'package:d_manager/constants/app_theme.dart';
@@ -27,8 +24,6 @@ class UpdateSellDeal extends StatefulWidget {
 
 class _UpdateSellDealState extends State<UpdateSellDeal> {
   bool submitted = false;
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
@@ -79,8 +74,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                             children: [
                               BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              //CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
-                              CustomDatePicker(selectedDate: DateTime.parse(selectedDate.toString()), firstDate: firstDate, lastDate: lastDate),
+                              CustomDatePicker(selectedDate: DateTime.parse(selectedDate.toString())),
                             ],
                           ),
                           Column(

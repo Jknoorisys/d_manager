@@ -1,7 +1,6 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
-import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -27,8 +26,6 @@ class ClothSellAdd extends StatefulWidget {
 
 class _ClothSellAddState extends State<ClothSellAdd> {
   bool submitted = false;
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
@@ -83,7 +80,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               //CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
-                              CustomDatePicker(selectedDate: DateTime.parse(selectedDate.toString()), firstDate: firstDate, lastDate: lastDate),
+                              CustomDatePicker(selectedDate: DateTime.parse(selectedDate.toString())),
                             ],
                           ),
                           Column(

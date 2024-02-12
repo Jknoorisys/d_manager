@@ -30,7 +30,6 @@ class _PartyListState extends State<PartyList> {
   final RefreshController _refreshController = RefreshController();
   List<PartyDetail> parties = [];
   int currentPage = 1;
-
   bool isLoading = false;
   ManagePartyServices partyServices = ManagePartyServices();
   @override
@@ -61,6 +60,7 @@ class _PartyListState extends State<PartyList> {
     return CustomDrawer(
       content: CustomBody(
         title: S.of(context).partyList,
+        isLoading: isLoading,
         content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -111,111 +111,127 @@ class _PartyListState extends State<PartyList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: parties.length,
-                    itemBuilder: (context, index) {
-                      var party = parties[index];
-                      return CustomAccordion(
-                        titleChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    SizedBox(width: Dimensions.width10),
-                                    CircleAvatar(
-                                      backgroundColor: AppTheme.secondary,
-                                      radius: Dimensions.height20,
-                                      child: BigText(text: party.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
-                                    ),
-                                    SizedBox(width: Dimensions.height10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        BigText(text: party.partyName!, color: AppTheme.primary, size: Dimensions.font16),
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: AppTheme.black,
-                                              radius: Dimensions.height10,
-                                              child: BigText(text: party.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                            ),
-                                            SizedBox(width: Dimensions.width10),
-                                            SmallText(text: party.firmName!, color: AppTheme.black, size: Dimensions.font12),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                          ],
-                        ),
-                        contentChild: Column(
-                          children: [
-                            AppTheme.divider,
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Address', party.address ?? ''),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Phone Number', party.phoneNumber ?? ''),
-                                SizedBox(width: Dimensions.width20),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Party State', party.state ?? ''),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('GST Number', party.gstNumber ?? ''),
-                                SizedBox(width: Dimensions.width20),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('PAN Number', party.panNumber ?? ''),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Status', party.status == 'active' ? 'Active' : 'Inactive'),
-                                SizedBox(width: Dimensions.width20),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.partyAdd, arguments: {'partyData': party});
-                                    },
-                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                                ),
-                                GFCheckbox(
-                                  size: Dimensions.height20,
-                                  type: GFCheckboxType.custom,
-                                  inactiveBgColor: AppTheme.nearlyWhite,
-                                  inactiveBorderColor: AppTheme.primary,
-                                  customBgColor: AppTheme.primary,
-                                  activeBorderColor: AppTheme.primary,
-                                  onChanged: (value) {
-                                    String newStatus = value ? 'active' : 'inactive';
-                                    _updateStatus(party.partyId!, newStatus);
-                                  },
-                                  value: party.status == 'active' ? true : false,
-                                  inactiveIcon: null,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    enablePullUp: true,
+                    onRefresh: () async {
+                      setState(() {
+                        parties.clear();
+                        currentPage = 1;
+                      });
+                      await _loadData(currentPage, searchController.text.trim());
+                      _refreshController.refreshCompleted();
                     },
+                    onLoading: () async {
+                      await _loadData(currentPage, searchController.text.trim());
+                      _refreshController.loadComplete();
+                    },
+                    child: ListView.builder(
+                      itemCount: parties.length,
+                      itemBuilder: (context, index) {
+                        var party = parties[index];
+                        return CustomAccordion(
+                          titleChild: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      SizedBox(width: Dimensions.width10),
+                                      CircleAvatar(
+                                        backgroundColor: AppTheme.secondary,
+                                        radius: Dimensions.height20,
+                                        child: BigText(text: party.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                      ),
+                                      SizedBox(width: Dimensions.height10),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          BigText(text: party.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                          Row(
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundColor: AppTheme.black,
+                                                radius: Dimensions.height10,
+                                                child: BigText(text: party.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                              ),
+                                              SizedBox(width: Dimensions.width10),
+                                              SmallText(text: party.firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              AppTheme.divider,
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Address', party.address ?? ''),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Phone Number', party.phoneNumber ?? ''),
+                                  SizedBox(width: Dimensions.width20),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Party State', party.state ?? ''),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('GST Number', party.gstNumber ?? ''),
+                                  SizedBox(width: Dimensions.width20),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('PAN Number', party.panNumber ?? ''),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Status', party.status == 'active' ? 'Active' : 'Inactive'),
+                                  SizedBox(width: Dimensions.width20),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(AppRoutes.partyAdd, arguments: {'partyId': party.partyId});
+                                      },
+                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
+                                  ),
+                                  GFCheckbox(
+                                    size: Dimensions.height20,
+                                    type: GFCheckboxType.custom,
+                                    inactiveBgColor: AppTheme.nearlyWhite,
+                                    inactiveBorderColor: AppTheme.primary,
+                                    customBgColor: AppTheme.primary,
+                                    activeBorderColor: AppTheme.primary,
+                                    onChanged: (value) {
+                                      String newStatus = value ? 'active' : 'inactive';
+                                      _updateStatus(party.partyId!, newStatus);
+                                    },
+                                    value: party.status == 'active' ? true : false,
+                                    inactiveIcon: null,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -287,9 +303,9 @@ class _PartyListState extends State<PartyList> {
     });
 
     try {
-      UpdatePartyStatusModel? updateFirmStatusModel = await partyServices.updatePartyStatus(partyId, status);
-      if (updateFirmStatusModel != null) {
-        if (updateFirmStatusModel.success == true) {
+      UpdatePartyStatusModel? updatePartyStatusModel = await partyServices.updatePartyStatus(partyId, status);
+      if (updatePartyStatusModel != null) {
+        if (updatePartyStatusModel.success == true) {
           setState(() {
             parties.clear();
             currentPage = 1;
@@ -298,14 +314,14 @@ class _PartyListState extends State<PartyList> {
           CustomApiSnackbar.show(
             context,
             'Success',
-            updateFirmStatusModel.message.toString(),
+            updatePartyStatusModel.message.toString(),
             mode: SnackbarMode.success,
           );
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateFirmStatusModel.message.toString(),
+            updatePartyStatusModel.message.toString(),
             mode: SnackbarMode.error,
           );
         }

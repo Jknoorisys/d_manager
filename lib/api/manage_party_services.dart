@@ -91,12 +91,13 @@ class ManagePartyServices {
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
         "party_id": partyId.toString(),
-        "party_status": status,
+        "status": status,
       };
 
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
+
       Response response = await post(Uri.parse(updatePartyStatusUrl), body: body, headers: headers);
       var data = json.decode(response.body);
       if (response.statusCode == 200) {

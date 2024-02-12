@@ -45,6 +45,15 @@ class HelperFunctions {
     return userName ?? '';
   }
 
+  static Future<bool> setUserImage(String userImage) async {
+    return pref.setString("UserImage", userImage);
+  }
+
+  static String getUserImage() {
+    String? userImage = pref.getString('UserImage');
+    return userImage ?? '';
+  }
+
   static Future<bool> setApiKey(String apiKey) async {
     return pref.setString("ApiKey", apiKey);
   }

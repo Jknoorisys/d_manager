@@ -20,8 +20,6 @@ class TransportDetailAdd extends StatefulWidget {
 
 class _TransportDetailAddState extends State<TransportDetailAdd> {
   DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
   String transportName = 'Dharma Transport';
   String hammalName = 'Prakash';
 
@@ -66,8 +64,6 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
               Gap(Dimensions.height10/2),
               CustomDatePicker(
                 selectedDate: selectedDate,
-                firstDate: firstDate,
-                lastDate: lastDate,
                 width: Dimensions.screenWidth,
               ),
             ],

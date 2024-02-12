@@ -1,13 +1,20 @@
+import 'package:d_manager/api/manage_yarn_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/master_models/add_yarn_model.dart';
+import 'package:d_manager/models/master_models/update_yarn_model.dart';
+import 'package:d_manager/models/master_models/yarn_detail_model.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 
 class YarnTypeAdd extends StatefulWidget {
-  final Map<String, dynamic>? yarnTypeData;
-  const YarnTypeAdd({Key? key, this.yarnTypeData}) : super(key: key);
+  final int? yarnTypeId;
+  const YarnTypeAdd({Key? key, this.yarnTypeId}) : super(key: key);
 
   @override
   _YarnTypeAddState createState() => _YarnTypeAddState();
@@ -18,12 +25,21 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
   final TextEditingController yarnTypeController = TextEditingController();
   bool submitted = false;
 
+  bool isLoading = false;
+  ManageYarnServices yarnServices = ManageYarnServices();
+
+  @override
+  void dispose() {
+    yarnNameController.dispose();
+    yarnTypeController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
-    if (widget.yarnTypeData != null) {
-      yarnNameController.text = widget.yarnTypeData!['yarnName'] ?? '';
-      yarnTypeController.text = widget.yarnTypeData!['yarnType'] ?? '';
+    if (widget.yarnTypeId != null) {
+      _getYarnDetails();
     }
   }
   @override
@@ -79,7 +95,29 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                Navigator.of(context).pop();
+                if (HelperFunctions.checkInternet() == false) {
+                  CustomApiSnackbar.show(
+                    context,
+                    'Warning',
+                    'No internet connection',
+                    mode: SnackbarMode.warning,
+                  );
+                } else {
+                  setState(() {
+                    isLoading = !isLoading;
+                  });
+                  Map<String, dynamic> body = {
+                    "yarn_type_id": widget.yarnTypeId != null ? widget.yarnTypeId.toString() : "",
+                    "user_id" : HelperFunctions.getUserID(),
+                    "yarn_name": yarnNameController.text,
+                    "type_name": yarnTypeController.text,
+                  };
+                  if (widget.yarnTypeId == null) {
+                    _addYarn(body);
+                  } else {
+                    _updateYarn(body);
+                  }
+                }
               }
             },
             buttonText: "Submit",
@@ -107,5 +145,107 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
     String errorYarnName = _validateYarnName(yarnNameController.text) ?? '';
     String errorYarnType = _validateYarnType(yarnTypeController.text) ?? '';
     return errorYarnName.isEmpty || errorYarnType.isEmpty ? true : false;
+  }
+
+  Future<void> _addYarn(Map<String, dynamic> body) async {
+    AddYarnModel? addYarnModel = await yarnServices.addYarn(body);
+    if (addYarnModel?.message != null) {
+      if (addYarnModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addYarnModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).popAndPushNamed(AppRoutes.yarnTypeList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addYarnModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateYarn(Map<String, dynamic> body) async {
+    UpdateYarnModel? updateYarnModel = await yarnServices.updateYarn(body);
+    if (updateYarnModel?.message != null) {
+      if (updateYarnModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updateYarnModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pop();
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updateYarnModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getYarnDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    YarnDetailModel? yarnDetailModel = await yarnServices.viewYarn(widget.yarnTypeId!);
+    if (yarnDetailModel?.message != null) {
+      if (yarnDetailModel?.success == true) {
+        yarnNameController.text = yarnDetailModel!.data!.yarnName.toString();
+        yarnTypeController.text = yarnDetailModel.data!.typeName.toString();
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          yarnDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    }
   }
 }

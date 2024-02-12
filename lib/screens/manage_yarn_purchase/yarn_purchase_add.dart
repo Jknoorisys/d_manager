@@ -23,8 +23,6 @@ class YarnPurchaseAdd extends StatefulWidget {
 class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
   String paymentType = 'Current';
   String myFirm = 'Danish Textiles';
   String partyName = 'Mehta and Sons Yarn Trades';
@@ -96,7 +94,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
+                              CustomDatePicker(selectedDate: selectedDate),
                             ],
                           ),
                           Column(
@@ -376,8 +374,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         Gap(Dimensions.height10/2),
         CustomDatePicker(
           selectedDate: selectedDate,
-          firstDate: firstDate,
-          lastDate: lastDate
         )
       ],
     );
@@ -414,8 +410,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         CustomDatePicker(
           width: MediaQuery.of(context).size.width,
           selectedDate: selectedDate,
-          firstDate: firstDate,
-          lastDate: lastDate
         )
       ],
     );

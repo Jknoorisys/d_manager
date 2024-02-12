@@ -9,6 +9,7 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'dashboard_card.dart';
 
 
@@ -41,18 +42,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Widget dynamicDashboardCard = const DashboardCard();
     if (_currentIndex == 0) {
       // Total Yarn Purchases card
-      dynamicDashboardCard = const DashboardCard(
+      dynamicDashboardCard = DashboardCard(
         title: 'Total Yarn Purchases',
         value: '1,00,000',
-        date: '2024-01-25',
+        date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
         image: AppImages.purchaseIcon,
       );
     } else if (_currentIndex == 1) {
       // Other card for Cloth Sells
-      dynamicDashboardCard = const DashboardCard(
+      dynamicDashboardCard = DashboardCard(
         title: 'Total Cloth Sells Deals',
         value: '500,000',
-        date: '2024-01-26',
+        date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
         image: AppImages.salesIcon,
       );
     }

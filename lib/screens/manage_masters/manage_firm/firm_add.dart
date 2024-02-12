@@ -241,7 +241,7 @@ class _FirmAddState extends State<FirmAdd> {
                               if (widget.firmId == null) {
                                 _addFirm(body);
                               } else {
-                                _updateFirm(widget.firmId!, body);
+                                _updateFirm(body);
                               }
                             }
                           }
@@ -415,7 +415,7 @@ class _FirmAddState extends State<FirmAdd> {
     }
   }
 
-  Future<void> _updateFirm(int firmId, Map<String, dynamic> body) async {
+  Future<void> _updateFirm(Map<String, dynamic> body) async {
     UpdateFirmModel? updateFirmModel = await manageFirmServices.updateFirm(body);
     if (updateFirmModel?.message != null) {
       if (updateFirmModel?.success == true) {

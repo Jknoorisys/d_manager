@@ -122,8 +122,8 @@ class AppRoutes {
     partyList: (context) => const PartyList(),
     partyAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? partyData = args?['partyData'];
-      return PartyAdd(partyData: partyData);
+      final int? partyId = args?['partyId'];
+      return PartyAdd(partyId: partyId);
     },
 
     // Manage Cloth Quality

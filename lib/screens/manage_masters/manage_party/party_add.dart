@@ -1,18 +1,23 @@
+import 'package:d_manager/api/manage_party_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/master_models/add_party_model.dart';
+import 'package:d_manager/models/master_models/party_detail_model.dart';
+import 'package:d_manager/models/master_models/update_party_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
-import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class PartyAdd extends StatefulWidget {
-  final Map<String, dynamic>? partyData;
-  const PartyAdd({Key? key, this.partyData}) : super(key: key);
+  final int? partyId;
+  const PartyAdd({Key? key, this.partyId}) : super(key: key);
 
   @override
   _PartyAddState createState() => _PartyAddState();
@@ -23,29 +28,38 @@ class _PartyAddState extends State<PartyAdd> {
   final TextEditingController firmNameController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController gstNumberController = TextEditingController();
+  final TextEditingController panNumberController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController accountHolderNameController = TextEditingController();
   final TextEditingController bankNameController = TextEditingController();
   final TextEditingController ifscCodeController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
-  bool isInMaharashtra = false;
+  bool isInMaharashtra = true;
   bool submitted = false;
+  bool isLoading = false;
+  ManagePartyServices partyServices = ManagePartyServices();
 
   @override
   void initState() {
     super.initState();
-    if (widget.partyData != null) {
-      partyNameController.text = widget.partyData!['partyName'] ?? '';
-      firmNameController.text = widget.partyData!['myFirm'] ?? '';
-      addressController.text = widget.partyData!['address'] ?? '';
-      gstNumberController.text = widget.partyData!['gstNumber'] ?? '';
-      phoneNumberController.text = widget.partyData!['phoneNumber'] ?? '';
-      accountHolderNameController.text = widget.partyData!['accountHolderName'] ?? '';
-      bankNameController.text = widget.partyData!['bankName'] ?? '';
-      ifscCodeController.text = widget.partyData!['ifscCode'] ?? '';
-      accountNumberController.text = widget.partyData!['accountNumber'] ?? '';
-      isInMaharashtra = widget.partyData!['isInMaharashtra'] ?? false;
+    if (widget.partyId != null) {
+      _getPartyDetails();
     }
+  }
+
+  @override
+  void dispose() {
+    partyNameController.dispose();
+    firmNameController.dispose();
+    addressController.dispose();
+    gstNumberController.dispose();
+    panNumberController.dispose();
+    phoneNumberController.dispose();
+    accountHolderNameController.dispose();
+    bankNameController.dispose();
+    ifscCodeController.dispose();
+    accountNumberController.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -53,6 +67,7 @@ class _PartyAddState extends State<PartyAdd> {
         errorPartyName = submitted == true ? _validatePartyName(partyNameController.text) : null,
         errorAddress = submitted == true ? _validateAddress(addressController.text) : null,
         errorGSTNumber = submitted == true ? _validateGSTNumber(gstNumberController.text) : null,
+        errorPanNumber = submitted == true ? _validatePanNumber(panNumberController.text) : null,
         errorPhoneNumber = submitted == true ? _validatePhoneNumber(phoneNumberController.text) : null,
         errorAccountHolderName = submitted == true ? _validateAccountHolderName(accountHolderNameController.text) : null,
         errorBankName = submitted == true ? _validateBankName(bankNameController.text) : null,
@@ -61,7 +76,8 @@ class _PartyAddState extends State<PartyAdd> {
 
     return CustomDrawer(
         content: CustomBody(
-          title: widget.partyData == null ? S.of(context).addParty : 'Edit Party',
+          title: widget.partyId == null ? S.of(context).addParty : 'Edit Party',
+          isLoading: isLoading,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -101,6 +117,15 @@ class _PartyAddState extends State<PartyAdd> {
                       Gap(Dimensions.height15),
 
                       CustomTextField(
+                        controller: phoneNumberController,
+                        labelText: "Phone Number",
+                        keyboardType: TextInputType.phone,
+                        borderRadius: Dimensions.radius10,
+                        errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
+                      ),
+                      Gap(Dimensions.height15),
+
+                      CustomTextField(
                         controller: addressController,
                         labelText: "Address",
                         keyboardType: TextInputType.multiline,
@@ -120,13 +145,13 @@ class _PartyAddState extends State<PartyAdd> {
                       Gap(Dimensions.height15),
 
                       CustomTextField(
-                        controller: phoneNumberController,
-                        labelText: "Phone Number",
-                        keyboardType: TextInputType.phone,
+                        controller: panNumberController,
+                        labelText: "PAN Number",
+                        keyboardType: TextInputType.text,
                         borderRadius: Dimensions.radius10,
-                        errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
+                        errorText: errorPanNumber.toString() != 'null' ? errorPanNumber.toString() : '',
                       ),
-                      Gap(Dimensions.height15),
+                      Gap(Dimensions.height30),
 
                       // Bank Account Details
                       Text(
@@ -181,7 +206,7 @@ class _PartyAddState extends State<PartyAdd> {
                           Row(
                             children: [
                               Radio(
-                                value: false,
+                                value: true,
                                 groupValue: isInMaharashtra,
                                 onChanged: (value) {
                                   setState(() {
@@ -195,7 +220,7 @@ class _PartyAddState extends State<PartyAdd> {
                           Row(
                             children: [
                               Radio(
-                                value: true,
+                                value: false,
                                 groupValue: isInMaharashtra,
                                 onChanged: (value) {
                                   setState(() {
@@ -216,7 +241,40 @@ class _PartyAddState extends State<PartyAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
+                            if (HelperFunctions.checkInternet() == false) {
+                              CustomApiSnackbar.show(
+                                context,
+                                'Warning',
+                                'No internet connection',
+                                mode: SnackbarMode.warning,
+                              );
+                            } else {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              Map<String, dynamic> body = {
+                                "party_id": widget.partyId != null ? widget.partyId.toString() : "",
+                                "user_id" : HelperFunctions.getUserID(),
+                                "party_name": partyNameController.text,
+                                "firm_name": firmNameController.text,
+                                "address": addressController.text,
+                                "gst_number": gstNumberController.text,
+                                "pan_number": panNumberController.text,
+                                "phone_number": phoneNumberController.text,
+                                "account_holder_name": accountHolderNameController.text,
+                                "bank_name": bankNameController.text,
+                                "ifsc_code": ifscCodeController.text,
+                                "account_number": accountNumberController.text,
+                                "state": isInMaharashtra ? "maharashtra" : "out-side"
+                              };
+                              print('Add Party: $body');
+                              if (widget.partyId == null) {
+                                print('Add Party: $body');
+                                _addParty(body);
+                              } else {
+                                _updateParty(body);
+                              }
+                            }
                           }
                         },
                         buttonText: "Submit",
@@ -281,6 +339,18 @@ class _PartyAddState extends State<PartyAdd> {
     return null;
   }
 
+  String? _validatePanNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter PAN Number';
+    }
+
+    if (value.length != 10) {
+      return 'PAN Number should be 10 characters long';
+    }
+
+    return null;
+  }
+
   String? _validateAccountHolderName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Account Holder Name is required';
@@ -331,13 +401,124 @@ class _PartyAddState extends State<PartyAdd> {
     String firmNameError = _validateFirmName(firmNameController.text) ?? '';
     String addressError = _validateAddress(addressController.text) ?? '';
     String gstNumberError = _validateGSTNumber(gstNumberController.text) ?? '';
+    String panNumberError = _validatePanNumber(panNumberController.text) ?? '';
     String phoneNumberError = _validatePhoneNumber(phoneNumberController.text) ?? '';
     String accountHolderNameError = _validateAccountHolderName(accountHolderNameController.text) ?? '';
     String bankNameError = _validateBankName(bankNameController.text) ?? '';
     String ifscCodeError = _validateIFSCCode(ifscCodeController.text) ?? '';
     String accountNumberError = _validateAccountNumber(accountNumberController.text) ?? '';
-    String partyStateError = isInMaharashtra ? '' : 'Please select Party State';
 
-    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && partyStateError.isEmpty ? true : false;
+    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && panNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty ? true : false;
+  }
+
+  Future<void> _addParty(Map<String, dynamic> body) async {
+    AddPartyModel? addPartyModel = await partyServices.addParty(body);
+    if (addPartyModel?.message != null) {
+      if (addPartyModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addPartyModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addPartyModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateParty(Map<String, dynamic> body) async {
+    UpdatePartyModel? updatePartyModel = await partyServices.updateParty(body);
+    if (updatePartyModel?.message != null) {
+      if (updatePartyModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updatePartyModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updatePartyModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getPartyDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    PartyDetailModel? partyDetailModel = await partyServices.viewParty(widget.partyId!);
+    if (partyDetailModel?.message != null) {
+      if (partyDetailModel?.success == true) {
+        partyNameController.text = partyDetailModel!.data!.partyName ?? '';
+        firmNameController.text = partyDetailModel.data!.firmName ?? '';
+        addressController.text = partyDetailModel.data!.address ?? '';
+        gstNumberController.text = partyDetailModel.data!.gstNumber ?? '';
+        panNumberController.text = partyDetailModel.data!.panNumber ?? '';
+        phoneNumberController.text = partyDetailModel.data!.phoneNumber ?? '';
+        accountHolderNameController.text = partyDetailModel.data!.bankDetails?.accountHolderName ?? '';
+        bankNameController.text = partyDetailModel.data!.bankDetails?.bankName ?? '';
+        ifscCodeController.text = partyDetailModel.data!.bankDetails?.ifscCode ?? '';
+        accountNumberController.text = partyDetailModel.data!.bankDetails?.accountNumber ?? '';
+        isInMaharashtra = partyDetailModel.data!.state == 'maharashtra' ? true : false;
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          partyDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    }
   }
 }
