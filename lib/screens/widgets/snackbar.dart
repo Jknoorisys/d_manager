@@ -38,20 +38,24 @@ enum SnackbarMode { success, error, warning }
 class CustomApiSnackbar {
   static void show(BuildContext context, String title, String message, {SnackbarMode mode = SnackbarMode.success}) {
     Color backgroundColor;
+    Color color = AppTheme.white;
     IconData icon;
 
     // Determine background color and icon based on the mode
     switch (mode) {
       case SnackbarMode.success:
-        backgroundColor = Colors.green;
+        backgroundColor = AppTheme.secondary;
+        color = AppTheme.white;
         icon = Icons.check_circle;
         break;
       case SnackbarMode.error:
-        backgroundColor = Colors.red;
+        backgroundColor = const Color(0xFFFF6B6B);
+        color = AppTheme.white;
         icon = Icons.error;
         break;
       case SnackbarMode.warning:
-        backgroundColor = Colors.amber;
+        backgroundColor = const Color(0xFFFFD166);
+        color = AppTheme.white;
         icon = Icons.warning;
         break;
     }
@@ -77,12 +81,12 @@ class CustomApiSnackbar {
               children: [
                 Text(
                   title,
-                  style: AppTheme.subtitle.copyWith(color: AppTheme.white),
+                  style: AppTheme.subtitle.copyWith(color: color, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: Dimensions.height10/5),
                 Text(
                   message,
-                  style: AppTheme.caption.copyWith(color: AppTheme.white),
+                  style: AppTheme.body2.copyWith(color: color, fontWeight: FontWeight.w500),
                 ),
               ],
             ),

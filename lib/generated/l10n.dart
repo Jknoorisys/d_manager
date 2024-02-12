@@ -380,16 +380,6 @@ class S {
     );
   }
 
-  /// `GST Return Amount`
-  String get gstReturnAmount {
-    return Intl.message(
-      'GST Return',
-      name: 'gst',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Profile`
   String get profile {
     return Intl.message(
@@ -513,8 +503,8 @@ class S {
   /// `Manage Yarn Purchase Deal`
   String get manageYarnPurchaseDeal {
     return Intl.message(
-      'Yarn Purchase Deal',
-      name: 'YarnPurchaseDeal',
+      'Manage Yarn Purchase Deal',
+      name: 'manageYarnPurchaseDeal',
       desc: '',
       args: [],
     );
@@ -533,28 +523,8 @@ class S {
   /// `Manage Cloth Sell Deal`
   String get manageClothSellDeal {
     return Intl.message(
-      'Cloth Sell Deal',
-      name: 'ClothSellDeal',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Manage GST Return Amount`
-  String get manageGstReturnAmount {
-    return Intl.message(
-      'GST Return Amount',
-      name: 'gstReturnAmount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update sell deal`
-  String get updateSellDeal {
-    return Intl.message(
-      'Update Cloth Sell Deal',
-      name: 'updateClothSellDeal',
+      'Manage Cloth Sell Deal',
+      name: 'manageClothSellDeal',
       desc: '',
       args: [],
     );
@@ -975,6 +945,56 @@ class S {
     return Intl.message(
       'Invalid OTP',
       name: 'invalidOtp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cloth Sell Deal`
+  String get clothSellDeal {
+    return Intl.message(
+      'Cloth Sell Deal',
+      name: 'clothSellDeal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `History`
+  String get history {
+    return Intl.message(
+      'History',
+      name: 'history',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Masters`
+  String get masters {
+    return Intl.message(
+      'Masters',
+      name: 'masters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yarn Purchase Deal`
+  String get yarnPurchaseDeal {
+    return Intl.message(
+      'Yarn Purchase Deal',
+      name: 'yarnPurchaseDeal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Return GST Amount`
+  String get returnGstAmount {
+    return Intl.message(
+      'Return GST Amount',
+      name: 'returnGstAmount',
       desc: '',
       args: [],
     );

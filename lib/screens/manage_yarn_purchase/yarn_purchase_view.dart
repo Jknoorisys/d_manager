@@ -377,7 +377,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                               ],
                                             ),
                                           ),
-                                          //BigText(text: 'Gross Weight ${widget.yarnPurchaseData!['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: 'Gross Weight ${widget.yarnPurchaseData!['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                         ],
                                       )
                                   ),

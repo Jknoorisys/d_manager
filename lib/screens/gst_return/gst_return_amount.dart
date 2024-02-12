@@ -21,8 +21,8 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          title: S.of(context).manageGstReturnAmount,
-          content: Column(
+          title: S.of(context).returnGstAmount,
+          content:  Column(
             children: [
               CustomAccordionWithoutExpanded(
                 titleChild: Column(

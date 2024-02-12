@@ -88,5 +88,10 @@
   "deliveryDetail": "Delivery Detail",
   "addTransportDetail": "Add Transport Detail",
   "clothSellDealDetails": "Cloth Sell Deal Details",
-  "invalidOtp": "Invalid OTP"
+  "invalidOtp": "Invalid OTP",
+  "clothSellDeal": "Cloth Sell Deal",
+  "history": "History",
+  "masters": "Masters",
+  "yarnPurchaseDeal": "Yarn Purchase Deal",
+  "returnGstAmount": "Return GST Amount"
 }

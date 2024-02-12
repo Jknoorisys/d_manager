@@ -4,7 +4,9 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:d_manager/models/add_firm_model.dart';
+import 'package:d_manager/models/master_models/add_firm_model.dart';
+import 'package:d_manager/models/master_models/firm_detail_model.dart';
+import 'package:d_manager/models/master_models/update_firm_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -14,8 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class FirmAdd extends StatefulWidget {
-  final Map<String, dynamic>? firmData;
-  const FirmAdd({Key? key, this.firmData}) : super(key: key);
+  final int? firmId;
+  const FirmAdd({Key? key, this.firmId}) : super(key: key);
   @override
   _FirmAddState createState() => _FirmAddState();
 }
@@ -25,6 +27,7 @@ class _FirmAddState extends State<FirmAdd> {
   final TextEditingController firmNameController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController gstNumberController = TextEditingController();
+  final TextEditingController panNumberController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController accountHolderNameController = TextEditingController();
   final TextEditingController bankNameController = TextEditingController();
@@ -42,6 +45,7 @@ class _FirmAddState extends State<FirmAdd> {
     firmNameController.dispose();
     addressController.dispose();
     gstNumberController.dispose();
+    panNumberController.dispose();
     phoneNumberController.dispose();
     accountHolderNameController.dispose();
     bankNameController.dispose();
@@ -54,17 +58,8 @@ class _FirmAddState extends State<FirmAdd> {
   @override
   void initState() {
     super.initState();
-    if (widget.firmData != null) {
-      partyNameController.text = widget.firmData!['partyName'] ?? '';
-      firmNameController.text = widget.firmData!['myFirm'] ?? '';
-      addressController.text = widget.firmData!['address'] ?? '';
-      gstNumberController.text = widget.firmData!['gstNumber'] ?? '';
-      phoneNumberController.text = widget.firmData!['phoneNumber'] ?? '';
-      accountHolderNameController.text = widget.firmData!['accountHolderName'] ?? '';
-      bankNameController.text = widget.firmData!['bankName'] ?? '';
-      ifscCodeController.text = widget.firmData!['ifscCode'] ?? '';
-      accountNumberController.text = widget.firmData!['accountNumber'] ?? '';
-      groupCodeController.text = widget.firmData!['groupCode'] ?? '';
+    if (widget.firmId != null) {
+      _getFirmDetails();
     }
   }
   @override
@@ -73,6 +68,7 @@ class _FirmAddState extends State<FirmAdd> {
         errorPartyName = submitted == true ? _validatePartyName(partyNameController.text) : null,
         errorAddress = submitted == true ? _validateAddress(addressController.text) : null,
         errorGSTNumber = submitted == true ? _validateGSTNumber(gstNumberController.text) : null,
+        errorPANNumber = submitted == true ? _validatePANNumber(panNumberController.text) : null,
         errorPhoneNumber = submitted == true ? _validatePhoneNumber(phoneNumberController.text) : null,
         errorAccountHolderName = submitted == true ? _validateAccountHolderName(accountHolderNameController.text) : null,
         errorBankName = submitted == true ? _validateBankName(bankNameController.text) : null,
@@ -82,7 +78,7 @@ class _FirmAddState extends State<FirmAdd> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
-          title: widget.firmData == null ? S.of(context).addFirm : S.of(context).editFirm,
+          title: widget.firmId == null ? S.of(context).addFirm : S.of(context).editFirm,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -105,7 +101,7 @@ class _FirmAddState extends State<FirmAdd> {
 
                       CustomTextField(
                         controller: partyNameController,
-                        labelText: "Enter Party Name (nickname)",
+                        labelText: "Owner Name (nickname)",
                         keyboardType: TextInputType.name,
                         borderRadius: Dimensions.radius10,
                         errorText: errorPartyName.toString() != 'null' ? errorPartyName.toString() : '',
@@ -118,6 +114,15 @@ class _FirmAddState extends State<FirmAdd> {
                         keyboardType: TextInputType.name,
                         borderRadius: Dimensions.radius10,
                         errorText: errorFirmName.toString() != 'null' ? errorFirmName.toString() : '',
+                      ),
+                      Gap(Dimensions.height15),
+
+                      CustomTextField(
+                        controller: phoneNumberController,
+                        labelText: "Phone Number",
+                        keyboardType: TextInputType.phone,
+                        borderRadius: Dimensions.radius10,
+                        errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
                       ),
                       Gap(Dimensions.height15),
 
@@ -141,18 +146,18 @@ class _FirmAddState extends State<FirmAdd> {
                       Gap(Dimensions.height15),
 
                       CustomTextField(
-                        controller: phoneNumberController,
-                        labelText: "Phone Number",
-                        keyboardType: TextInputType.phone,
+                        controller: panNumberController,
+                        labelText: "PAN Number",
+                        keyboardType: TextInputType.text,
                         borderRadius: Dimensions.radius10,
-                        errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
+                        errorText: errorPANNumber.toString() != 'null' ? errorPANNumber.toString() : '',
                       ),
                       Gap(Dimensions.height15),
 
                       CustomTextField(
                         controller: groupCodeController,
                         labelText: "Group Code",
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.text,
                         borderRadius: Dimensions.radius10,
                         errorText: errorGroupCode.toString() != 'null' ? errorGroupCode.toString() : '',
                       ),
@@ -219,19 +224,25 @@ class _FirmAddState extends State<FirmAdd> {
                                 isLoading = !isLoading;
                               });
                               Map<String, dynamic> body = {
+                                "firm_id": widget.firmId != null ? widget.firmId.toString() : "",
                                 "user_id" : HelperFunctions.getUserID(),
                                 "owner_name": partyNameController.text,
                                 "firm_name": firmNameController.text,
                                 "address": addressController.text,
                                 "gst_number": gstNumberController.text,
+                                "pan_number": panNumberController.text,
                                 "phone_number": phoneNumberController.text,
                                 "account_holder_name": accountHolderNameController.text,
                                 "bank_name": bankNameController.text,
                                 "ifsc_code": ifscCodeController.text,
                                 "account_number": accountNumberController.text,
-                                "groupCode": groupCodeController.text,
+                                "group_code": groupCodeController.text,
                               };
-                              _addFirm(body);
+                              if (widget.firmId == null) {
+                                _addFirm(body);
+                              } else {
+                                _updateFirm(widget.firmId!, body);
+                              }
                             }
                           }
                         },
@@ -274,6 +285,16 @@ class _FirmAddState extends State<FirmAdd> {
     }
     if (value.length != 15) {
       return 'GST Number should be 15 characters long';
+    }
+    return null;
+  }
+
+  String? _validatePANNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter PAN Number';
+    }
+    if (value.length != 10) {
+      return 'PAN Number should be 10 characters long';
     }
     return null;
   }
@@ -347,6 +368,7 @@ class _FirmAddState extends State<FirmAdd> {
     String firmNameError = _validateFirmName(firmNameController.text) ?? '';
     String addressError = _validateAddress(addressController.text) ?? '';
     String gstNumberError = _validateGSTNumber(gstNumberController.text) ?? '';
+    String panNumberError = _validatePANNumber(panNumberController.text) ?? '';
     String phoneNumberError = _validatePhoneNumber(phoneNumberController.text) ?? '';
     String accountHolderNameError = _validateAccountHolderName(accountHolderNameController.text) ?? '';
     String bankNameError = _validateBankName(bankNameController.text) ?? '';
@@ -354,13 +376,19 @@ class _FirmAddState extends State<FirmAdd> {
     String accountNumberError = _validateAccountNumber(accountNumberController.text) ?? '';
     String groupCodeError = _validateGroupCode(groupCodeController.text) ?? '';
 
-    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && groupCodeError.isEmpty ? true : false;
+    return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && panNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && groupCodeError.isEmpty ? true : false;
   }
 
   Future<void> _addFirm(Map<String, dynamic> body) async {
     AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body);
     if (addFirmModel?.message != null) {
       if (addFirmModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addFirmModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
         Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
       }  else {
         CustomApiSnackbar.show(
@@ -384,6 +412,81 @@ class _FirmAddState extends State<FirmAdd> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _updateFirm(int firmId, Map<String, dynamic> body) async {
+    UpdateFirmModel? updateFirmModel = await manageFirmServices.updateFirm(body);
+    if (updateFirmModel?.message != null) {
+      if (updateFirmModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updateFirmModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updateFirmModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getFirmDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    FirmDetailModel? firmDetailModel = await manageFirmServices.viewFirm(widget.firmId!);
+    if (firmDetailModel?.message != null) {
+      if (firmDetailModel?.success == true) {
+        partyNameController.text = firmDetailModel!.data!.ownerName ?? '';
+        firmNameController.text = firmDetailModel.data!.firmName ?? '';
+        addressController.text = firmDetailModel.data!.address ?? '';
+        gstNumberController.text = firmDetailModel.data!.gstNumber ?? '';
+        panNumberController.text = firmDetailModel.data!.panNumber ?? '';
+        phoneNumberController.text = firmDetailModel.data!.phoneNumber ?? '';
+        accountHolderNameController.text = firmDetailModel.data!.bankDetails?.accountHolderName ?? '';
+        bankNameController.text = firmDetailModel.data!.bankDetails?.bankName ?? '';
+        ifscCodeController.text = firmDetailModel.data!.bankDetails?.ifscCode ?? '';
+        accountNumberController.text = firmDetailModel.data!.bankDetails?.accountNumber ?? '';
+        groupCodeController.text = firmDetailModel.data!.groupCode ?? '';
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          firmDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
     }
   }
 }

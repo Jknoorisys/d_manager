@@ -42,6 +42,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "clothQualityList":
             MessageLookupByLibrary.simpleMessage("Cloth Quality List"),
         "clothSell": MessageLookupByLibrary.simpleMessage("Cloth Sell"),
+        "clothSellDeal":
+            MessageLookupByLibrary.simpleMessage("Cloth Sell Deal"),
         "clothSellDealDetails":
             MessageLookupByLibrary.simpleMessage("Cloth Sell Deal Details"),
         "clothSellList":
@@ -80,6 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Forgot Password"),
         "hammal": MessageLookupByLibrary.simpleMessage("Hammal"),
         "hammalList": MessageLookupByLibrary.simpleMessage("Hammal List"),
+        "history": MessageLookupByLibrary.simpleMessage("History"),
         "invalidEmail": MessageLookupByLibrary.simpleMessage("Invalid Email"),
         "invalidOtp": MessageLookupByLibrary.simpleMessage("Invalid OTP"),
         "login": MessageLookupByLibrary.simpleMessage("Login"),
@@ -94,6 +97,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Manage \nMasters"),
         "manageYarnPurchaseDeal":
             MessageLookupByLibrary.simpleMessage("Manage Yarn Purchase Deal"),
+        "masters": MessageLookupByLibrary.simpleMessage("Masters"),
         "myFirm": MessageLookupByLibrary.simpleMessage("My Firm"),
         "newPassword": MessageLookupByLibrary.simpleMessage("New Password"),
         "oldPassword": MessageLookupByLibrary.simpleMessage("Old Password"),
@@ -124,6 +128,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reminders": MessageLookupByLibrary.simpleMessage("Reminders"),
         "resend": MessageLookupByLibrary.simpleMessage("RESEND"),
         "resetPassword": MessageLookupByLibrary.simpleMessage("Reset Password"),
+        "returnGstAmount":
+            MessageLookupByLibrary.simpleMessage("Return GST Amount"),
         "searchClothQuality":
             MessageLookupByLibrary.simpleMessage("Search Cloth Quality"),
         "searchDeliveryDetails":
@@ -150,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "transportList": MessageLookupByLibrary.simpleMessage("Transport List"),
         "verify": MessageLookupByLibrary.simpleMessage("VERIFY"),
         "yarnPurchase": MessageLookupByLibrary.simpleMessage("Yarn Purchase"),
+        "yarnPurchaseDeal":
+            MessageLookupByLibrary.simpleMessage("Yarn Purchase Deal"),
         "yarnPurchaseDealDetails":
             MessageLookupByLibrary.simpleMessage("Yarn Purchase Deal Details"),
         "yarnPurchasesList":
