@@ -17,7 +17,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
+import '../widgets/snackbar.dart';
 import 'cloth_sell_view.dart';
 
 class ClothSellList extends StatefulWidget {
@@ -30,6 +32,7 @@ class ClothSellList extends StatefulWidget {
 class _ClothSellListState extends State<ClothSellList> {
   SellDealDetails sellDealDetails = SellDealDetails();
   final searchController = TextEditingController();
+  final RefreshController _refreshController = RefreshController();
   // List<Map<String, dynamic>> unFilteredClothSellList = [
   //   {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
   // ];
@@ -40,27 +43,41 @@ class _ClothSellListState extends State<ClothSellList> {
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
   String status = 'On Going';
+  int currentPage = 1;
+
+  bool isLoading = false;
 
   HelperFunctions helperFunctions = HelperFunctions();
 
   @override
   void initState() {
     super.initState();
-    _initializeData();
-  }
-
-  Future<void> _initializeData() async {
-    try {
-      await getSellDealList();
-    } catch (e) {
-      print("Error during initialization: $e");
+    if (HelperFunctions.checkInternet() == false) {
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    } else {
+      setState(() {
+        isLoading = !isLoading;
+      });
+      getSellDealList(currentPage, searchController.text.trim());
     }
+  }
+  @override
+  void dispose() {
+    searchController.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content:
         CustomBody(
+          isLoading: isLoading,
           title: S.of(context).clothSellList,
           filterButton: GestureDetector(
             onTap: () {
@@ -85,21 +102,18 @@ class _ClothSellListState extends State<ClothSellList> {
                           borderRadius: Dimensions.radius10,
                           borderColor: AppTheme.primary,
                           onSuffixTap: () {
-                            searchController.clear();
                             setState(() {
-                              clothSellList;
+                              searchController.clear();
+                              clothSellList.clear();
+                              currentPage = 1;
+                              getSellDealList(currentPage, searchController.text.trim());
                             });
                           },
                           onChanged: (value) {
                             setState(() {
-                              clothSellList
-                                  .where((firm) => firm.partyName!
-                                  .toLowerCase()
-                                  .contains(value.toLowerCase()) ||
-                                  firm.firmName!
-                                      .toLowerCase()
-                                      .contains(value.toLowerCase()))
-                                  .toList();
+                              clothSellList.clear();
+                              currentPage = 1;
+                              getSellDealList(currentPage, value);
                             });
                           }
                       ),
@@ -120,128 +134,145 @@ class _ClothSellListState extends State<ClothSellList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: sellDealListModel == null? Center(child: CircularProgressIndicator(color: AppTheme.black,)):
-                  ListView.builder(
-                    itemCount: clothSellList.length,
-                    itemBuilder: (context, index) {
-                      return CustomAccordion(
-                        titleChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    SizedBox(width: Dimensions.width10),
-                                    CircleAvatar(
-                                      backgroundColor: AppTheme.secondary,
-                                      radius: Dimensions.height20,
-                                      child: BigText(text: sellDealListModel!.data![index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
-                                    ),
-                                    SizedBox(width: Dimensions.height10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        BigText(text: sellDealListModel!.data![index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: AppTheme.black,
-                                              radius: Dimensions.height10,
-                                              child: BigText(text: sellDealListModel!.data![index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                            ),
-                                            SizedBox(width: Dimensions.width10),
-                                            SmallText(text: sellDealListModel!.data![index].firmName!, color: AppTheme.black, size: Dimensions.font12),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            AppTheme.divider,
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Deal Date', sellDealListModel!.data![index].sellDate!),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Cloth Quality', sellDealListModel!.data![index].qualityName!),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Total Than', sellDealListModel!.data![index].totalThan!),
-                              ],
-                            ),
-                          ],
-                        ),
-                        contentChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                _buildInfoColumn('Than Delivered', sellDealListModel!.data![index].thanDelivered!),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Than Remaining', sellDealListModel!.data![index].thanRemaining!),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Rate', sellDealListModel!.data![index].rate!),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Status', sellDealListModel!.data![index].dealStatus!),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                    onPressed: () {
-                                     //Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': sellDealListModel});
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView( sellID: sellDealListModel!.data![index].sellId!)));
-                                      //Navigator.of(context).pushNamed(AppRoutes.clothSellView);
-                                    },
-                                    icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
-                                ),
-                                IconButton(
-                                    onPressed: () {
-                                      // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': sellDealListModel!.data![index]});
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: sellDealListModel!.data![index].sellId!)));
-                                    },
-                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                                ),
-                                IconButton(
-                                    onPressed: () {
+                  child: SmartRefresher(
+                    enablePullUp: true,
+                    controller: _refreshController,
+                    onRefresh: () async {
+                      setState(() {
+                        clothSellList.clear();
+                        currentPage = 1;
+                      });
+                      getSellDealList(currentPage, searchController.text.trim());
+                      _refreshController.refreshCompleted();
+                    },
+                    onLoading: () async {
+                      getSellDealList(currentPage, searchController.text.trim());
+                      _refreshController.loadComplete();
+                    },
+                    child:
+                    ListView.builder(
+                      itemCount: clothSellList.length,
+                      itemBuilder: (context, index) {
+                        return CustomAccordion(
+                          titleChild: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      SizedBox(width: Dimensions.width10),
+                                      CircleAvatar(
+                                        backgroundColor: AppTheme.secondary,
+                                        radius: Dimensions.height20,
+                                        child: BigText(text: clothSellList[index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
+                                      ),
+                                      SizedBox(width: Dimensions.height10),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          BigText(text: clothSellList[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
+                                          Row(
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundColor: AppTheme.black,
+                                                radius: Dimensions.height10,
+                                                child: BigText(text: clothSellList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                              ),
+                                              SizedBox(width: Dimensions.width10),
+                                              SmallText(text: clothSellList[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              AppTheme.divider,
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Deal Date', clothSellList[index].sellDate!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Total Than', clothSellList[index].totalThan!),
+                                ],
+                              ),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Rate', clothSellList[index].rate!),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Status', clothSellList[index].dealStatus!),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        //Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': sellDealListModel});
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView( sellID: clothSellList[index].sellId!)));
+                                        //Navigator.of(context).pushNamed(AppRoutes.clothSellView);
+                                      },
+                                      icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
+                                  ),
+                                  IconButton(
+                                      onPressed: () {
+                                        // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: clothSellList[index].sellId!)));
+                                      },
+                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
+                                  ),
+                                  IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          sellDealListModel!.data!.removeAt(index);
+                                        });
+                                      },
+                                      icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
+                                  ),
+                                  GFCheckbox(
+                                    size: Dimensions.height20,
+                                    type: GFCheckboxType.custom,
+                                    inactiveBgColor: AppTheme.nearlyWhite,
+                                    inactiveBorderColor: AppTheme.primary,
+                                    customBgColor: AppTheme.primary,
+                                    activeBorderColor: AppTheme.primary,
+                                    onChanged: (value) {
                                       setState(() {
-                                        sellDealListModel!.data!.removeAt(index);
+                                        clothSellList[index].dealStatus = value == true ? 'Completed' : 'On Going';
                                       });
                                     },
-                                    icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                                ),
-                                GFCheckbox(
-                                  size: Dimensions.height20,
-                                  type: GFCheckboxType.custom,
-                                  inactiveBgColor: AppTheme.nearlyWhite,
-                                  inactiveBorderColor: AppTheme.primary,
-                                  customBgColor: AppTheme.primary,
-                                  activeBorderColor: AppTheme.primary,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      sellDealListModel!.data![index].dealStatus = value == true ? 'Completed' : 'On Going';
-                                    });
-                                  },
-                                  value: sellDealListModel!.data![index].dealStatus == 'Completed' ? true : false,
-                                  inactiveIcon: null,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                                    value: clothSellList[index].dealStatus == 'Completed' ? true : false,
+                                    inactiveIcon: null,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
+
                 ),
               ],
             ),
@@ -367,15 +398,48 @@ class _ClothSellListState extends State<ClothSellList> {
     );
   }
 
-    Future<SellDealListModel?> getSellDealList() async {
-      SellDealListModel? model = await sellDealDetails.sellDealListApi();
-      if (model?.success == true) {
+    Future<SellDealListModel?> getSellDealList(int pageNo, String search,) async {
+      setState(() {
+        isLoading = true;
+      });
+      try {
+        SellDealListModel? model = await sellDealDetails.sellDealListApi(
+          pageNo.toString(),
+          search,
+        );
+        if (model != null) {
+          if (model.success == true) {
+            if (model.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                clothSellList.clear();
+              }
+              setState(() {
+                clothSellList.addAll(model.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              model.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            'Something went wrong, please try again later.',
+            mode: SnackbarMode.error,
+          );
+        }
+      } finally {
         setState(() {
-          sellDealListModel = model;
-          clothSellList = model!.data ?? [];
+          isLoading = false;
         });
-      }else{
-        print(model?.message!);
       }
     }
 }
