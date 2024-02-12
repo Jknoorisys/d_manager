@@ -178,7 +178,7 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
                                         ],
                                       ),
                                     ),
-                                    BigText(text: 'Gross Weight 500 kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                    BigText(text: 'Gross Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                   ],
                                 )
                             ),

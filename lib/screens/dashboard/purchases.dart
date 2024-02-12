@@ -75,7 +75,7 @@ class _PurchasesState extends State<Purchases> {
                   children: [
                     _buildInfoColumn('Deal Date', yarnPurchaseList[index]['dealDate']),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Yarn Name', yarnPurchaseList[index]['yarnName']),
+                    _buildInfoColumn('Rate', yarnPurchaseList[index]['rate']),
                     SizedBox(width: Dimensions.width20),
                     _buildInfoColumn('Yarn Type', yarnPurchaseList[index]['yarnType']),
                   ],
@@ -166,8 +166,8 @@ class _PurchasesState extends State<Purchases> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                            BigText(text: '₹ ${yarnPurchaseList[index]['rate']}',color: AppTheme.primary, size: Dimensions.font18)
+                            BigText(text: 'Yarn Name', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                            BigText(text: '₹ ${yarnPurchaseList[index]['yarnName']}',color: AppTheme.primary, size: Dimensions.font18)
                           ],
                         )
                     ),
