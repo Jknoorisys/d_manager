@@ -14,7 +14,6 @@ import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
