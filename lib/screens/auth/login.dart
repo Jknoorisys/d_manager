@@ -234,7 +234,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isFormValid() {
     String emailError = _validateEmail(emailController.text) ?? '';
     String passwordError = _validatePassword(passwordController.text) ?? '';
-
     return emailError.isEmpty && passwordError.isEmpty;
   }
 
@@ -256,7 +255,6 @@ class _LoginScreenState extends State<LoginScreen> {
           mode: SnackbarMode.error,
         );
       }
-
       setState(() {
         isLoading = false;
       });
