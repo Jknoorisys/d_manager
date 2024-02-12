@@ -112,7 +112,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                     child: ListView.builder(
                       itemCount: filteredPurchaseHistoryList.length,
                       itemBuilder: (context, index) {
-                        return CustomAccordion(
+                        return
+                          CustomAccordion(
                           titleChild: Column(
                             children: [
                               SizedBox(

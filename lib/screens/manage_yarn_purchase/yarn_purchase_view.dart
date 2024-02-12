@@ -26,11 +26,11 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   String paymentPaid = 'Yes';
 
   List<Map<String, dynamic>> deliveryDetailList = [
-    {'no': 1, 'dealDate': '2024-01-25', 'paymentType': 'Current', 'paymentMethod': 'Cheque', 'boxReceived': '500', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-10', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
-    {'no': 2, 'dealDate': '2024-01-26', 'paymentType': 'Dhara', 'paymentMethod': 'RTGS', 'boxReceived': '400', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-12', 'paid': true, 'paidDate': '2024-02-05', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
-    {'no': 3, 'dealDate': '2024-01-27', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '650', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-15', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'Completed'},
-    {'no': 4, 'dealDate': '2024-01-28', 'paymentType': 'Dhara', 'paymentMethod': 'Cheque', 'boxReceived': '550', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-18', 'paid': true, 'paidDate': '2024-02-10', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'invoice.pdf', 'status': 'On Going'},
-    {'no': 5, 'dealDate': '2024-01-29', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '600', 'netWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-20', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
+    {'no': 1, 'dealDate': '2024-01-25', 'paymentType': 'Current', 'paymentMethod': 'Cheque', 'boxReceived': '500', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-10', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
+    {'no': 2, 'dealDate': '2024-01-26', 'paymentType': 'Dhara', 'paymentMethod': 'RTGS', 'boxReceived': '400', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-12', 'paid': true, 'paidDate': '2024-02-05', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
+    {'no': 3, 'dealDate': '2024-01-27', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '650', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-15', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'Completed'},
+    {'no': 4, 'dealDate': '2024-01-28', 'paymentType': 'Dhara', 'paymentMethod': 'Cheque', 'boxReceived': '550', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-18', 'paid': true, 'paidDate': '2024-02-10', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'invoice.pdf', 'status': 'On Going'},
+    {'no': 5, 'dealDate': '2024-01-29', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '600', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-20', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
   ];
 
   @override
@@ -90,7 +90,8 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                             children: [
                               _buildInfoColumn('Deal Date', widget.yarnPurchaseData!['dealDate']),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Yarn Name', widget.yarnPurchaseData!['yarnName']),
+                              _buildInfoColumn('Payment Type', widget.yarnPurchaseData!['paymentType']),
+                              // _buildInfoColumn('Yarn Name', widget.yarnPurchaseData!['yarnName']),
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Yarn Type', widget.yarnPurchaseData!['yarnType']),
                             ],
@@ -98,7 +99,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                           SizedBox(height: Dimensions.height10),
                           Row(
                             children: [
-                              _buildInfoColumn('Payment Type', widget.yarnPurchaseData!['paymentType']),
+                              _buildInfoColumn('Yarn Name', widget.yarnPurchaseData!['paymentType']),
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Lot Number', widget.yarnPurchaseData!['lotNumber']),
                               SizedBox(width: Dimensions.width20),
@@ -256,7 +257,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                         return CustomAccordion(
                           titleChild: Row(
                             children: [
-                              _buildInfoColumn('Deal Date', deliveryDetailList[index]['dealDate']),
+                              _buildInfoColumn('Delivery Date', deliveryDetailList[index]['dealDate']),
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Payment Type', deliveryDetailList[index]['paymentType']),
                               SizedBox(width: Dimensions.width20),
@@ -280,9 +281,11 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Net Weight', deliveryDetailList[index]['netWeight']),
+                                  _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Rate', deliveryDetailList[index]['rate']),
+                                  _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
+                                  // SizedBox(width: Dimensions.width20),
+                                  // _buildInfoColumn('Rate', deliveryDetailList[index]['rate']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Bill Amount', deliveryDetailList[index]['billAmount']),
                                 ],
@@ -293,38 +296,49 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                   _buildInfoColumn('GST', deliveryDetailList[index]['GST']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Due Date', deliveryDetailList[index]['dueDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Paid', deliveryDetailList[index]['paid'] == true ? 'Yes' : 'No'),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
-                                  SizedBox(width: Dimensions.width20),
+                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Difference In Amount', deliveryDetailList[index]['differenceInAmount']),
+                                  // _buildInfoColumn('Paid', deliveryDetailList[index]['paid'] == true ? 'Yes' : 'No'),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
+                                  // _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
+                                  // SizedBox(width: Dimensions.width20),
+                                  // _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
+                                  // SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Denyar', deliveryDetailList[index]['denyar']),
+                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Cops', deliveryDetailList[index]['cops']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Denyar', deliveryDetailList[index]['denyar']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill Received', deliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
+                                  _buildInfoColumn('Net Weight', '${deliveryDetailList[index]['netWeight']} Kg'),
+                                  // _buildInfoColumn('Bill Received', deliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
+                                  // _buildInfoColumn('Cops', deliveryDetailList[index]['cops']),
+                                  // SizedBox(width: Dimensions.width20),
+                                  // _buildInfoColumn('Denyar', deliveryDetailList[index]['denyar']),
+                                  // SizedBox(width: Dimensions.width20),
+                                  // _buildInfoColumn('Bill Received', deliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
                                   _buildInfoColumn('View PDF', deliveryDetailList[index]['viewPDF']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Status', deliveryDetailList[index]['status']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('', ''),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  // _buildInfoColumn('View PDF', deliveryDetailList[index]['viewPDF']),
+                                  // // SizedBox(width: Dimensions.width20),
+                                  // _buildInfoColumn('Status', deliveryDetailList[index]['status']),
+                                  // SizedBox(width: Dimensions.width20),
+                                  // _buildInfoColumn('', ''),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
@@ -342,7 +356,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          BigText(text: 'Total Net Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: 'Gross wt (ton)', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                           RichText(
                                             text: TextSpan(
                                               style: TextStyle(
