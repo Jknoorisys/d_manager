@@ -1,7 +1,6 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
-import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -12,10 +11,10 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-
 import '../../api/manage_sell_deals.dart';
 import '../../models/sell_models/create_sell_deal_model.dart';
 import '../widgets/loader.dart';
+import '../widgets/snackbar.dart';
 
 class ClothSellAdd extends StatefulWidget {
   final Map<String, dynamic>? clothSellData;
@@ -38,6 +37,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   TextEditingController rateController = TextEditingController();
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
+  bool isLoading = false;
 
 
 
@@ -200,6 +200,9 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                       Gap(Dimensions.height20),
                       CustomElevatedButton(
                         onPressed: () {
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
                           _handleCreateSellDeal();
                           // setState(() {
                           //   submitted = true;
@@ -216,7 +219,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
               ),
             ),
           ),
-        )
+        ),
     );
   }
 
@@ -274,9 +277,16 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       );
       if (model?.success == true) {
         Navigator.of(context).pop(); // Close the loading dialog
+
         Navigator.of(context).pushNamed(AppRoutes.clothSellList);
       } else {
         Navigator.of(context).pop(); // Close the loading dialog
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          model!.message!,
+          mode: SnackbarMode.error,
+        );
       }
     } catch (e) {
       print("Error occurred: $e");
@@ -296,8 +306,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
         totalThanController.text,
         rateController.text,
       );
-    }else{
-      print("Something Went wrong");
     }
   }
 }
