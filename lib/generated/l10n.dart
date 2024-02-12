@@ -860,6 +860,27 @@ class S {
     );
   }
 
+
+  /// `Current Amount`
+  String get currentAmount {
+    return Intl.message(
+      'Current Amount',
+      name: 'currentAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last month Amount`
+  String get lastMonthAmount {
+    return Intl.message(
+      'Last Month Amount',
+      name: 'lastMonthAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Yarn Purchases List`
   String get yarnPurchasesList {
     return Intl.message(

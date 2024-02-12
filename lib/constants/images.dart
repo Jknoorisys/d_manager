@@ -9,6 +9,9 @@ class AppImages {
   static const String appLogoHorizontal = 'assets/images/logo/logo_horizontal.png';
   static const String appIcon = 'assets/images/logo/app_icon.png';
 
+  //GST
+  static const String gstIcon = 'assets/images/icons/gst.png';
+
   static const String googleIcon = 'assets/images/icons/google.png';
   static const String userImage = 'assets/images/icons/user.jpeg';
 
@@ -20,4 +23,5 @@ class AppImages {
   static const String salesIcon = 'assets/images/svg/sales_icon.svg';
   static const String salesFillIcon = 'assets/images/svg/sales_fill.svg';
   static const String salesUnFillIcon = 'assets/images/svg/sales_unfill.svg';
+
 }

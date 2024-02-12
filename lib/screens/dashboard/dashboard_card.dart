@@ -33,7 +33,8 @@ class _DashboardCardState extends State<DashboardCard> {
             top: 0,
             left: 0,
             right: 0,
-            child: Container(
+            child:
+            Container(
               height: Dimensions.height50*4,
               decoration: BoxDecoration(
                 color: AppTheme.secondary,
@@ -42,7 +43,8 @@ class _DashboardCardState extends State<DashboardCard> {
                   bottomRight: Radius.circular(Dimensions.radius30),
                 ),
               ),
-              child: Padding(
+              child:
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: Dimensions.height15, horizontal: Dimensions.height30),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -70,7 +72,6 @@ class _DashboardCardState extends State<DashboardCard> {
                                 lastDate: lastDate,
                               )
                             ) as DateTime?;
-
                             if (pickedDate != null && pickedDate != selectedDate) {
                               setState(() {
                                 selectedDate = pickedDate;
@@ -98,7 +99,8 @@ class _DashboardCardState extends State<DashboardCard> {
             right: 0,
             child: Padding(
               padding: EdgeInsets.all(Dimensions.height30),
-              child: Container(
+              child:
+              Container(
                 height: Dimensions.height40*4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(Dimensions.radius20),
