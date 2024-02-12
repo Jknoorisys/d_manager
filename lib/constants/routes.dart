@@ -114,8 +114,8 @@ class AppRoutes {
     firmList: (context) => const FirmList(),
     firmAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? firmData = args?['firmData'];
-      return FirmAdd(firmData: firmData);
+      final int? firmId = args?['firmId'];
+      return FirmAdd(firmId: firmId);
     },
 
     // Manage Party

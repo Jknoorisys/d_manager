@@ -4,7 +4,7 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:d_manager/models/change_password_model.dart';
+import 'package:d_manager/models/auth_models/change_password_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';

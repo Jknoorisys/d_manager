@@ -15,7 +15,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          title: S.of(context).manageGstReturnAmount,
+          title: 'Return GST Amount',
           content: const Column(
             children: [
 

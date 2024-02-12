@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:d_manager/models/change_password_model.dart';
-import 'package:d_manager/models/forget_password_model.dart';
-import 'package:d_manager/models/login_model.dart';
-import 'package:d_manager/models/reset_password_model.dart';
-import 'package:d_manager/models/verify_otp_model.dart';
+import 'package:d_manager/models/auth_models/change_password_model.dart';
+import 'package:d_manager/models/auth_models/forget_password_model.dart';
+import 'package:d_manager/models/auth_models/login_model.dart';
+import 'package:d_manager/models/auth_models/reset_password_model.dart';
+import 'package:d_manager/models/auth_models/verify_otp_model.dart';
 import 'package:http/http.dart';
 
 class AuthServices {

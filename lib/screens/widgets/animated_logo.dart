@@ -20,14 +20,19 @@ class _AnimatedLogoState extends State<AnimatedLogo> with SingleTickerProviderSt
       duration: const Duration(seconds: 1),
     );
 
-    // Add a listener to reverse the animation when it completes
+    Animation<double> pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        controller.reverse();
+        controller.dispose();
       }
     });
 
-    // Start the animation when the widget is built
     controller.forward();
   }
 
@@ -38,9 +43,8 @@ class _AnimatedLogoState extends State<AnimatedLogo> with SingleTickerProviderSt
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
-          return Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.rotationY(controller.value * 3.141), // Flip animation
+          return Transform.scale(
+            scale: controller.value,
             child: Image.asset(AppImages.appLogoTransparent, fit: BoxFit.contain),
           );
         },
@@ -50,7 +54,9 @@ class _AnimatedLogoState extends State<AnimatedLogo> with SingleTickerProviderSt
 
   @override
   void dispose() {
-    controller.dispose();
+    if (controller.isAnimating) {
+      controller.dispose();
+    }
     super.dispose();
   }
 }

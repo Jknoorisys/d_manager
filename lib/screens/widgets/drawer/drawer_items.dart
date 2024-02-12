@@ -55,20 +55,22 @@ class DrawerItems extends StatelessWidget {
               buildTitle(S.of(context).dashboard, Icons.home, () {
                 Navigator.of(context).pushNamed(AppRoutes.dashboard);
               }),
+              
               // Manage GST return amount screen
-              buildTitle(S.of(context).gstReturnAmount, Icons.currency_rupee, () {
+              buildTitle(S.of(context).returnGstAmount, Icons.bar_chart, () {
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GSTReturnAmount(),));
-                //Navigator.of(context).pushNamed(AppRoutes.dashboard);
               }),
+              
               // Manage Yarn Purchase Deal
-              buildTitle(S.of(context).manageYarnPurchaseDeal, Icons.list, () {
+              buildTitle(S.of(context).yarnPurchaseDeal, Icons.list, () {
                 Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseList);
               }),
 
               // Manage Cloth Sell Deal
-              buildTitle(S.of(context).manageClothSellDeal, Icons.edit, () {
+              buildTitle(S.of(context).clothSellDeal, Icons.edit, () {
                 Navigator.of(context).pushNamed(AppRoutes.clothSellList);
               }),
+
               // Manage Reminders
               ExpansionTile(
                 shape: InputBorder.none,
@@ -96,8 +98,8 @@ class DrawerItems extends StatelessWidget {
               ExpansionTile(
                 shape: InputBorder.none,
                 childrenPadding: EdgeInsets.only(left: Dimensions.width20),
-                leading: Icon(Icons.bar_chart, color: AppTheme.secondaryLight, size: Dimensions.font22,),
-                title: SmallText(text: S.of(context).manageHistory, color: AppTheme.secondaryLight, size: Dimensions.font15),
+                leading: Icon(Icons.manage_history, color: AppTheme.secondaryLight, size: Dimensions.font22,),
+                title: SmallText(text: S.of(context).history, color: AppTheme.secondaryLight, size: Dimensions.font15),
                 trailing: const Icon(Icons.arrow_drop_down, color: AppTheme.secondaryLight),
                 children: [
                   buildTitle(S.of(context).purchaseHistory, Icons.arrow_right, () {
@@ -114,7 +116,7 @@ class DrawerItems extends StatelessWidget {
                 shape: InputBorder.none,
                 childrenPadding: EdgeInsets.only(left: Dimensions.width20),
                 leading: Icon(Icons.dashboard_customize, color: AppTheme.secondaryLight, size: Dimensions.font22,),
-                title: SmallText(text: S.of(context).manageMasters, color: AppTheme.secondaryLight, size: Dimensions.font15),
+                title: SmallText(text: S.of(context).masters, color: AppTheme.secondaryLight, size: Dimensions.font15),
                 trailing: const Icon(Icons.arrow_drop_down, color: AppTheme.secondaryLight),
                 children: [
                   buildTitle(S.of(context).myFirm, Icons.arrow_right, () {

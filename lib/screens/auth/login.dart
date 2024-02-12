@@ -4,7 +4,7 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:d_manager/models/login_model.dart';
+import 'package:d_manager/models/auth_models/login_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
@@ -77,9 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: S.of(context).password,
                       errorText: errorPassword.toString() != 'null' ? errorPassword.toString() : '',
                       keyboardType: TextInputType.visiblePassword,
-                      prefixIcon: _obscureText ? Icons.visibility : Icons.visibility_off,
+                      suffixIcon: _obscureText ? Icons.visibility : Icons.visibility_off,
+                      prefixIcon: Icons.lock,
                       borderColor: AppTheme.primary,
-                      onTap: (){
+                      onSuffixTap: (){
                         setState(() {
                           _obscureText = !_obscureText;
                         });
@@ -157,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Login with Google Button
                     OutlinedButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+                        // Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
                       },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppTheme.primary),
