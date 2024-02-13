@@ -52,7 +52,7 @@ class ManageTransportServices {
     try {
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
-        "quality_id": transportId.toString(),
+        "transport_id": transportId.toString(),
       };
 
       Map<String, String> headers = {
@@ -90,7 +90,7 @@ class ManageTransportServices {
     try {
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
-        "quality_id": transportId.toString(),
+        "transport_id": transportId.toString(),
         "status": status,
       };
 

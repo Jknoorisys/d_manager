@@ -63,6 +63,7 @@ class _TransportListState extends State<TransportList> {
     return CustomDrawer(
       content: CustomBody(
         title: S.of(context).transportList,
+        isLoading: isLoading,
         content: Padding(
           padding: EdgeInsets.all(Dimensions.height15),
           child: Column(
@@ -150,23 +151,25 @@ class _TransportListState extends State<TransportList> {
                                   child: BigText(text: transport.transportName![0], color: AppTheme.primary, size: Dimensions.font18),
                                 ),
                                 SizedBox(width: Dimensions.height10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    BigText(text: transport.transportName!, color: AppTheme.primary, size: Dimensions.font16),
-                                    Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: AppTheme.black,
-                                          radius: Dimensions.height10,
-                                          child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                        ),
-                                        SizedBox(width: Dimensions.width10),
-                                        SmallText(text: transport.transportPhoneNo!, color: AppTheme.black, size: Dimensions.font12),
-                                      ],
-                                    ),
-                                  ],
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      BigText(text: transport.transportName!, color: AppTheme.primary, size: Dimensions.font16),
+                                      Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: AppTheme.black,
+                                            radius: Dimensions.height10,
+                                            child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                          ),
+                                          SizedBox(width: Dimensions.width10),
+                                          SmallText(text: transport.transportPhoneNo!, color: AppTheme.black, size: Dimensions.font12),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

@@ -52,7 +52,7 @@ class ManageHammalServices {
     try {
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
-        "quality_id": hammalId.toString(),
+        "hammal_id": hammalId.toString(),
       };
 
       Map<String, String> headers = {
@@ -90,7 +90,7 @@ class ManageHammalServices {
     try {
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
-        "quality_id": hammalId.toString(),
+        "hammal_id": hammalId.toString(),
         "status": status,
       };
 
