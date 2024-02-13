@@ -8,6 +8,9 @@ import 'package:d_manager/models/master_models/update_firm_model.dart';
 import 'package:d_manager/models/master_models/update_firm_status_model.dart';
 import 'package:http/http.dart';
 
+import '../models/sell_models/active_firms_model.dart';
+import '../models/sell_models/active_parties_model.dart';
+
 class ManageFirmServices {
   Future<AddFirmModel?> addFirm(Map<String, dynamic> body) async {
     try {
@@ -103,6 +106,23 @@ class ManageFirmServices {
         return UpdateFirmStatusModel.fromJson(data);
       } else {
         return UpdateFirmStatusModel.fromJson(data);
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+  // firm list without pagination
+  Future<ActiveFirmsModel?> activeFirms() async {
+    try {
+      Map<String, String> body = {};
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      Response response = await post(Uri.parse(activeFirmsList), body: body, headers: headers);
+      if (response.statusCode == 200) {
+        return activeFirmsModelFromJson(response.body);
+      } else {
+        return activeFirmsModelFromJson(response.body);
       }
     } catch (e) {
       return null;
