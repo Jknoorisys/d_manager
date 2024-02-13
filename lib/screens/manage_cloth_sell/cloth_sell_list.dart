@@ -404,6 +404,7 @@ class _ClothSellListState extends State<ClothSellList> {
           pageNo.toString(),
           search,
         );
+        print("modeloflistapi===== ${model}");
         if (model != null) {
           if (model.success == true) {
             if (model.data!.isNotEmpty) {

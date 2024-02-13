@@ -257,7 +257,6 @@ class _FirmListState extends State<FirmList> {
     setState(() {
       isLoading = true;
     });
-
     try {
       FirmListModel? firmListModel = await firmServices.firmList(pageNo, search);
       if (firmListModel != null) {

@@ -8,6 +8,8 @@ import 'package:d_manager/models/master_models/update_party_model.dart';
 import 'package:d_manager/models/master_models/update_party_status_model.dart';
 import 'package:http/http.dart';
 
+import '../models/sell_models/active_parties_model.dart';
+
 class ManagePartyServices {
   Future<AddPartyModel?> addParty(Map<String, dynamic> body) async {
     try {
@@ -104,6 +106,22 @@ class ManagePartyServices {
         return UpdatePartyStatusModel.fromJson(data);
       } else {
         return UpdatePartyStatusModel.fromJson(data);
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+  Future<ActivePartiesModel?> activeParties() async {
+    try {
+      Map<String, String> body = {};
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      Response response = await post(Uri.parse(activePartiesWithoutPagination), body: body, headers: headers);
+      if (response.statusCode == 200) {
+        return activePartiesModelFromJson(response.body);
+      } else {
+        return activePartiesModelFromJson(response.body);
       }
     } catch (e) {
       return null;
