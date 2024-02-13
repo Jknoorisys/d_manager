@@ -1,31 +1,20 @@
 import 'package:d_manager/screens/widgets/body.dart';
-import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import '../../constants/images.dart';
 import '../../generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/screens/widgets/texts.dart';
-import '../../models/sell_models/get_sell_deal_model.dart';
 
 class GSTReturnAmount extends StatefulWidget {
-  final String? title;
-  final String? value;
-  final String? date;
-  final String? image;
-  const GSTReturnAmount({super.key, this.title, this.value, this.date, this.image});
+  const GSTReturnAmount({super.key});
 
   @override
   State<GSTReturnAmount> createState() => _GSTReturnAmountState();
 }
 
 class _GSTReturnAmountState extends State<GSTReturnAmount> {
-  GetSellDealModel? getSellDealModel;
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
-
   DateTime selectedDate = DateTime.now();
 
   @override
@@ -33,42 +22,30 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
     return CustomDrawer(
         content: CustomBody(
           title: S.of(context).returnGstAmount,
-          filterButton:ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary,
-              visualDensity: VisualDensity.comfortable,
-            ),
+          filterButton: IconButton(
             onPressed: () async {
-              DateTime? pickedDate = (
-                  await showDateRangePicker(
-                    initialEntryMode: DatePickerEntryMode.input,
-                    helpText: S.of(context).selectDate,
-                    context: context,
-                    firstDate: firstDate,
-                    lastDate: lastDate,
-                  )
-              ) as DateTime?;
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                helpText: S.of(context).selectDate,
+                initialDate: selectedDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2050),
+                initialDatePickerMode: DatePickerMode.year,
+              );
+
               if (pickedDate != null && pickedDate != selectedDate) {
                 setState(() {
                   selectedDate = pickedDate;
                 });
               }
             },
-            child: Row(
-              children: [
-                SmallText(text: S.of(context).selectDate, color: AppTheme.white,),
-                SizedBox(width: Dimensions.width20,),
-                SvgPicture.asset(AppImages.calenderIcon, width: Dimensions.iconSize20, height: Dimensions.iconSize20,),
-              ],
-            ),
+            icon: const Icon(Icons.calendar_month, color: AppTheme.black),
           ),
-          content:
-          Padding(
-            padding: const EdgeInsets.all(10.0),
+          content: Padding(
+            padding: EdgeInsets.all(Dimensions.height15),
             child: SingleChildScrollView(
               child: Column(
                 children:[
-                  SizedBox(height: Dimensions.height50,),
                   Container(
                     height: Dimensions.height40*4,
                     decoration: BoxDecoration(
@@ -88,7 +65,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Image.asset(
-                                widget.image ?? AppImages.gstIcon,
+                                AppImages.gstIcon,
                                 width: Dimensions.height50,
                                 height: Dimensions.height50,
                                 color: AppTheme.white,
@@ -97,13 +74,13 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(widget.title ?? S.of(context).currentAmount,
+                                  Text(S.of(context).currentMonthAmount,
                                       style: AppTheme.title.copyWith(color: AppTheme.white)),
                                   Row(
                                     children: [
                                       const Icon(Icons.currency_rupee,
                                         color: AppTheme.secondary,),
-                                      Text(widget.value ?? "1,50,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                      Text("1,50,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                     ],
                                   )
                                 ],
@@ -118,7 +95,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                                  Text(widget.date ?? "31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                                  Text("31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                                 ],
                               )
                             ],
@@ -127,7 +104,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                       ),
                     ),
                   ),
-                  SizedBox(height: Dimensions.height50,),
+                  SizedBox(height: Dimensions.height30,),
                   Container(
                     height: Dimensions.height40*4,
                     decoration: BoxDecoration(
@@ -147,7 +124,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Image.asset(
-                                widget.image ?? AppImages.gstIcon,
+                                AppImages.gstIcon,
                                 width: Dimensions.height50,
                                 height: Dimensions.height50,
                                 color: AppTheme.white,
@@ -156,13 +133,13 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(widget.title ?? S.of(context).lastMonthAmount,
+                                  Text(S.of(context).lastMonthAmount,
                                       style: AppTheme.title.copyWith(color: AppTheme.white)),
                                   Row(
                                     children: [
                                       const Icon(Icons.currency_rupee,
                                         color: AppTheme.secondary,),
-                                      Text(widget.value ?? "1,00,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                      Text("1,00,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                     ],
                                   )
                                 ],
@@ -177,7 +154,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                                  Text(widget.date ?? "31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                                  Text(DateFormat('dd-MM-yyyy').format(DateTime.now()), style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                                 ],
                               )
                             ],

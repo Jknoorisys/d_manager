@@ -35,6 +35,17 @@ const String getYarnUrl = '$baseUrl/api/get-yarn';
 const String updateYarnUrl = '$baseUrl/api/update-yarn';
 const String updateYarnStatusUrl = '$baseUrl/api/update-yarn-status';
 
+const String addHammalUrl = '$baseUrl/api/add-hammal';
+const String hammalListUrl = '$baseUrl/api/hammal';
+const String getHammalUrl = '$baseUrl/api/get-hammal';
+const String updateHammalUrl = '$baseUrl/api/update-hammal';
+const String updateHammalStatusUrl = '$baseUrl/api/update-hammal-status';
+
+const String addTransportUrl = '$baseUrl/api/add-transport';
+const String transportListUrl = '$baseUrl/api/transport';
+const String getTransportUrl = '$baseUrl/api/get-transport';
+const String updateTransportUrl = '$baseUrl/api/update-transport';
+const String updateTransportStatusUrl = '$baseUrl/api/update-transport-status';
 
 // Manage Sell Deals
 const String createSellDeal = '$baseUrl/api/add-sell-deal';

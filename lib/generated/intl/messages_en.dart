@@ -59,6 +59,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmPasswordMustBeAtLeast6Characters":
             MessageLookupByLibrary.simpleMessage(
                 "Confirm Password must be at least 6 characters"),
+        "currentMonthAmount":
+            MessageLookupByLibrary.simpleMessage("Current Month Amount"),
         "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
         "deliveryDetail":
             MessageLookupByLibrary.simpleMessage("Delivery Detail"),
@@ -85,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "history": MessageLookupByLibrary.simpleMessage("History"),
         "invalidEmail": MessageLookupByLibrary.simpleMessage("Invalid Email"),
         "invalidOtp": MessageLookupByLibrary.simpleMessage("Invalid OTP"),
+        "lastMonthAmount":
+            MessageLookupByLibrary.simpleMessage("Last Month Amount"),
         "login": MessageLookupByLibrary.simpleMessage("Login"),
         "loginWithGoogle":
             MessageLookupByLibrary.simpleMessage("Login with Google"),

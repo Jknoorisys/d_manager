@@ -6,8 +6,8 @@ import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 
 class TransportAdd extends StatefulWidget {
-  final Map<String, dynamic>? transportData;
-  const TransportAdd({Key? key, this.transportData}) : super(key: key);
+  final int? transportId;
+  const TransportAdd({Key? key, this.transportId}) : super(key: key);
 
   @override
   _TransportAddState createState() => _TransportAddState();
@@ -22,11 +22,7 @@ class _TransportAddState extends State<TransportAdd> {
   @override
   void initState() {
     super.initState();
-    if (widget.transportData != null) {
-      transportNameController.text = widget.transportData!['transportName'] ?? '';
-      phoneNumberController.text = widget.transportData!['phoneNumber'] ?? '';
-      descriptionController.text = widget.transportData!['description'] ?? '';
-    }
+
   }
   @override
   Widget build(BuildContext context) {

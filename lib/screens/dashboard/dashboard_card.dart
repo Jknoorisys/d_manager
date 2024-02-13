@@ -99,8 +99,7 @@ class _DashboardCardState extends State<DashboardCard> {
             right: 0,
             child: Padding(
               padding: EdgeInsets.all(Dimensions.height30),
-              child:
-              Container(
+              child: Container(
                 height: Dimensions.height40*4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(Dimensions.radius20),

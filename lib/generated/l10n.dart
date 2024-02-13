@@ -860,27 +860,6 @@ class S {
     );
   }
 
-
-  /// `Current Amount`
-  String get currentAmount {
-    return Intl.message(
-      'Current Amount',
-      name: 'currentAmount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Last month Amount`
-  String get lastMonthAmount {
-    return Intl.message(
-      'Last Month Amount',
-      name: 'lastMonthAmount',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Yarn Purchases List`
   String get yarnPurchasesList {
     return Intl.message(
@@ -1016,6 +995,26 @@ class S {
     return Intl.message(
       'Return GST Amount',
       name: 'returnGstAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current Month Amount`
+  String get currentMonthAmount {
+    return Intl.message(
+      'Current Month Amount',
+      name: 'currentMonthAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Month Amount`
+  String get lastMonthAmount {
+    return Intl.message(
+      'Last Month Amount',
+      name: 'lastMonthAmount',
       desc: '',
       args: [],
     );

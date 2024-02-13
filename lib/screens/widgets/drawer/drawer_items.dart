@@ -40,7 +40,7 @@ class DrawerItems extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: Dimensions.height40,
-                      backgroundImage: const AssetImage(AppImages.userImage),
+                      backgroundImage: HelperFunctions.getUserImage() != null ? NetworkImage(HelperFunctions.getUserImage()) : const AssetImage(AppImages.userImage) as ImageProvider,
                     ),
                     SizedBox(height: Dimensions.height10),
                     SmallText(text: HelperFunctions.getUserName(), color: AppTheme.secondaryLight, size: Dimensions.font14),

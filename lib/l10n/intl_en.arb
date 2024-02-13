@@ -93,5 +93,7 @@
   "history": "History",
   "masters": "Masters",
   "yarnPurchaseDeal": "Yarn Purchase Deal",
-  "returnGstAmount": "Return GST Amount"
+  "returnGstAmount": "Return GST Amount",
+  "currentMonthAmount": "Current Month Amount",
+  "lastMonthAmount": "Last Month Amount"
 }

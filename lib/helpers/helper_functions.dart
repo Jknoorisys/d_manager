@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:d_manager/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HelperFunctions {
@@ -51,7 +52,7 @@ class HelperFunctions {
 
   static String getUserImage() {
     String? userImage = pref.getString('UserImage');
-    return userImage ?? '';
+    return '$baseUrl/$userImage' ?? '';
   }
 
   static Future<bool> setApiKey(String apiKey) async {
