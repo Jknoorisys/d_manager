@@ -51,8 +51,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   }
   @override
   Widget build(BuildContext context) {
-    return
-      CustomDrawer(
+    return CustomDrawer(
         content: CustomBody(
           title: widget.clothSellData == null ? 'Create Cloth Sell Deal' : 'Update Cloth Sell Deal',
           content: Padding(
@@ -155,7 +154,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                // errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
+                                //errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
                               ),
                             ],
                           ),
@@ -243,7 +242,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   }
   Future<void> NewSellDeal(
       BuildContext context,
-      String userID,
       DateTime sellDate,
       String firmID,
       String partyID,
@@ -251,11 +249,9 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       String totalThan,
       String rate,
       ) async {
-
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
       CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
-        userID,
         formattedSellDate,
         firmID,
         partyID,
@@ -285,7 +281,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     if (isFormValid) {
       NewSellDeal(
         context,
-        '1',
         selectedDate,
         '1',
         '1',
