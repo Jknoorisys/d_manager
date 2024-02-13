@@ -11,9 +11,18 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../api/manage_firm_services.dart';
+import '../../api/manage_party_services.dart';
 import '../../api/manage_sell_deals.dart';
+import '../../helpers/helper_functions.dart';
+import '../../models/master_models/firm_list_model.dart';
+import '../../models/master_models/party_list_model.dart';
+import '../../models/sell_models/active_firms_model.dart';
+import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/create_sell_deal_model.dart';
 import '../widgets/loader.dart';
+import '../widgets/new_custom_dropdown.dart';
 import '../widgets/snackbar.dart';
 
 class ClothSellAdd extends StatefulWidget {
@@ -26,8 +35,8 @@ class ClothSellAdd extends StatefulWidget {
 
 class _ClothSellAddState extends State<ClothSellAdd> {
   bool submitted = false;
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mahesh Textiles';
+  String myFirm = 'Select Firm';
+  String partyName = 'Select Party';
   String clothQuality = '5 - Kilo';
   String status = 'On Going';
 
@@ -36,8 +45,16 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
   bool isLoading = false;
-
-
+  ManageFirmServices firmServices = ManageFirmServices();
+  ManagePartyServices partyServices = ManagePartyServices();
+  List<ActiveFirmsList> firms = [];
+  List<ActivePartiesList> parties = [];
+  final RefreshController _refreshController = RefreshController();
+  int currentPage = 1;
+  ActiveFirmsList? selectedFirm;
+  ActivePartiesList? selectedParty;
+  String? firmID;
+  String? partyID;
 
   void handleDateChanged(DateTime newDate) {
     setState(() {
@@ -48,6 +65,13 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     setState(() {
       myFirm = newValue!;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+    _loadPartyData();
   }
   @override
   Widget build(BuildContext context) {
@@ -89,10 +113,23 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                             children: [
                               BigText(text: 'Select My Firm', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles', 'Laxmi Traders'],
-                                selectedValue: myFirm,
-                                onChanged: handleMyFirmChanged,
+                              CustomDropdownNew<ActiveFirmsList>(
+                                dropdownItems:firms ?? [],
+                                selectedValue:selectedFirm,
+                                onChanged:(newValue){
+                                  setState(() {
+                                    selectedFirm = newValue;
+                                    if (newValue != null) {
+                                      firmID = newValue.firmId.toString();
+                                      print("firmIDisselected===== $firmID");
+                                    } else {
+                                      firmID = null; // Reset firmID if selectedFirm is null
+                                    }
+                                  });
+                                } ,
+                                displayTextFunction: (ActiveFirmsList? firm){
+                                  return firm!.firmName!;
+                                },
                               ),
                             ],
                           ),
@@ -108,13 +145,22 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                             children: [
                               BigText(text: 'Select Party Name', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: const ['Mahesh Textiles', 'Tulsi Textiles', 'Laxmi Traders', 'Mahalaxmi Textiles', 'Veenapani Textiles'],
-                                selectedValue: partyName,
-                                onChanged: (newValue) {
+                              CustomDropdownNew<ActivePartiesList>(
+                                dropdownItems:parties ?? [],
+                                selectedValue:selectedParty,
+                                onChanged:(newValue){
                                   setState(() {
-                                    partyName = newValue!;
+                                    selectedParty = newValue;
+                                    if (newValue != null) {
+                                      partyID = newValue.partyId.toString();
+                                      print("partyIDselected===== $partyID");
+                                    } else {
+                                      partyID = null; // Reset firmID if selectedFirm is null
+                                    }
                                   });
+                                } ,
+                                displayTextFunction: (ActivePartiesList? parties){
+                                  return parties!.partyName!;
                                 },
                               ),
                             ],
@@ -201,12 +247,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                             isLoading = !isLoading;
                           });
                           _handleCreateSellDeal();
-                          // setState(() {
-                          //   submitted = true;
-                          // });
-                          // if (_isFormValid()) {
-                          //   Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellList);
-                          // }
                         },
                         buttonText: 'Save',
                       )
@@ -240,7 +280,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
 
     return totalThanError.isEmpty && rateError.isEmpty ? true : false;
   }
-  Future<void> NewSellDeal(
+  Future<CreateSellDealModel?> NewSellDeal(
       BuildContext context,
       DateTime sellDate,
       String firmID,
@@ -276,18 +316,106 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     }
   }
   Future<void> _handleCreateSellDeal()async{
-    // Validate total than and rate fields
-    bool isFormValid = _isFormValid();
-    if (isFormValid) {
-      NewSellDeal(
-        context,
-        selectedDate,
-        '1',
-        '1',
-        '1',
-        totalThanController.text,
-        rateController.text,
-      );
+    if (_isFormValid()) {
+      if (HelperFunctions.checkInternet() == false) {
+        CustomApiSnackbar.show(
+          context,
+          'Warning',
+          'No internet connection',
+          mode: SnackbarMode.warning,
+        );
+      } else {
+        setState(() {
+          isLoading = !isLoading;
+        });
+        NewSellDeal(
+          context,
+          selectedDate,
+          firmID!,
+          partyID!, // Assuming partyID is not null
+          '1', // Assuming qualityID is fixed
+          totalThanController.text,
+          rateController.text,
+        );
+      }
+    }
+  }
+  Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      ActiveFirmsModel? activeFirms = await firmServices.activeFirms();
+      if (activeFirms != null) {
+        if (activeFirms.success == true) {
+          if (activeFirms.data!.isNotEmpty) {
+            setState(() {
+              firms.clear();
+              firms.addAll(activeFirms!.data!);
+            });
+            selectedFirm = activeFirms!.data!.first;
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            activeFirms.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> _loadPartyData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      ActivePartiesModel? activePartiesModel = await partyServices.activeParties();
+      if (activePartiesModel != null) {
+        if (activePartiesModel.success == true) {
+          if (activePartiesModel.data!.isNotEmpty) {
+            setState(() {
+              parties.clear();
+              parties.addAll(activePartiesModel.data!);
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            activePartiesModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }
