@@ -1,6 +1,10 @@
+import 'package:d_manager/api/dropdown_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_yarn_list_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -24,12 +28,19 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
   String paymentType = 'Current';
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mehta and Sons Yarn Trades';
-  String yarnName = 'Golden';
+  var selectedFirm;
+  var selectedParty;
+  var selectedYarn;
   String yarnType = 'Roto';
   String status = 'On Going';
   String dharaOption = '15 days';
+  bool isLoading = false;
+
+  List<Firm> firms = [];
+  List<Party> parties = [];
+  List<Yarn> yarns = [];
+
+  DropdownServices dropdownServices = DropdownServices();
 
 
   TextEditingController lotNumberController = TextEditingController();
@@ -42,14 +53,15 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   @override
   void initState() {
     super.initState();
+    isLoading = true;
+    _getFirms();
+    _getParties();
+    _getYarns();
     if (widget.yarnPurchaseData != null) {
-      selectedDate = DateFormat('dd-MM-yyyy').parse(widget.yarnPurchaseData!['dealDate']);
-      myFirm = widget.yarnPurchaseData!['myFirm'];
-      partyName = widget.yarnPurchaseData!['partyName'];
+      selectedDate = DateFormat('yyyy-MM-dd').parse(widget.yarnPurchaseData!['dealDate']);
       status = widget.yarnPurchaseData!['status'];
       lotNumberController.text = widget.yarnPurchaseData!['lotNumber'];
       netWeightController.text = widget.yarnPurchaseData!['totalNetWeight'];
-      yarnName = widget.yarnPurchaseData!['yarnName'];
       yarnType = widget.yarnPurchaseData!['yarnType'];
       boxOrderedController.text = widget.yarnPurchaseData!['boxOrdered'];
       denyarController.text = widget.yarnPurchaseData!['Deiner'];
@@ -68,6 +80,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         errorCops = submitted == true ? _validateCops(copsController.text) : null;
     return CustomDrawer(
         content: CustomBody(
+          isLoading: isLoading,
           title: widget.yarnPurchaseData == null ? 'Create Yarn Purchase Deal' : 'Update Yarn Purchase Deal',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
@@ -103,15 +116,16 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Select My Firm', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles and Sons', 'Laxmi Traders'],
-                                selectedValue: myFirm,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    myFirm = newValue!;
-                                  });
-                                },
-                              ),
+                              CustomApiDropdown(
+                                  hintText: 'Select Firm',
+                                  dropdownItems: firms.map((e) => DropdownMenuItem<dynamic>(value: e.firmId!, child: BigText(text: e.firmName!, size: Dimensions.font14,))).toList(),
+                                  selectedValue: selectedFirm,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedFirm = newValue!;
+                                    });
+                                  }
+                              )
                             ],
                           ),
                         ],
@@ -126,15 +140,16 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Select Party Name', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['SS Textile', 'Nageena Textile', 'Mehta and Sons Yarn Trades', 'Bluesky Cloth Sale', 'Suntex Textiles'],
-                                selectedValue: partyName,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    partyName = newValue!;
-                                  });
-                                },
-                              ),
+                              CustomApiDropdown(
+                                  hintText: 'Select Party',
+                                  dropdownItems: parties.map((e) => DropdownMenuItem<dynamic>(value: e.partyId!, child: BigText(text: e.partyName!, size: Dimensions.font14,))).toList(),
+                                  selectedValue: selectedParty,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedParty = newValue!;
+                                    });
+                                  }
+                              )
                             ],
                           ),
                           Column(
@@ -208,15 +223,16 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['Bhilosa', 'Golden', 'Silver'],
-                                selectedValue: yarnName,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    yarnName = newValue!;
-                                  });
-                                },
-                              ),
+                              CustomApiDropdown(
+                                hintText: 'Select Yarn',
+                                  dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
+                                  selectedValue: selectedYarn,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedYarn = newValue!;
+                                    });
+                                  }
+                              )
                             ],
                           ),
                           Column(
@@ -465,5 +481,35 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     String rateError = _validateRate(rateController.text) ?? '';
     String copsError = _validateCops(copsController.text) ?? '';
     return lotNumberError.isEmpty && netWeightError.isEmpty && boxOrderedError.isEmpty && denyarError.isEmpty && rateError.isEmpty && copsError.isEmpty ? true : false;
+  }
+  
+  Future<void> _getFirms() async {
+    DropdownFirmListModel? response = await dropdownServices.firmList();
+    if (response != null) {
+      setState(() {
+        firms.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getParties() async {
+    DropdownPartyListModel? response = await dropdownServices.partyList();
+    if (response != null) {
+      setState(() {
+        parties.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getYarns() async {
+    DropdownYarnListModel? response = await dropdownServices.yarnList();
+    if (response != null) {
+      setState(() {
+        yarns.addAll(response.data!);
+        isLoading = false;
+      });
+    }
   }
 }

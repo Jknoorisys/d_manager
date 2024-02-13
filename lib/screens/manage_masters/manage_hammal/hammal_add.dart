@@ -1,13 +1,20 @@
+import 'package:d_manager/api/manage_hammal_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/master_models/add_hammal_model.dart';
+import 'package:d_manager/models/master_models/hammal_detail_model.dart';
+import 'package:d_manager/models/master_models/update_hammal_model.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 
 class HammalAdd extends StatefulWidget {
-  final Map<String, dynamic>? hammalData;
-  const HammalAdd({Key? key, this.hammalData}) : super(key: key);
+  final int? hammalId;
+  const HammalAdd({Key? key, this.hammalId}) : super(key: key);
 
   @override
   _HammalAddState createState() => _HammalAddState();
@@ -16,23 +23,32 @@ class HammalAdd extends StatefulWidget {
 class _HammalAddState extends State<HammalAdd> {
   final TextEditingController hammalNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
   bool submitted = false;
+
+  bool isLoading = false;
+  ManageHammalServices hammalServices = ManageHammalServices();
+
+  @override
+  void dispose() {
+    hammalNameController.dispose();
+    phoneNumberController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-    if (widget.hammalData != null) {
-      hammalNameController.text = widget.hammalData!['hammalName'] ?? '';
-      phoneNumberController.text = widget.hammalData!['phoneNumber'] ?? '';
-      descriptionController.text = widget.hammalData!['description'] ?? '';
+    if (widget.hammalId != null) {
+      _getHammalDetails();
     }
   }
   @override
   Widget build(BuildContext context) {
     var errorHammalName = submitted == true ? _validateHammalName(hammalNameController.text) : null;
     var errorPhoneNumber = submitted == true ? _validatePhoneNumber(phoneNumberController.text) : null;
-    var errorDescription = submitted == true ? _validateDescription(descriptionController.text) : null;
+    var errorAddress = submitted == true ? _validateAddress(addressController.text) : null;
     return SingleChildScrollView(
       child: AlertDialog(
         alignment: Alignment.center,
@@ -44,7 +60,7 @@ class _HammalAddState extends State<HammalAdd> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              S.of(context).addHammal,
+              widget.hammalId != null ? S.of(context).updateHammal : S.of(context).addHammal,
               style: AppTheme.heading2,
             ),
             IconButton(
@@ -71,17 +87,17 @@ class _HammalAddState extends State<HammalAdd> {
               labelText: "Enter Phone Number",
               keyboardType: TextInputType.phone,
               borderRadius: Dimensions.radius10,
-              errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
+              // errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
             ),
-            SizedBox(height: Dimensions.height15),
-            CustomTextField(
-              controller: descriptionController,
-              labelText: "Enter Description",
-              keyboardType: TextInputType.name,
-              borderRadius: Dimensions.radius10,
-              maxLines: 4,
-              errorText: errorDescription.toString() != 'null' ? errorDescription.toString() : '',
-            ),
+            // SizedBox(height: Dimensions.height15),
+            // CustomTextField(
+            //   controller: addressController,
+            //   labelText: "Enter Address",
+            //   keyboardType: TextInputType.name,
+            //   borderRadius: Dimensions.radius10,
+            //   maxLines: 4,
+            //   errorText: errorAddress.toString() != 'null' ? errorAddress.toString() : '',
+            // ),
           ],
         ),
         actions: [
@@ -91,7 +107,30 @@ class _HammalAddState extends State<HammalAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                Navigator.of(context).pop();
+                if (HelperFunctions.checkInternet() == false) {
+                  CustomApiSnackbar.show(
+                    context,
+                    'Warning',
+                    'No internet connection',
+                    mode: SnackbarMode.warning,
+                  );
+                } else {
+                  setState(() {
+                    isLoading = !isLoading;
+                  });
+                  Map<String, dynamic> body = {
+                    "hammal_id": widget.hammalId != null ? widget.hammalId.toString() : "",
+                    "user_id" : HelperFunctions.getUserID(),
+                    "hammal_name": hammalNameController.text,
+                    "hammal_phone_no": phoneNumberController.text,
+                    // "hammal_address": addressController.text,
+                  };
+                  if (widget.hammalId == null) {
+                    _addHammal(body);
+                  } else {
+                    _updateHammal(body);
+                  }
+                }
               }
             },
             buttonText: "Submit",
@@ -119,9 +158,9 @@ class _HammalAddState extends State<HammalAdd> {
     return null;
   }
 
-  String? _validateDescription(String value) {
+  String? _validateAddress(String value) {
     if (value.isEmpty) {
-      return 'Description is required';
+      return 'Address is required';
     }
     return null;
   }
@@ -129,7 +168,110 @@ class _HammalAddState extends State<HammalAdd> {
   bool _isFormValid() {
     String errorHammalName = _validateHammalName(hammalNameController.text) ?? '';
     String errorPhoneNumber = _validatePhoneNumber(phoneNumberController.text) ?? '';
-    String errorDescription = _validateDescription(descriptionController.text) ?? '';
-    return errorHammalName.isEmpty || errorDescription.isEmpty || errorPhoneNumber.isEmpty ? true : false;
+    String errorAddress = _validateAddress(addressController.text) ?? '';
+    return errorHammalName.isEmpty ? true : false;
+  }
+
+  Future<void> _addHammal(Map<String, dynamic> body) async {
+    AddHammalModel? addHammalModel = await hammalServices.addHammal(body);
+    if (addHammalModel?.message != null) {
+      if (addHammalModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addHammalModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).popAndPushNamed(AppRoutes.hammalList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addHammalModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateHammal(Map<String, dynamic> body) async {
+    UpdateHammalModel? updateHammalModel = await hammalServices.updateHammal(body);
+    if (updateHammalModel?.message != null) {
+      if (updateHammalModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updateHammalModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).popAndPushNamed(AppRoutes.hammalList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updateHammalModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getHammalDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    HammalDetailModel? hammalDetailModel = await hammalServices.viewHammal(widget.hammalId!);
+    if (hammalDetailModel?.message != null) {
+      if (hammalDetailModel?.success == true) {
+        hammalNameController.text = hammalDetailModel!.data!.hammalName.toString();
+        phoneNumberController.text = hammalDetailModel.data!.hammalPhoneNo.toString();
+        // addressController.text = hammalDetailModel.data!.hammalAddress.toString();
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          hammalDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    }
   }
 }

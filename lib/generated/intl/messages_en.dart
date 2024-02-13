@@ -158,6 +158,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Total Purchase Amount"),
         "transport": MessageLookupByLibrary.simpleMessage("Transport"),
         "transportList": MessageLookupByLibrary.simpleMessage("Transport List"),
+        "updateClothQuality":
+            MessageLookupByLibrary.simpleMessage("Update Cloth Quality"),
+        "updateHammal": MessageLookupByLibrary.simpleMessage("Update Hammal"),
+        "updateTransport":
+            MessageLookupByLibrary.simpleMessage("Update Transport"),
+        "updateYarnType":
+            MessageLookupByLibrary.simpleMessage("Update Yarn Type"),
         "verify": MessageLookupByLibrary.simpleMessage("VERIFY"),
         "yarnPurchase": MessageLookupByLibrary.simpleMessage("Yarn Purchase"),
         "yarnPurchaseDeal":

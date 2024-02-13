@@ -165,7 +165,7 @@ class _TransportListState extends State<TransportList> {
                                             child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
                                           ),
                                           SizedBox(width: Dimensions.width10),
-                                          SmallText(text: transport.transportPhoneNo!, color: AppTheme.black, size: Dimensions.font12),
+                                          SmallText(text: transport.transportPhoneNo != '' ? transport.transportPhoneNo! : 'Not available', color: AppTheme.black, size: Dimensions.font12),
                                         ],
                                       ),
                                     ],
@@ -177,10 +177,11 @@ class _TransportListState extends State<TransportList> {
                           ],
                         ),
                         contentChild: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             AppTheme.divider,
                             SizedBox(height: Dimensions.height10),
-                            _buildInfoColumn('Address', transport.transportAddress ?? ''),
+                            _buildInfoColumn('Address', transport.transportAddress != '' ? transport.transportAddress! : 'Not available'),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

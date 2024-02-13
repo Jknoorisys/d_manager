@@ -53,7 +53,7 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              S.of(context).addClothQuality,
+              widget.clothQualityId == null ? S.of(context).addClothQuality : S.of(context).updateClothQuality,
               style: AppTheme.heading2,
             ),
             IconButton(
@@ -172,7 +172,7 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
           updateClothQualityModel!.message.toString(),
           mode: SnackbarMode.success,
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).popAndPushNamed(AppRoutes.clothQualityList);
       }  else {
         CustomApiSnackbar.show(
           context,

@@ -30,10 +30,24 @@ class _LoginScreenState extends State<LoginScreen> {
   AuthServices authServices = AuthServices();
 
   @override
+  void initState() {
+    super.initState();
+    _loadStoredCredentials();
+  }
+
+  @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  _loadStoredCredentials() async {
+    Map<String, String> storedCredentials = await HelperFunctions.getStoredCredentials();
+    setState(() {
+      emailController.text = storedCredentials['email'] ?? '';
+      passwordController.text = storedCredentials['password'] ?? '';
+    });
   }
 
   @override
@@ -247,6 +261,11 @@ class _LoginScreenState extends State<LoginScreen> {
         await HelperFunctions.setUserName(loginModel.data!.userName.toString());
         await HelperFunctions.setUserImage(loginModel.data!.profilePic.toString());
         await HelperFunctions.setLoginStatus(true);
+        if (isChecked == true) {
+          HelperFunctions.saveCredentials(emailController.text, passwordController.text);
+        } else{
+          HelperFunctions.saveCredentials('', '');
+        }
         Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
       }  else {
         CustomApiSnackbar.show(

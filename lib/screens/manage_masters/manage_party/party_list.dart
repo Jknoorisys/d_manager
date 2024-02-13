@@ -149,7 +149,10 @@ class _PartyListState extends State<PartyList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          BigText(text: party.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                          SizedBox(
+                                              width: Dimensions.screenWidth * 0.5,
+                                              child: BigText(text: party.partyName!, color: AppTheme.primary, size: Dimensions.font16)
+                                          ),
                                           Row(
                                             children: [
                                               CircleAvatar(

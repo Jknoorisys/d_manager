@@ -95,5 +95,9 @@
   "yarnPurchaseDeal": "Yarn Purchase Deal",
   "returnGstAmount": "Return GST Amount",
   "currentMonthAmount": "Current Month Amount",
-  "lastMonthAmount": "Last Month Amount"
+  "lastMonthAmount": "Last Month Amount",
+  "updateTransport": "Update Transport",
+  "updateYarnType": "Update Yarn Type",
+  "updateClothQuality": "Update Cloth Quality",
+  "updateHammal": "Update Hammal"
 }

@@ -1019,6 +1019,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Update Transport`
+  String get updateTransport {
+    return Intl.message(
+      'Update Transport',
+      name: 'updateTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Yarn Type`
+  String get updateYarnType {
+    return Intl.message(
+      'Update Yarn Type',
+      name: 'updateYarnType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Cloth Quality`
+  String get updateClothQuality {
+    return Intl.message(
+      'Update Cloth Quality',
+      name: 'updateClothQuality',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Hammal`
+  String get updateHammal {
+    return Intl.message(
+      'Update Hammal',
+      name: 'updateHammal',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

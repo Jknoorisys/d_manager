@@ -57,7 +57,7 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              S.of(context).addYarnType,
+              widget.yarnTypeId == null ? S.of(context).addYarnType : S.of(context).updateYarnType,
               style: AppTheme.heading2,
             ),
             IconButton(
@@ -193,7 +193,7 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
           updateYarnModel!.message.toString(),
           mode: SnackbarMode.success,
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).popAndPushNamed(AppRoutes.yarnTypeList);
       }  else {
         CustomApiSnackbar.show(
           context,

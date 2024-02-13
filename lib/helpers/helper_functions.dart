@@ -73,6 +73,20 @@ class HelperFunctions {
     return lang ?? 'en';
   }
 
+  static Future<void> saveCredentials(String userEmail, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', userEmail);
+    await prefs.setString('password', password);
+  }
+
+  static Future<Map<String, String>> getStoredCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userEmail = prefs.getString('email');
+    String? password = prefs.getString('password');
+
+    return {'email': userEmail ?? '', 'password': password ?? ''};
+  }
+
   static Future<bool> checkInternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');

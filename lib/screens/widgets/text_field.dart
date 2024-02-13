@@ -166,6 +166,7 @@ class CustomTextField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(vertical: Dimensions.width10, horizontal: Dimensions.width10),
         labelText: labelText,
         labelStyle: AppTheme.hintText.copyWith(color: borderColor ?? AppTheme.deactivatedText),
+        alignLabelWithHint: true,
         hintText: hintText,
         hintStyle: AppTheme.hintText.copyWith(color: borderColor ?? AppTheme.deactivatedText),
         fillColor: fillColor ?? Colors.white,

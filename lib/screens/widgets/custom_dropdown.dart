@@ -54,3 +54,55 @@ class CustomDropdown extends StatelessWidget {
     );
   }
 }
+
+class CustomApiDropdown<V, D> extends StatelessWidget {
+  final List<DropdownMenuItem<V>> dropdownItems;
+  final V? selectedValue;
+  final ValueChanged<V?> onChanged;
+  final String? hintText;
+
+  final double? height;
+  final double? width;
+
+  CustomApiDropdown({
+    required this.dropdownItems,
+    required this.selectedValue,
+    required this.onChanged,
+    this.height,
+    this.width,
+    this.hintText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: Dimensions.width10 / 2, vertical: Dimensions.height10 / 2),
+      height: height ?? Dimensions.height50,
+      width: width ?? MediaQuery.of(context).size.width / 2.65,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(Dimensions.radius10),
+        color: Colors.white,
+        border: Border.all(color: AppTheme.black, width: 0.5),
+      ),
+      child: Center(
+        child: DropdownButton<V>(
+          hint: hintText != null ? SmallText(text: hintText!, size: Dimensions.font14,) : null,
+          dropdownColor: AppTheme.white,
+          padding: EdgeInsets.symmetric(horizontal: Dimensions.height10 / 2, vertical: Dimensions.height10 / 2),
+          alignment: Alignment.center,
+          isExpanded: true,
+          isDense: true,
+          value: selectedValue,
+          onChanged: onChanged,
+          underline: Container(
+            height: 0,
+            color: Colors.transparent,
+          ),
+          items: dropdownItems,
+        ),
+      ),
+    );
+  }
+}
+
+

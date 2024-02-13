@@ -1,7 +1,14 @@
+import 'package:d_manager/api/manage_transport_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/master_models/add_transport_model.dart';
+import 'package:d_manager/models/master_models/transport_detail_model.dart';
+import 'package:d_manager/models/master_models/update_transport_model.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -16,19 +23,32 @@ class TransportAdd extends StatefulWidget {
 class _TransportAddState extends State<TransportAdd> {
   final TextEditingController transportNameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
   bool submitted = false;
+
+  bool isLoading = false;
+  ManageTransportServices transportServices = ManageTransportServices();
+
+  @override
+  void dispose() {
+    transportNameController.dispose();
+    phoneNumberController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-
+    if (widget.transportId != null) {
+      _getTransportDetails();
+    }
   }
   @override
   Widget build(BuildContext context) {
     var errorTransportName = submitted == true ? _validateTransportName(transportNameController.text) : null;
     var errorPhoneNumber = submitted == true ? _validatePhoneNumber(phoneNumberController.text) : null;
-    var errorDescription = submitted == true ? _validateDescription(descriptionController.text) : null;
+    var errorAddress = submitted == true ? _validateAddress(addressController.text) : null;
     return SingleChildScrollView(
       child: AlertDialog(
         alignment: Alignment.center,
@@ -40,7 +60,7 @@ class _TransportAddState extends State<TransportAdd> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              S.of(context).addTransport,
+              widget.transportId == null ? S.of(context).addTransport : S.of(context).updateTransport,
               style: AppTheme.heading2,
             ),
             IconButton(
@@ -67,16 +87,16 @@ class _TransportAddState extends State<TransportAdd> {
               labelText: "Enter Phone Number",
               keyboardType: TextInputType.phone,
               borderRadius: Dimensions.radius10,
-              errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
+              // errorText: errorPhoneNumber.toString() != 'null' ? errorPhoneNumber.toString() : '',
             ),
             SizedBox(height: Dimensions.height15),
             CustomTextField(
-              controller: descriptionController,
-              labelText: "Enter Description",
+              controller: addressController,
+              labelText: "Enter Address",
               keyboardType: TextInputType.name,
               borderRadius: Dimensions.radius10,
               maxLines: 4,
-              errorText: errorDescription.toString() != 'null' ? errorDescription.toString() : '',
+              // errorText: errorAddress.toString() != 'null' ? errorAddress.toString() : '',
             ),
           ],
         ),
@@ -87,7 +107,30 @@ class _TransportAddState extends State<TransportAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                Navigator.of(context).pop();
+                if (HelperFunctions.checkInternet() == false) {
+                  CustomApiSnackbar.show(
+                    context,
+                    'Warning',
+                    'No internet connection',
+                    mode: SnackbarMode.warning,
+                  );
+                } else {
+                  setState(() {
+                    isLoading = !isLoading;
+                  });
+                  Map<String, dynamic> body = {
+                    "transport_id": widget.transportId != null ? widget.transportId.toString() : "",
+                    "user_id" : HelperFunctions.getUserID(),
+                    "transport_name": transportNameController.text,
+                    "transport_phone_no": phoneNumberController.text,
+                    "transport_address": addressController.text,
+                  };
+                  if (widget.transportId == null) {
+                    _addTransport(body);
+                  } else {
+                    _updateTransport(body);
+                  }
+                }
               }
             },
             buttonText: "Submit",
@@ -115,9 +158,9 @@ class _TransportAddState extends State<TransportAdd> {
     return null;
   }
 
-  String? _validateDescription(String value) {
+  String? _validateAddress(String value) {
     if (value.isEmpty) {
-      return 'Description is required';
+      return 'Address is required';
     }
     return null;
   }
@@ -125,7 +168,110 @@ class _TransportAddState extends State<TransportAdd> {
   bool _isFormValid() {
     String errorTransportName = _validateTransportName(transportNameController.text) ?? '';
     String errorPhoneNumber = _validatePhoneNumber(phoneNumberController.text) ?? '';
-    String errorDescription = _validateDescription(descriptionController.text) ?? '';
-    return errorTransportName.isEmpty || errorDescription.isEmpty || errorPhoneNumber.isEmpty ? true : false;
+    String errorAddress = _validateAddress(addressController.text) ?? '';
+    return errorTransportName.isEmpty ? true : false;
+  }
+
+  Future<void> _addTransport(Map<String, dynamic> body) async {
+    AddTransportModel? addTransportModel = await transportServices.addTransport(body);
+    if (addTransportModel?.message != null) {
+      if (addTransportModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addTransportModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).popAndPushNamed(AppRoutes.transportList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addTransportModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateTransport(Map<String, dynamic> body) async {
+    UpdateTransportModel? updateTransportModel = await transportServices.updateTransport(body);
+    if (updateTransportModel?.message != null) {
+      if (updateTransportModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updateTransportModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).popAndPushNamed(AppRoutes.transportList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updateTransportModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getTransportDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    TransportDetailModel? transportDetailModel = await transportServices.viewTransport(widget.transportId!);
+    if (transportDetailModel?.message != null) {
+      if (transportDetailModel?.success == true) {
+        transportNameController.text = transportDetailModel!.data!.transportName.toString();
+        phoneNumberController.text = transportDetailModel.data!.transportPhoneNo.toString();
+        addressController.text = transportDetailModel.data!.transportAddress.toString();
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          transportDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    }
   }
 }

@@ -1,16 +1,22 @@
+import 'package:d_manager/api/manage_hammal_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/master_models/hammal_list_model.dart';
+import 'package:d_manager/models/master_models/update_hammal_status_model.dart';
 import 'package:d_manager/screens/manage_masters/manage_hammal/hammal_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HammalList extends StatefulWidget {
   const HammalList({Key? key}) : super(key: key);
@@ -20,24 +26,43 @@ class HammalList extends StatefulWidget {
 }
 
 class _HammalListState extends State<HammalList> {
-  final TextEditingController searchController = TextEditingController();
-  List<Map<String, dynamic>> hammalList = [
-    {'no': 1, 'hammalName': 'Kamlesh', 'phoneNumber' : '963258741', 'description' : 'Hardworking and reliable. Has several years of experience in various types of manual labor. Known for attention to detail and ability to handle challenging tasks.', 'status': true},
-    {'no': 2, 'hammalName': 'Sami Khan', 'phoneNumber' : '7412589632', 'description' : 'Experienced in heavy lifting and physical endurance tasks. Specializes in handling heavy machinery and equipment.', 'status': true},
-    {'no': 3, 'hammalName': 'Prakash', 'phoneNumber' : '9874563215', 'description' : 'Punctual and diligent worker. Skilled in various construction tasks and project coordination.', 'status': true},
-  ];
-  List<Map<String, dynamic>> filteredHammalList = [];
+  final searchController = TextEditingController();
+  final RefreshController _refreshController = RefreshController();
+  List<HammalDetail> hammals = [];
+  int currentPage = 1;
+  bool isLoading = false;
+  ManageHammalServices hammalServices = ManageHammalServices();
 
   @override
   void initState() {
     super.initState();
-    filteredHammalList = hammalList;
+    if (HelperFunctions.checkInternet() == false) {
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    } else {
+      setState(() {
+        isLoading = !isLoading;
+      });
+      _loadData(currentPage, searchController.text.trim());
+    }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
       content: CustomBody(
         title: S.of(context).hammalList,
+        isLoading: isLoading,
         content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -56,19 +81,18 @@ class _HammalListState extends State<HammalList> {
                           borderRadius: Dimensions.radius10,
                           borderColor: AppTheme.primary,
                           onSuffixTap: () {
-                            searchController.clear();
                             setState(() {
-                              filteredHammalList = hammalList;
+                              searchController.clear();
+                              hammals.clear();
+                              currentPage = 1;
+                              _loadData(currentPage, searchController.text.trim());
                             });
                           },
                           onChanged: (value) {
                             setState(() {
-                              filteredHammalList = hammalList
-                                  .where((firm) =>
-                                  firm['hammalName']
-                                      .toLowerCase()
-                                      .contains(value.toLowerCase()))
-                                  .toList();
+                              hammals.clear();
+                              currentPage = 1;
+                              _loadData(currentPage, value);
                             });
                           }
                       ),
@@ -94,98 +118,107 @@ class _HammalListState extends State<HammalList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredHammalList.length,
-                    itemBuilder: (context, index) {
-                      return CustomAccordion(
-                        titleChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(width: Dimensions.width10),
-                                CircleAvatar(
-                                  backgroundColor: AppTheme.secondary,
-                                  radius: Dimensions.height20,
-                                  child: BigText(text: filteredHammalList[index]['hammalName'][0], color: AppTheme.primary, size: Dimensions.font18),
-                                ),
-                                SizedBox(width: Dimensions.height10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    BigText(text: filteredHammalList[index]['hammalName'], color: AppTheme.primary, size: Dimensions.font16),
-                                    Row(
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    enablePullDown: true,
+                    enablePullUp: true,
+                    onRefresh: () async {
+                      setState(() {
+                        hammals.clear();
+                        currentPage = 1;
+                      });
+                      await _loadData(currentPage, searchController.text.trim());
+                      _refreshController.refreshCompleted();
+                    },
+                    onLoading: () async {
+                      await _loadData(currentPage, searchController.text.trim());
+                      _refreshController.loadComplete();
+                    },
+                    child: ListView.builder(
+                      itemCount: hammals.length,
+                      itemBuilder: (context, index) {
+                        var hammal = hammals[index];
+                        return CustomAccordion(
+                          titleChild: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(width: Dimensions.width10),
+                                  CircleAvatar(
+                                    backgroundColor: AppTheme.secondary,
+                                    radius: Dimensions.height20,
+                                    child: BigText(text: hammal.hammalName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                  ),
+                                  SizedBox(width: Dimensions.height10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        CircleAvatar(
-                                          backgroundColor: AppTheme.black,
-                                          radius: Dimensions.height10,
-                                          child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                        BigText(text: hammal.hammalName!, color: AppTheme.primary, size: Dimensions.font16),
+                                        Row(
+                                          children: [
+                                            CircleAvatar(
+                                              backgroundColor: AppTheme.black,
+                                              radius: Dimensions.height10,
+                                              child: Icon(Icons.phone, color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                            ),
+                                            SizedBox(width: Dimensions.width10),
+                                            SmallText(text: hammal.hammalPhoneNo != '' ? hammal.hammalPhoneNo! : 'Not available', color: AppTheme.black, size: Dimensions.font12),
+                                          ],
                                         ),
-                                        SizedBox(width: Dimensions.width10),
-                                        SmallText(text: filteredHammalList[index]['phoneNumber'], color: AppTheme.black, size: Dimensions.font12),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                          ],
-                        ),
-                        contentChild: Column(
-                          children: [
-                            AppTheme.divider,
-                            SizedBox(height: Dimensions.height10),
-                            _buildInfoColumn('Description', filteredHammalList[index]['description']),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _buildInfoColumn('', filteredHammalList[index]['status'] ? 'Active' : 'Inactive'),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return HammalAdd(hammalData: filteredHammalList[index]);
-                                            },
-                                          );
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              AppTheme.divider,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildInfoColumn('', hammal.status == 'active' ? 'Active' : 'Inactive'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return HammalAdd(hammalId: hammal.hammalId);
+                                              },
+                                            );
+                                          },
+                                          icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
+                                      ),
+                                      GFCheckbox(
+                                        size: Dimensions.height20,
+                                        type: GFCheckboxType.custom,
+                                        inactiveBgColor: AppTheme.nearlyWhite,
+                                        inactiveBorderColor: AppTheme.primary,
+                                        customBgColor: AppTheme.primary,
+                                        activeBorderColor: AppTheme.primary,
+                                        onChanged: (value) {
+                                          String newStatus = value ? 'active' : 'inactive';
+                                          _updateStatus(hammal.hammalId!, newStatus);
                                         },
-                                        icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                                    ),
-                                    IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            filteredHammalList.removeAt(index);
-                                          });
-                                        },
-                                        icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                                    ),
-                                    GFCheckbox(
-                                      size: Dimensions.height20,
-                                      type: GFCheckboxType.custom,
-                                      inactiveBgColor: AppTheme.nearlyWhite,
-                                      inactiveBorderColor: AppTheme.primary,
-                                      customBgColor: AppTheme.primary,
-                                      activeBorderColor: AppTheme.primary,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          filteredHammalList[index]['status'] = value;
-                                        });
-                                      },
-                                      value: filteredHammalList[index]['status'],
-                                      inactiveIcon: null,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                                        value: hammal.status == 'active' ? true : false,
+                                        inactiveIcon: null,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -203,5 +236,92 @@ class _HammalListState extends State<HammalList> {
         SmallText(text: value, color: AppTheme.grey, size: Dimensions.font12),
       ],
     );
+  }
+
+  Future<void> _loadData(int pageNo, String search) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      HammalListModel? hammalListModel = await hammalServices.hammalList(pageNo, search);
+      if (hammalListModel != null) {
+        if (hammalListModel.success == true) {
+          if (hammalListModel.data!.isNotEmpty) {
+            if (pageNo == 1) {
+              hammals.clear();
+            }
+
+            setState(() {
+              hammals.addAll(hammalListModel.data!);
+              currentPage++;
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            hammalListModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateStatus(int hammalId, String status) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      UpdateHammalStatusModel? updateHammalStatusModel = await hammalServices.updateHammalStatus(hammalId, status);
+      if (updateHammalStatusModel != null) {
+        if (updateHammalStatusModel.success == true) {
+          setState(() {
+            hammals.clear();
+            currentPage = 1;
+          });
+          await _loadData(currentPage, '');
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateHammalStatusModel.message.toString(),
+            mode: SnackbarMode.success,
+          );
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateHammalStatusModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

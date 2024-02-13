@@ -150,7 +150,10 @@ class _FirmListState extends State<FirmList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          BigText(text: firm.firmName!, color: AppTheme.primary, size: Dimensions.font16),
+                                          SizedBox(
+                                            width: Dimensions.screenWidth * 0.5,
+                                              child: BigText(text: firm.firmName!, color: AppTheme.primary, size: Dimensions.font16)
+                                          ),
                                           Row(
                                             children: [
                                               CircleAvatar(

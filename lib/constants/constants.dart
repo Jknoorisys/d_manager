@@ -47,6 +47,14 @@ const String getTransportUrl = '$baseUrl/api/get-transport';
 const String updateTransportUrl = '$baseUrl/api/update-transport';
 const String updateTransportStatusUrl = '$baseUrl/api/update-transport-status';
 
+// Dropdown Lists
+const String dropdownFirmListUrl = '$baseUrl/api/firm-list';
+const String dropdownPartyListUrl = '$baseUrl/api/party-list';
+const String dropdownClothQualityListUrl = '$baseUrl/api/quality-list';
+const String dropdownYarnListUrl = '$baseUrl/api/yarn-list';
+const String dropdownHammalListUrl = '$baseUrl/api/hammal-list';
+const String dropdownTransportListUrl = '$baseUrl/api/transport-list';
+
 // Manage Sell Deals
 const String createSellDeal = '$baseUrl/api/add-sell-deal';
 const String sellDealList = '$baseUrl/api/cloth-sell-deal';
