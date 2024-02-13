@@ -33,9 +33,6 @@ class _ClothSellListState extends State<ClothSellList> {
   SellDealDetails sellDealDetails = SellDealDetails();
   final searchController = TextEditingController();
   final RefreshController _refreshController = RefreshController();
-  // List<Map<String, dynamic>> unFilteredClothSellList = [
-  //   {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-  // ];
   SellDealListModel? sellDealListModel;
   List<SellListData> clothSellList = [];
 
