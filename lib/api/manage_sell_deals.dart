@@ -9,18 +9,15 @@ import '../models/sell_models/update_sell_deal_model.dart';
 final dio = Dio();
 class SellDealDetails{
   Future<CreateSellDealModel?> createNewSellDeal(
-      String userID,
       String sellDate,
       String firmID,
       String partyID,
       String qualityID,
       String totalThan,
       String rate)async{
-     String userID = await HelperFunctions.getUserID();
-     print("userID===== $userID");
     try{
       Map<String, dynamic> body = {
-        "user_id": userID,
+        "user_id": HelperFunctions.getUserID(),
         "sell_date": sellDate,
         "firm_id": firmID,
         "party_id": partyID,
