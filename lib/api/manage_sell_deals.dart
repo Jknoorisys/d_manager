@@ -46,9 +46,16 @@ class SellDealDetails{
     }
   }
 
-  Future<SellDealListModel?> sellDealListApi()async{
+  Future<SellDealListModel?> sellDealListApi(
+      String pageNo,
+      String search,
+      )async{
     try{
-      Map<String, dynamic> body = {};
+      Map<String, dynamic> body = {
+        "user_id":HelperFunctions.getUserID(),
+        "page_no":pageNo,
+        "search":search,
+      };
       Response response = await dio.post(sellDealList, data: body,
         options: Options(
           headers: {

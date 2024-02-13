@@ -251,16 +251,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       String totalThan,
       String rate,
       ) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomLoader(
-          body: Container(), // Pass an empty container as body for now
-          message: "Loading... Please wait",
-        );
-      },
-    );
 
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
@@ -275,7 +265,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       );
       if (model?.success == true) {
         Navigator.of(context).pop(); // Close the loading dialog
-
         Navigator.of(context).pushNamed(AppRoutes.clothSellList);
       } else {
         Navigator.of(context).pop(); // Close the loading dialog
