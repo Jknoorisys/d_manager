@@ -14,7 +14,6 @@ class HelperFunctions {
   static setLoginStatus(bool status) async {
     pref.setBool("LoginStatus", status);
   }
-
   static bool getLoginStatus()  {
     bool? status = pref.getBool('LoginStatus');
     return status ?? false;
@@ -40,10 +39,48 @@ class HelperFunctions {
   static Future<bool> setUserName(String userName) async {
     return pref.setString("UserName", userName);
   }
-
   static String getUserName() {
     String? userName = pref.getString('UserName');
     return userName ?? '';
+  }
+// Firm ID
+  static Future<bool> setFirmID(String firmID) async {
+    return pref.setString("firmID", firmID);
+  }
+
+  static String getFirmID() {
+    String? getFirm = pref.getString('firmID');
+    return getFirm ?? '';
+  }
+  // Party ID
+
+  static Future<bool> setPartyID(String partyID) async {
+    return pref.setString("partyID", partyID);
+  }
+
+  static String getPartyID() {
+    String? getParty = pref.getString('partyID');
+    return getParty ?? '';
+  }
+  // Cloth Quality ID
+
+  static Future<bool> setClothID(String clothID) async {
+    return pref.setString("clothID", clothID);
+  }
+
+  static String getClothID() {
+    String? getCloth = pref.getString('clothID');
+    return getCloth ?? '';
+  }
+  // Deal Status
+
+  static Future<bool> setDealStatus(String status) async {
+    return pref.setString("status", status);
+  }
+
+  static String getDealStatus() {
+    String? getDealStatus = pref.getString('status');
+    return getDealStatus ?? '';
   }
 
   static Future<bool> setUserImage(String userImage) async {
@@ -98,5 +135,9 @@ class HelperFunctions {
     } on SocketException catch (_) {
       return false;
     }
+  }
+
+  static Future<bool> setSellId(String id) async {
+    return pref.setString("dealStatus", id);
   }
 }

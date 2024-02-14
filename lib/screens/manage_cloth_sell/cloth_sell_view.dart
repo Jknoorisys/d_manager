@@ -14,8 +14,10 @@ import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
 import '../../api/manage_sell_deals.dart';
+import '../../helpers/helper_functions.dart';
 import '../../models/sell_models/get_sell_deal_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
+import '../widgets/snackbar.dart';
 class ClothSellView extends StatefulWidget {
   final int sellID;
   const ClothSellView({Key? key,required this.sellID }) : super(key: key);
@@ -74,43 +76,45 @@ class _ClothSellViewState extends State<ClothSellView> {
       'status': 'On Going'
     },
   ];
+  bool _isLoading = true;
   List<Map<String, dynamic>> invoicesList = [];
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
-
+  SellDealDetails sellDealDetails = SellDealDetails();
+  GetSellDealModel? getSellDealModel;
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    getSellDealData();
     invoicesList = invoiceDataList;
   }
-  SellDealDetails sellDealDetails = SellDealDetails();
-  GetSellDealModel? getSellDealModel;
-  Future<void> _initializeData() async {
-    try {
-      setState(() {
-        _isLoading = true; // Set loading state to true before making the API call
-      });
+
+  Future<void> handleViewDeal()async{
+    if (HelperFunctions.checkInternet() == false) {
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    } else {
       await getSellDealData();
-    } catch (e) {
-      print("Error during initialization: $e");
-    }finally {
-      setState(() {
-        _isLoading = false; // Set loading state to false after the API call is completed
-      });
     }
   }
-  bool _isLoading = false;
+
+
+  //await getSellDealData();
   @override
   Widget build(BuildContext context) {
     // Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
     return CustomDrawer(
         content: CustomBody(
+          isLoading:_isLoading,
           title: S.of(context).clothSellDealDetails,
-          content: SingleChildScrollView(
+          content: _isLoading ? Container() : SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
-              child: _isLoading ? Center(child: CircularProgressIndicator(color: Colors.black)) : Column(
+              child: Column(
                 children: [
                   CustomAccordionWithoutExpanded(
                     titleChild: Column(
@@ -384,13 +388,29 @@ class _ClothSellViewState extends State<ClothSellView> {
     );
   }
   Future<GetSellDealModel?> getSellDealData() async {
-    GetSellDealModel? model = await sellDealDetails.getSellDealApi(widget.sellID.toString());
-    if (model?.success == true) {
-      setState(() {
+    setState(() {
+      _isLoading = true; // Show loader before making API call
+    });
+    try {
+      GetSellDealModel? model = await sellDealDetails.getSellDealApi(
+          widget.sellID.toString());
+      if (model!.success == true) {
+        setState(() {
         getSellDealModel = model;
       });
-    }else{
-      print(model?.message!);
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    }
+    finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 }

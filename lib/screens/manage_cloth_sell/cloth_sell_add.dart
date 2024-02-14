@@ -118,7 +118,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                     selectedFirm = newValue;
                                     if (newValue != null) {
                                       firmID = newValue.firmId.toString();
-                                      print("firmIDisselected===== $firmID");
                                     } else {
                                       firmID = null; // Reset firmID if selectedFirm is null
                                     }

@@ -11,111 +11,147 @@ String sellDealListModelToJson(SellDealListModel data) => json.encode(data.toJso
 class SellDealListModel {
   bool? success;
   String? message;
-  List<SellListData>? data;
+  int? total;
+  Data? data;
 
   SellDealListModel({
     this.success,
     this.message,
+    this.total,
     this.data,
   });
 
   factory SellDealListModel.fromJson(Map<String, dynamic> json) => SellDealListModel(
     success: json["success"],
     message: json["message"],
-    data: json["data"] == null ? [] : List<SellListData>.from(json["data"]!.map((x) => SellListData.fromJson(x))),
+    total: json["total"],
+    data: json["data"] == null ? null : Data.fromJson(json["data"]),
   );
 
   Map<String, dynamic> toJson() => {
     "success": success,
     "message": message,
-    "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
+    "total": total,
+    "data": data?.toJson(),
   };
 }
 
-class SellListData {
-  int? sellId;
-  String? sellDate;
+class Data {
+  Filter? filter;
+  List<SellDeal>? sellDeals;
+
+  Data({
+    this.filter,
+    this.sellDeals,
+  });
+
+  factory Data.fromJson(Map<String, dynamic> json) => Data(
+    filter: json["filter"] == null ? null : Filter.fromJson(json["filter"]),
+    sellDeals: json["sell_deals"] == null ? [] : List<SellDeal>.from(json["sell_deals"]!.map((x) => SellDeal.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "filter": filter?.toJson(),
+    "sell_deals": sellDeals == null ? [] : List<dynamic>.from(sellDeals!.map((x) => x.toJson())),
+  };
+}
+
+class Filter {
   String? firmId;
   String? partyId;
   String? qualityId;
+  String? dealStatus;
+
+  Filter({
+    this.firmId,
+    this.partyId,
+    this.qualityId,
+    this.dealStatus,
+  });
+
+  factory Filter.fromJson(Map<String, dynamic> json) => Filter(
+    firmId: json["firm_id"],
+    partyId: json["party_id"],
+    qualityId: json["quality_id"],
+    dealStatus: json["deal_status"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "firm_id": firmId,
+    "party_id": partyId,
+    "quality_id": qualityId,
+    "deal_status": dealStatus,
+  };
+}
+
+class SellDeal {
+  int? sellId;
+  String? sellDate;
+  String? firmId;
+  String? firmName;
+  String? partyId;
+  String? partyFirm;
+  String? partyName;
+  String? qualityId;
+  String? qualityName;
   String? totalThan;
   String? rate;
   String? thanDelivered;
   String? thanRemaining;
   String? dealStatus;
   String? status;
-  String? createdAt;
-  String? createdBy;
-  String? updatedAt;
-  String? updatedBy;
-  String? firmName;
-  String? partyFirm;
-  String? partyName;
-  String? qualityName;
 
-  SellListData({
+  SellDeal({
     this.sellId,
     this.sellDate,
     this.firmId,
+    this.firmName,
     this.partyId,
+    this.partyFirm,
+    this.partyName,
     this.qualityId,
+    this.qualityName,
     this.totalThan,
     this.rate,
     this.thanDelivered,
     this.thanRemaining,
     this.dealStatus,
     this.status,
-    this.createdAt,
-    this.createdBy,
-    this.updatedAt,
-    this.updatedBy,
-    this.firmName,
-    this.partyFirm,
-    this.partyName,
-    this.qualityName,
   });
 
-  factory SellListData.fromJson(Map<String, dynamic> json) => SellListData(
+  factory SellDeal.fromJson(Map<String, dynamic> json) => SellDeal(
     sellId: json["sell_id"],
     sellDate: json["sell_date"],
     firmId: json["firm_id"],
+    firmName: json["firm_name"],
     partyId: json["party_id"],
+    partyFirm: json["party_firm"],
+    partyName: json["party_name"],
     qualityId: json["quality_id"],
+    qualityName: json["quality_name"],
     totalThan: json["total_than"],
     rate: json["rate"],
     thanDelivered: json["than_delivered"],
     thanRemaining: json["than_remaining"],
     dealStatus: json["deal_status"],
     status: json["status"],
-    createdAt: json["created_at"],
-    createdBy: json["created_by"],
-    updatedAt: json["updated_at"],
-    updatedBy: json["updated_by"],
-    firmName: json["firm_name"],
-    partyFirm: json["party_firm"],
-    partyName: json["party_name"],
-    qualityName: json["quality_name"],
   );
 
   Map<String, dynamic> toJson() => {
     "sell_id": sellId,
     "sell_date": sellDate,
     "firm_id": firmId,
+    "firm_name": firmName,
     "party_id": partyId,
+    "party_firm": partyFirm,
+    "party_name": partyName,
     "quality_id": qualityId,
+    "quality_name": qualityName,
     "total_than": totalThan,
     "rate": rate,
     "than_delivered": thanDelivered,
     "than_remaining": thanRemaining,
     "deal_status": dealStatus,
     "status": status,
-    "created_at": createdAt,
-    "created_by": createdBy,
-    "updated_at": updatedAt,
-    "updated_by": updatedBy,
-    "firm_name": firmName,
-    "party_firm": partyFirm,
-    "party_name": partyName,
-    "quality_name": qualityName,
   };
 }

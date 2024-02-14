@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../constants/routes.dart';
 import '../../generated/l10n.dart';
+import '../../models/sell_models/sell_deal_list_model.dart';
 import '../../models/sell_models/update_sell_deal_model.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../api/dropdown_services.dart';
@@ -25,21 +26,22 @@ import '../widgets/new_custom_dropdown.dart';
 import '../widgets/snackbar.dart';
 class UpdateSellDeal extends StatefulWidget {
   final int sellID;
-  const UpdateSellDeal({super.key, required this.sellID});
+  final SellDeal sellListData;
+  const UpdateSellDeal({super.key, required this.sellID,required this.sellListData});
   @override
   State<UpdateSellDeal> createState() => _UpdateSellDealState();
 }
 
 class _UpdateSellDealState extends State<UpdateSellDeal> {
+  late SellDeal _sellListData;
+  late TextEditingController totalThanController;
+  late TextEditingController rateController;
   bool submitted = false;
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
   String status = 'On Going';
   bool isLoading = false;
-
-  TextEditingController totalThanController = TextEditingController();
-  TextEditingController rateController = TextEditingController();
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
 
@@ -66,6 +68,9 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
   @override
   void initState() {
     super.initState();
+    _sellListData = widget.sellListData;
+    totalThanController = TextEditingController(text: _sellListData.totalThan);
+    rateController = TextEditingController(text: _sellListData.rate);
     _loadData();
     _loadPartyData();
     _loadClothData();
@@ -118,7 +123,6 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                     selectedFirm = newValue;
                                     if (newValue != null) {
                                       firmID = newValue.firmId.toString();
-                                      print("firmIDisselected===== $firmID");
                                     } else {
                                       firmID = null; // Reset firmID if selectedFirm is null
                                     }
@@ -151,7 +155,6 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                     selectedParty = newValue;
                                     if (newValue != null) {
                                       partyID = newValue.partyId.toString();
-                                      print("partyIDselected===== $partyID");
                                     } else {
                                       partyID = null; // Reset firmID if selectedFirm is null
                                     }

@@ -60,6 +60,7 @@ const String createSellDeal = '$baseUrl/api/add-sell-deal';
 const String sellDealList = '$baseUrl/api/cloth-sell-deal';
 const String getSellDeal = '$baseUrl/api/get-sell-deal';
 const String updateSellDeal = '$baseUrl/api/update-sell-deal';
+const String statusSellDeal = '$baseUrl/api/update-sell-deal-status';
 const String activeFirmsList = '$baseUrl/api/firm-list';
 const String activePartiesWithoutPagination = '$baseUrl/api/party-list';
 
