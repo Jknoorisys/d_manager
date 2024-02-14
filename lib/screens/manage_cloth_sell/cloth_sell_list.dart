@@ -169,7 +169,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          BigText(text: clothSellList[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
+                                          BigText(text: clothSellList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16),
                                           Row(
                                             children: [
                                               CircleAvatar(

@@ -123,23 +123,23 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 CircleAvatar(
                                   backgroundColor: AppTheme.secondary,
                                   radius: Dimensions.height20,
-                                  child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                  child: BigText(text: getSellDealModel!.data!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
                                 ),
                                 SizedBox(width: Dimensions.height10),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    BigText(text: getSellDealModel!.data!.firmName!, color: AppTheme.primary, size: Dimensions.font16),
+                                    BigText(text: getSellDealModel!.data!.partyName!, color: AppTheme.primary, size: Dimensions.font16),
                                     Row(
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: AppTheme.black,
                                           radius: Dimensions.height10,
-                                          child: BigText(text: 'a', color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                          child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                         ),
                                         SizedBox(width: Dimensions.width10),
-                                        SmallText(text: getSellDealModel!.data!.partyFirm!, color: AppTheme.black, size: Dimensions.font12),
+                                        SmallText(text: getSellDealModel!.data!.firmName!, color: AppTheme.black, size: Dimensions.font12),
                                       ],
                                     ),
                                   ],
@@ -385,7 +385,6 @@ class _ClothSellViewState extends State<ClothSellView> {
   }
   Future<GetSellDealModel?> getSellDealData() async {
     GetSellDealModel? model = await sellDealDetails.getSellDealApi(widget.sellID.toString());
-    print("modeloflist=== ${model}");
     if (model?.success == true) {
       setState(() {
         getSellDealModel = model;

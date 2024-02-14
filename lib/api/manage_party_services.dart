@@ -99,7 +99,6 @@ class ManagePartyServices {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
-
       Response response = await post(Uri.parse(updatePartyStatusUrl), body: body, headers: headers);
       var data = json.decode(response.body);
       if (response.statusCode == 200) {
