@@ -12,12 +12,14 @@ class SellDealListModel {
   bool? success;
   String? message;
   int? total;
-  Data? data;
+  Filter? filter;
+  List<SellDeal>? data;
 
   SellDealListModel({
     this.success,
     this.message,
     this.total,
+    this.filter,
     this.data,
   });
 
@@ -25,62 +27,16 @@ class SellDealListModel {
     success: json["success"],
     message: json["message"],
     total: json["total"],
-    data: json["data"] == null ? null : Data.fromJson(json["data"]),
+    filter: json["filter"] == null ? null : Filter.fromJson(json["filter"]),
+    data: json["data"] == null ? [] : List<SellDeal>.from(json["data"]!.map((x) => SellDeal.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "success": success,
     "message": message,
     "total": total,
-    "data": data?.toJson(),
-  };
-}
-
-class Data {
-  Filter? filter;
-  List<SellDeal>? sellDeals;
-
-  Data({
-    this.filter,
-    this.sellDeals,
-  });
-
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-    filter: json["filter"] == null ? null : Filter.fromJson(json["filter"]),
-    sellDeals: json["sell_deals"] == null ? [] : List<SellDeal>.from(json["sell_deals"]!.map((x) => SellDeal.fromJson(x))),
-  );
-
-  Map<String, dynamic> toJson() => {
     "filter": filter?.toJson(),
-    "sell_deals": sellDeals == null ? [] : List<dynamic>.from(sellDeals!.map((x) => x.toJson())),
-  };
-}
-
-class Filter {
-  String? firmId;
-  String? partyId;
-  String? qualityId;
-  String? dealStatus;
-
-  Filter({
-    this.firmId,
-    this.partyId,
-    this.qualityId,
-    this.dealStatus,
-  });
-
-  factory Filter.fromJson(Map<String, dynamic> json) => Filter(
-    firmId: json["firm_id"],
-    partyId: json["party_id"],
-    qualityId: json["quality_id"],
-    dealStatus: json["deal_status"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "firm_id": firmId,
-    "party_id": partyId,
-    "quality_id": qualityId,
-    "deal_status": dealStatus,
+    "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
   };
 }
 
@@ -153,5 +109,33 @@ class SellDeal {
     "than_remaining": thanRemaining,
     "deal_status": dealStatus,
     "status": status,
+  };
+}
+
+class Filter {
+  String? firmId;
+  String? partyId;
+  String? qualityId;
+  String? dealStatus;
+
+  Filter({
+    this.firmId,
+    this.partyId,
+    this.qualityId,
+    this.dealStatus,
+  });
+
+  factory Filter.fromJson(Map<String, dynamic> json) => Filter(
+    firmId: json["firm_id"],
+    partyId: json["party_id"],
+    qualityId: json["quality_id"],
+    dealStatus: json["deal_status"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "firm_id": firmId,
+    "party_id": partyId,
+    "quality_id": qualityId,
+    "deal_status": dealStatus,
   };
 }

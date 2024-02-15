@@ -64,3 +64,10 @@ const String statusSellDeal = '$baseUrl/api/update-sell-deal-status';
 const String activeFirmsList = '$baseUrl/api/firm-list';
 const String activePartiesWithoutPagination = '$baseUrl/api/party-list';
 
+// Reminders
+const String yarnToBeReceivedForReminder = '$baseUrl/api/reminder-yarn-to-be-received';
+const String yarnPaymentToBePaidForReminder = '$baseUrl/api/reminder-yarn-purchase-payment-due';
+const String thansToBeDelivered = '$baseUrl/api/reminder-than-to-be-delivered';
+
+
+
