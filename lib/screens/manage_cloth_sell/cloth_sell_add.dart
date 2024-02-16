@@ -71,6 +71,8 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   }
   @override
   Widget build(BuildContext context) {
+    var errorTotalThan = submitted == true ? _validateTotalThan(totalThanController.text) : null,
+        errorRate = submitted == true ? _validateRate(rateController.text) : null;
     return CustomDrawer(
         content: CustomBody(
           title: widget.clothSellData == null ? 'Create Cloth Sell Deal' : 'Update Cloth Sell Deal',
@@ -207,7 +209,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                //errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
+                                errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
                               ),
                             ],
                           ),
@@ -223,7 +225,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                //errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
+                                errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
                               )
                             ],
                           ),
@@ -250,10 +252,37 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                       Gap(Dimensions.height20),
                       CustomElevatedButton(
                         onPressed: () {
+                          // setState(() {
+                          //   isLoading = !isLoading;
+                          // });
+                          // _handleCreateSellDeal();
                           setState(() {
-                            isLoading = !isLoading;
+                            submitted = true;
                           });
-                          _handleCreateSellDeal();
+                          if (_isFormValid()) {
+                            if (HelperFunctions.checkInternet() == false) {
+                              CustomApiSnackbar.show(
+                                context,
+                                'Warning',
+                                'No internet connection',
+                                mode: SnackbarMode.warning,
+                              );
+                              print("internetpermission");
+                            } else {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              NewSellDeal(
+                                context,
+                                selectedDate,
+                                firmID!,
+                                partyID!, // Assuming partyID is not null
+                                clothID!, // Assuming qualityID is fixed
+                                totalThanController.text,
+                                rateController.text,
+                              );
+                            }
+                          }
                         },
                         buttonText: 'Save',
                       )
@@ -284,9 +313,9 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   bool _isFormValid() {
     String totalThanError = _validateTotalThan(totalThanController.text) ?? '';
     String rateError = _validateRate(rateController.text) ?? '';
-
     return totalThanError.isEmpty && rateError.isEmpty ? true : false;
   }
+
   Future<CreateSellDealModel?> NewSellDeal(
       BuildContext context,
       DateTime sellDate,
@@ -309,6 +338,12 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       if (model?.success == true) {
         Navigator.of(context).pop(); // Close the loading dialog
         Navigator.of(context).pushNamed(AppRoutes.clothSellList);
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          'Your deal has been created successfully',
+          mode: SnackbarMode.success,
+        );
       } else {
         Navigator.of(context).pop(); // Close the loading dialog
         CustomApiSnackbar.show(
@@ -322,31 +357,34 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       print("Error occurred: $e");
     }
   }
-  Future<void> _handleCreateSellDeal()async{
-    if (_isFormValid()) {
-      if (HelperFunctions.checkInternet() == false) {
-        CustomApiSnackbar.show(
-          context,
-          'Warning',
-          'No internet connection',
-          mode: SnackbarMode.warning,
-        );
-      } else {
-        setState(() {
-          isLoading = !isLoading;
-        });
-        NewSellDeal(
-          context,
-          selectedDate,
-          firmID!,
-          partyID!, // Assuming partyID is not null
-          clothID!, // Assuming qualityID is fixed
-          totalThanController.text,
-          rateController.text,
-        );
-      }
-    }
-  }
+  // Future<void> _handleCreateSellDeal()async{
+  //   print("formValidation==== ${_isFormValid()}");
+  //   print("internet==== ${HelperFunctions.checkInternet()}");
+  //   if (_isFormValid()) {
+  //     if (HelperFunctions.checkInternet() == false) {
+  //       CustomApiSnackbar.show(
+  //         context,
+  //         'Warning',
+  //         'No internet connection',
+  //         mode: SnackbarMode.warning,
+  //       );
+  //       print("internetpermission");
+  //     } else {
+  //       setState(() {
+  //         isLoading = !isLoading;
+  //       });
+  //       NewSellDeal(
+  //         context,
+  //         selectedDate,
+  //         firmID!,
+  //         partyID!, // Assuming partyID is not null
+  //         clothID!, // Assuming qualityID is fixed
+  //         totalThanController.text,
+  //         rateController.text,
+  //       );
+  //     }
+  //   }
+  // }
   Future<void> _loadData() async {
     setState(() {
       isLoading = true;

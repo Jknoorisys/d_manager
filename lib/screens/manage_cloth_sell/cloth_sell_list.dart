@@ -563,9 +563,9 @@ class _ClothSellListState extends State<ClothSellList> {
           clothSellList[index].dealStatus = 'completed';
           CustomApiSnackbar.show(
             context,
-            'Successfull',
-            model.message.toString(),
-            mode: SnackbarMode.error,
+            'Success',
+            model.message!.toString(),
+            mode: SnackbarMode.success,
           );
         } else {
           CustomApiSnackbar.show(

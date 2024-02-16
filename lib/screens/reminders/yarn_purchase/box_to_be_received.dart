@@ -120,7 +120,6 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                           AppTheme.divider,
                           SizedBox(height: Dimensions.height10),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _buildInfoColumn('Due Date', reminderForYarnToBeReceived[index].dueDate!.toString(),index),
                               SizedBox(width: Dimensions.width20),
@@ -199,8 +198,8 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                             children: [
                               CustomElevatedButton(
                                 onPressed: (){
-                                  Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
-                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView()));
+                                  //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
+                                   Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView()));
                                 },
                                 buttonText: 'View Details',
                                 isBackgroundGradient: false,
