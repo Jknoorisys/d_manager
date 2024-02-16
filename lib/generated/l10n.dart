@@ -551,10 +551,10 @@ class S {
   }
 
   /// `Box to be Received`
-  String get boxToBeReceived {
+  String get yarnToBeReceived {
     return Intl.message(
-      'Box to be Received',
-      name: 'boxToBeReceived',
+      'Yarn to be Received',
+      name: 'yarnToBeReceived',
       desc: '',
       args: [],
     );

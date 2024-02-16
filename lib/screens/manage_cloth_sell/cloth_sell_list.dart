@@ -18,9 +18,17 @@ import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
+import '../../models/sell_models/status_sell_deal_model.dart';
+import '../widgets/new_custom_dropdown.dart';
 import '../widgets/snackbar.dart';
 import 'cloth_sell_view.dart';
+import '../../api/dropdown_services.dart';
+import '../../api/manage_firm_services.dart';
+import '../../api/manage_party_services.dart';
+import '../../models/dropdown_models/dropdown_cloth_quality_list_model.dart';
+import '../../models/sell_models/active_firms_model.dart';
 
 class ClothSellList extends StatefulWidget {
   const ClothSellList({Key? key}) : super(key: key);
@@ -34,7 +42,7 @@ class _ClothSellListState extends State<ClothSellList> {
   final searchController = TextEditingController();
   final RefreshController _refreshController = RefreshController();
   SellDealListModel? sellDealListModel;
-  List<SellListData> clothSellList = [];
+  List<SellDeal> clothSellList = [];
 
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
@@ -42,9 +50,26 @@ class _ClothSellListState extends State<ClothSellList> {
   String status = 'On Going';
   int currentPage = 1;
 
+
+  ManageFirmServices firmServices = ManageFirmServices();
+  ManagePartyServices partyServices = ManagePartyServices();
+  DropdownServices dropdownServices = DropdownServices();
+  List<ActiveFirmsList> firms = [];
+  List<ActivePartiesList> parties = [];
+  List<ClothQuality> activeClothQuality = [];
+
+  ActiveFirmsList? selectedFirm;
+  ActivePartiesList? selectedParty;
+  ClothQuality? selectedClothQuality;
+  String? firmID;
+  String? partyID;
+  String? clothID;
+
   bool isLoading = false;
 
   HelperFunctions helperFunctions = HelperFunctions();
+  bool isFilterApplied = false;
+
 
   @override
   void initState() {
@@ -62,7 +87,11 @@ class _ClothSellListState extends State<ClothSellList> {
       });
       getSellDealList(currentPage, searchController.text.trim());
     }
+    _loadData();
+    _loadPartyData();
+    _loadClothData();
   }
+
   @override
   void dispose() {
     searchController.dispose();
@@ -78,9 +107,21 @@ class _ClothSellListState extends State<ClothSellList> {
           title: S.of(context).clothSellList,
           filterButton: GestureDetector(
             onTap: () {
-              _showBottomSheet(context);
+              if (isFilterApplied) {
+                // If filters are applied, clear the filters
+                clearFilters();
+                setState(() {
+                  isFilterApplied = false; // Reset the filter applied flag
+                });
+              } else {
+                // Otherwise, show the filter bottom sheet
+                _showBottomSheet(context);
+              }
             },
-            child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+            child: isFilterApplied ?Text(
+              'Clear',
+              style: TextStyle(color: AppTheme.black),
+            ): FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
           ),
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
@@ -131,7 +172,8 @@ class _ClothSellListState extends State<ClothSellList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
+                  child:
+                  SmartRefresher(
                     enablePullUp: true,
                     controller: _refreshController,
                     onRefresh: () async {
@@ -169,7 +211,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          BigText(text: clothSellList[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
+                                          BigText(text: clothSellList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16),
                                           Row(
                                             children: [
                                               CircleAvatar(
@@ -234,7 +276,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                   IconButton(
                                       onPressed: () {
                                         // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: clothSellList[index].sellId!)));
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: clothSellList[index].sellId!,sellListData: clothSellList[index])));
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                   ),
@@ -254,11 +296,17 @@ class _ClothSellListState extends State<ClothSellList> {
                                     customBgColor: AppTheme.primary,
                                     activeBorderColor: AppTheme.primary,
                                     onChanged: (value) {
-                                      setState(() {
-                                        clothSellList[index].dealStatus = value == true ? 'Completed' : 'On Going';
-                                      });
+
+                                      if (clothSellList[index].dealStatus == 'ongoing') {
+                                        updateStatusOfSellDeal(
+                                            clothSellList[index].sellId.toString(), 'completed', index);
+                                      }
+                                      // setState(() {
+                                      //   clothSellList[index].dealStatus = value == true ? 'Completed' : 'On Going';
+                                      // });
+
                                     },
-                                    value: clothSellList[index].dealStatus == 'Completed' ? true : false,
+                                    value: clothSellList[index].dealStatus == 'completed' ? true : false,
                                     inactiveIcon: null,
                                   ),
                                 ],
@@ -301,97 +349,153 @@ class _ClothSellListState extends State<ClothSellList> {
       ),
       elevation: 10,
       context: context,
-      builder: (BuildContext context) {
-        return Padding(
+      builder: (context) =>
+    StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+    return Padding(
           padding: EdgeInsets.all(Dimensions.height20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Select My Firm', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles', 'Laxmi Traders'],
-                        selectedValue: myFirm,
-                        onChanged: (newValue) {
-                          setState(() {
-                            myFirm = newValue!;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  Gap(Dimensions.height10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Select Party Name', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: const ['Mahesh Textiles', 'Tulsi Textiles', 'Laxmi Traders', 'Mahalaxmi Textiles', 'Veenapani Textiles'],
-                        selectedValue: partyName,
-                        onChanged: (newValue) {
-                          setState(() {
-                            partyName = newValue!;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+          child: Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                        Gap(Dimensions.height10/2),
+                        CustomDropdownNew<ActiveFirmsList>(
+                          hintText: 'Select Firm',
+                          dropdownItems:firms ?? [],
+                          selectedValue:selectedFirm,
+                          onChanged:(newValue)async{
+                            if (newValue != null) {
+                              firmID = newValue.firmId.toString();
+                              await HelperFunctions.setFirmID(firmID!);
+                              print("firmID==== $firmID");
+                            } else {
+                              await HelperFunctions.setFirmID('');
+                              firmID = null; // Reset firmID if selectedFirm is null
+                            }
+                            setState(()  {
+                              selectedFirm = newValue;
+                            });
+                          } ,
+                          displayTextFunction: (ActiveFirmsList? firm) {
+                            return firm?.firmName ?? ''; // Ensure you're returning a non-null value
+                          },
+                        ),
+                      ],
+                    ),
+                    Gap(Dimensions.height10),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BigText(text: 'Select Party Name', size: Dimensions.font12,),
+                        Gap(Dimensions.height10/2),
+                        CustomDropdownNew<ActivePartiesList>(
+                          hintText: 'Select Party',
+                          dropdownItems:parties ?? [],
+                          selectedValue:selectedParty,
+                          onChanged:(newValue)async{
+                            if (newValue != null) {
+                              partyID = newValue.partyId.toString();
+                              await HelperFunctions.setPartyID(partyID!);
+                              print("partyIDselected===== $partyID");
+                            } else {
+                              await HelperFunctions.setPartyID('');
+                              partyID = null; // Reset firmID if selectedFirm is null
+                            }
+                            setState((){
+                              selectedParty = newValue;
+                            });
+                          } ,
+                          displayTextFunction: (ActivePartiesList? parties){
+                            return parties!.partyName!;
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Gap(Dimensions.height20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
+                        Gap(Dimensions.height10/2),
+                        CustomDropdownNew<ClothQuality>(
+                          hintText: 'Cloth Quality',
+                          dropdownItems:activeClothQuality ?? [],
+                          selectedValue:selectedClothQuality,
+                          onChanged:(newValue)async{
+                            if (newValue != null) {
+                              clothID = newValue.qualityId.toString();
+                              await HelperFunctions.setClothID(clothID!);
+                              print("ClothIDisselected===== $clothID");
+                            } else {
+                              await HelperFunctions.setClothID('');
+                              clothID = null; // Reset firmID if selectedFirm is null
+                            }
+                            setState((){
+                              selectedClothQuality = newValue;
+                            });
+                          } ,
+                          displayTextFunction: (ClothQuality? cloth){
+                            return cloth!.qualityName!;
+                          },
+                        ),
+                      ],
+                    ),
+                    Gap(Dimensions.height10),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BigText(text: 'Status', size: Dimensions.font12,),
+                        Gap(Dimensions.height10/2),
+                        CustomDropdown(
+                          dropdownItems: ['On Going', 'Completed'],
+                          selectedValue: status,
+                          onChanged: (newValue)async {
+                            await HelperFunctions.setDealStatus(status!);
+                            setState(() {
+                              status = newValue!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Gap(Dimensions.height25),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dimensions.width20),
+                  child: CustomElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      setState((){
+                        currentPage = 0;
+                        getSellDealList(currentPage, searchController.text  );
+                        isFilterApplied = true;
+                      });
+                    },
+                    buttonText: 'Submit',
+                    ),
+                ),
                 ],
               ),
-              Gap(Dimensions.height20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['5 - Kilo', '6 - Kilo', '5/200'],
-                        selectedValue: clothQuality,
-                        onChanged: (newValue) {
-                          setState(() {
-                            clothQuality = newValue!;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  Gap(Dimensions.height10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Status', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['On Going', 'Completed'],
-                        selectedValue: status,
-                        onChanged: (newValue) {
-                          setState(() {
-                            status = newValue!;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              )
-            ],
           ),
-        );
-      },
+          );
+        },
+      )
     );
   }
 
@@ -404,13 +508,13 @@ class _ClothSellListState extends State<ClothSellList> {
           pageNo.toString(),
           search,
         );
-        print("modeloflistapi===== ${model}");
         if (model != null) {
           if (model.success == true) {
             if (model.data!.isNotEmpty) {
               if (pageNo == 1) {
                 clothSellList.clear();
               }
+              print("sellDealList===");
               setState(() {
                 clothSellList.addAll(model.data!);
                 currentPage++;
@@ -440,4 +544,173 @@ class _ClothSellListState extends State<ClothSellList> {
         });
       }
     }
+
+  Future<UpdateSellDealStatusModel?> updateStatusOfSellDeal(
+      String sellID,
+      String dealStatus,
+      int index
+      ) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      UpdateSellDealStatusModel? model = await sellDealDetails.updateSellDealStatus(
+        sellID,
+        dealStatus,
+      );
+      if (model != null) {
+        if (model.success == true) {
+          clothSellList[index].dealStatus = 'completed';
+          CustomApiSnackbar.show(
+            context,
+            'Successfull',
+            model.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      ActiveFirmsModel? activeFirms = await firmServices.activeFirms();
+      if (activeFirms != null) {
+        if (activeFirms.success == true) {
+          if (activeFirms.data!.isNotEmpty) {
+            setState(() {
+              firms.clear();
+              firms.addAll(activeFirms!.data!);
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            activeFirms.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> _loadPartyData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      ActivePartiesModel? activePartiesModel = await partyServices.activeParties();
+      if (activePartiesModel != null) {
+        if (activePartiesModel.success == true) {
+          if (activePartiesModel.data!.isNotEmpty) {
+            setState(() {
+              parties.clear();
+              parties.addAll(activePartiesModel.data!);
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            activePartiesModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> _loadClothData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DropdownClothQualityListModel? activeClothQualityModel = await dropdownServices.clothQualityList();
+      if (activeClothQualityModel != null) {
+        if (activeClothQualityModel.success == true) {
+          if (activeClothQualityModel.data!.isNotEmpty) {
+            setState(() {
+              activeClothQuality.clear();
+              activeClothQuality.addAll(activeClothQualityModel.data!);
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            activeClothQualityModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void clearFilters() async {
+    // Clear the preferences
+    await HelperFunctions.setFirmID('');
+    await HelperFunctions.setPartyID('');
+    await HelperFunctions.setClothID('');
+    await HelperFunctions.setDealStatus('');
+
+    getSellDealList(1, ''); // Assuming you're resetting to the first page and empty search query
+  }
 }

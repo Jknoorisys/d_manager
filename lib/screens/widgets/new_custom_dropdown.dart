@@ -10,6 +10,7 @@ class CustomDropdownNew<T> extends StatelessWidget {
   final String Function(T)? displayTextFunction;
   final double? height;
   final double? width;
+  final String? hintText;
 
   CustomDropdownNew({
     required this.dropdownItems,
@@ -18,6 +19,7 @@ class CustomDropdownNew<T> extends StatelessWidget {
     this.displayTextFunction,
     this.height,
     this.width,
+    this.hintText,
   });
 
   @override
@@ -34,6 +36,7 @@ class CustomDropdownNew<T> extends StatelessWidget {
       child: Center(
         child: DropdownButton<T>(
           dropdownColor: AppTheme.white,
+          hint: hintText != null ? SmallText(text: hintText!, size: Dimensions.font14,) : null,
           padding: EdgeInsets.symmetric(horizontal: Dimensions.height10/2, vertical: Dimensions.height10/2),
           alignment: Alignment.center,
           isExpanded: true,

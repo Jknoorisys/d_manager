@@ -202,6 +202,5 @@ class AppRoutes {
     purchaseHistory: (context) => const PurchaseHistory(),
     sellHistory: (context) => const SellHistory(),
 
-    yarnPurchaseViewFromReminder: (context) => const YarnPurchaseView(),
   };
 }

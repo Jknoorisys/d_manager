@@ -12,16 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../api/dropdown_services.dart';
 import '../../api/manage_firm_services.dart';
 import '../../api/manage_party_services.dart';
 import '../../api/manage_sell_deals.dart';
 import '../../helpers/helper_functions.dart';
-import '../../models/master_models/firm_list_model.dart';
-import '../../models/master_models/party_list_model.dart';
+import '../../models/dropdown_models/dropdown_cloth_quality_list_model.dart';
 import '../../models/sell_models/active_firms_model.dart';
 import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/create_sell_deal_model.dart';
-import '../widgets/loader.dart';
 import '../widgets/new_custom_dropdown.dart';
 import '../widgets/snackbar.dart';
 
@@ -35,9 +34,6 @@ class ClothSellAdd extends StatefulWidget {
 
 class _ClothSellAddState extends State<ClothSellAdd> {
   bool submitted = false;
-  String myFirm = 'Select Firm';
-  String partyName = 'Select Party';
-  String clothQuality = '5 - Kilo';
   String status = 'On Going';
 
   TextEditingController totalThanController = TextEditingController();
@@ -47,23 +43,22 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   bool isLoading = false;
   ManageFirmServices firmServices = ManageFirmServices();
   ManagePartyServices partyServices = ManagePartyServices();
+  DropdownServices dropdownServices = DropdownServices();
   List<ActiveFirmsList> firms = [];
   List<ActivePartiesList> parties = [];
+  List<ClothQuality> activeClothQuality = [];
   final RefreshController _refreshController = RefreshController();
   int currentPage = 1;
   ActiveFirmsList? selectedFirm;
   ActivePartiesList? selectedParty;
+  ClothQuality? selectedClothQuality;
   String? firmID;
   String? partyID;
+  String? clothID;
 
   void handleDateChanged(DateTime newDate) {
     setState(() {
       selectedDate = newDate;
-    });
-  }
-  void handleMyFirmChanged(String? newValue) {
-    setState(() {
-      myFirm = newValue!;
     });
   }
 
@@ -72,6 +67,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     super.initState();
     _loadData();
     _loadPartyData();
+    _loadClothData();
   }
   @override
   Widget build(BuildContext context) {
@@ -114,6 +110,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               BigText(text: 'Select My Firm', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomDropdownNew<ActiveFirmsList>(
+                                hintText: 'Select Firm',
                                 dropdownItems:firms ?? [],
                                 selectedValue:selectedFirm,
                                 onChanged:(newValue){
@@ -121,7 +118,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                     selectedFirm = newValue;
                                     if (newValue != null) {
                                       firmID = newValue.firmId.toString();
-                                      print("firmIDisselected===== $firmID");
                                     } else {
                                       firmID = null; // Reset firmID if selectedFirm is null
                                     }
@@ -146,6 +142,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               BigText(text: 'Select Party Name', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomDropdownNew<ActivePartiesList>(
+                                hintText: 'Select Party',
                                 dropdownItems:parties ?? [],
                                 selectedValue:selectedParty,
                                 onChanged:(newValue){
@@ -171,13 +168,23 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                             children: [
                               BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['5 - Kilo', '6 - Kilo', '5/200'],
-                                selectedValue: clothQuality,
-                                onChanged: (newValue) {
+                              CustomDropdownNew<ClothQuality>(
+                                hintText: 'Cloth Quality',
+                                dropdownItems:activeClothQuality ?? [],
+                                selectedValue:selectedClothQuality,
+                                onChanged:(newValue){
                                   setState(() {
-                                    clothQuality = newValue!;
+                                    selectedClothQuality = newValue;
+                                    if (newValue != null) {
+                                      clothID = newValue.qualityId.toString();
+                                      print("ClothIDisselected===== $clothID");
+                                    } else {
+                                      clothID = null; // Reset firmID if selectedFirm is null
+                                    }
                                   });
+                                } ,
+                                displayTextFunction: (ClothQuality? cloth){
+                                  return cloth!.qualityName!;
                                 },
                               ),
                             ],
@@ -333,7 +340,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
           selectedDate,
           firmID!,
           partyID!, // Assuming partyID is not null
-          '1', // Assuming qualityID is fixed
+          clothID!, // Assuming qualityID is fixed
           totalThanController.text,
           rateController.text,
         );
@@ -353,7 +360,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
               firms.clear();
               firms.addAll(activeFirms!.data!);
             });
-            selectedFirm = activeFirms!.data!.first;
           } else {
             _refreshController.loadNoData();
           }
@@ -383,7 +389,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
     setState(() {
       isLoading = true;
     });
-
     try {
       ActivePartiesModel? activePartiesModel = await partyServices.activeParties();
       if (activePartiesModel != null) {
@@ -401,6 +406,44 @@ class _ClothSellAddState extends State<ClothSellAdd> {
             context,
             'Error',
             activePartiesModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> _loadClothData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DropdownClothQualityListModel? activeClothQualityModel = await dropdownServices.clothQualityList();
+      if (activeClothQualityModel != null) {
+        if (activeClothQualityModel.success == true) {
+          if (activeClothQualityModel.data!.isNotEmpty) {
+            setState(() {
+              activeClothQuality.clear();
+              activeClothQuality.addAll(activeClothQualityModel.data!);
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            activeClothQualityModel.message.toString(),
             mode: SnackbarMode.error,
           );
         }

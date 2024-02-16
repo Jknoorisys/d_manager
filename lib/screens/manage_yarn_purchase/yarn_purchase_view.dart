@@ -15,6 +15,8 @@ import 'package:getwidget/types/gf_checkbox_type.dart';
 
 class YarnPurchaseView extends StatefulWidget {
   final Map<String, dynamic>? yarnPurchaseData;
+  // final String purchaseId;
+  //required this.purchaseId
   const YarnPurchaseView({Key? key, this.yarnPurchaseData}) : super(key: key);
 
   @override
