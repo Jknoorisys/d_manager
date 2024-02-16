@@ -40,6 +40,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   TextEditingController rateController = TextEditingController();
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
+  DateTime selectedDueDate = DateTime.now();
   bool isLoading = false;
   ManageFirmServices firmServices = ManageFirmServices();
   ManagePartyServices partyServices = ManagePartyServices();
@@ -232,30 +233,41 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                         ],
                       ),
                       Gap(Dimensions.height20),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          BigText(text: 'Status', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          CustomDropdown(
-                            dropdownItems: ['On Going', 'Completed'],
-                            selectedValue: status,
-                            onChanged: (newValue) {
-                              setState(() {
-                                status = newValue!;
-                              });
-                            },
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Status', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomDropdown(
+                                dropdownItems: ['On Going', 'Completed'],
+                                selectedValue: status,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    status = newValue!;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Select Due Date', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              //CustomDatePicker(selectedDate: selectedDate, firstDate: firstDate, lastDate: lastDate),
+                              CustomDatePicker(selectedDate: DateTime.parse(selectedDueDate.toString())),
+                            ],
                           ),
                         ],
                       ),
                       Gap(Dimensions.height20),
                       CustomElevatedButton(
                         onPressed: () {
-                          // setState(() {
-                          //   isLoading = !isLoading;
-                          // });
-                          // _handleCreateSellDeal();
                           setState(() {
                             submitted = true;
                           });
@@ -280,6 +292,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 clothID!, // Assuming qualityID is fixed
                                 totalThanController.text,
                                 rateController.text,
+                                  selectedDueDate
                               );
                             }
                           }
@@ -324,9 +337,11 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       String qualityID,
       String totalThan,
       String rate,
+      DateTime sellDueDate
       ) async {
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
+      String formattedSellDueDate = DateFormat('yyyy-MM-dd').format(sellDueDate);
       CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
         formattedSellDate,
         firmID,
@@ -334,6 +349,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
         qualityID,
         totalThan,
         rate,
+        formattedSellDueDate,
       );
       if (model?.success == true) {
         Navigator.of(context).pop(); // Close the loading dialog

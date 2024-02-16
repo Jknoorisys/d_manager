@@ -12,6 +12,11 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '../../api/manage_history_services.dart';
+import '../../models/history_models/purchase_history_model.dart';
+import '../widgets/snackbar.dart';
 class PurchaseHistory extends StatefulWidget {
   const PurchaseHistory({super.key});
 
@@ -30,7 +35,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Diamond Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
     {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
   ];
-  List<Map<String, dynamic>> filteredPurchaseHistoryList = [];
+  List<PurchaseHistoryList> purchaseHistoryList = [];
   String myFirm = 'Danish Textiles';
   String partyName = 'Mehta and Sons Yarn Trades';
   String yarnName = 'Golden';
@@ -39,12 +44,15 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 30));
+  ManageHistoryServices manageHistoryServices = ManageHistoryServices();
+  bool isLoading = false;
+  int currentPage = 1;
+  final RefreshController _refreshController = RefreshController();
 
 
   @override
   void initState() {
     super.initState();
-    filteredPurchaseHistoryList = purchaseHistory;
   }
   @override
   Widget build(BuildContext context) {
@@ -84,22 +92,18 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                             borderRadius: Dimensions.radius10,
                             borderColor: AppTheme.primary,
                             onSuffixTap: () {
-                              searchController.clear();
                               setState(() {
-                                filteredPurchaseHistoryList = purchaseHistory;
+                                searchController.clear();
+                                purchaseHistoryList.clear();
+                                currentPage = 1;
+                                getPurchaseHistory(currentPage, searchController.text.trim());
                               });
                             },
                             onChanged: (value) {
                               setState(() {
-                                filteredPurchaseHistoryList = purchaseHistory
-                                    .where((firm) =>
-                                firm['partyName']
-                                    .toLowerCase()
-                                    .contains(value.toLowerCase()) ||
-                                    firm['myFirm']
-                                        .toLowerCase()
-                                        .contains(value.toLowerCase()))
-                                    .toList();
+                                purchaseHistoryList.clear();
+                                currentPage = 1;
+                                getPurchaseHistory(currentPage, value);
                               });
                             }
                         ),
@@ -109,191 +113,210 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                   SizedBox(height: Dimensions.height10),
                   AppTheme.divider,
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: filteredPurchaseHistoryList.length,
-                      itemBuilder: (context, index) {
-                        return
-                          CustomAccordion(
-                          titleChild: Column(
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: Row(
-                                  children: [
-                                    SizedBox(height: Dimensions.height10),
-                                    Flexible(
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: Dimensions.width10),
-                                          CircleAvatar(
-                                            backgroundColor: AppTheme.secondary,
-                                            radius: Dimensions.height20,
-                                            child: BigText(text: filteredPurchaseHistoryList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
-                                          ),
-                                          SizedBox(width: Dimensions.height10),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                    child:
+                    SmartRefresher(
+                      enablePullUp: true,
+                      controller: _refreshController,
+                      onRefresh: () async {
+                        setState(() {
+                          purchaseHistoryList.clear();
+                          currentPage = 1;
+                        });
+                        getPurchaseHistory(currentPage, searchController.text.trim());
+                        _refreshController.refreshCompleted();
+                      },
+                      onLoading: () async {
+                        getPurchaseHistory(currentPage, searchController.text.trim());
+                        _refreshController.loadComplete();
+                      },
+                      child:
+                      ListView.builder(
+                        itemCount: purchaseHistoryList.length,
+                        itemBuilder: (context, index) {
+                          return
+                            CustomAccordion(
+                              titleChild: Column(
+                                children: [
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(height: Dimensions.height10),
+                                        Flexible(
+                                          child: Row(
                                             children: [
-                                              BigText(text: filteredPurchaseHistoryList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
-                                              Row(
+                                              SizedBox(width: Dimensions.width10),
+                                              CircleAvatar(
+                                                backgroundColor: AppTheme.secondary,
+                                                radius: Dimensions.height20,
+                                                child: BigText(text: purchaseHistoryList[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                              ),
+                                              SizedBox(width: Dimensions.height10),
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.start,
                                                 children: [
-                                                  CircleAvatar(
-                                                    backgroundColor: AppTheme.black,
-                                                    radius: Dimensions.height10,
-                                                    child: BigText(text: filteredPurchaseHistoryList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                  BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                                                  Row(
+                                                    children: [
+                                                      CircleAvatar(
+                                                        backgroundColor: AppTheme.black,
+                                                        radius: Dimensions.height10,
+                                                        child: BigText(text: purchaseHistoryList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                      ),
+                                                      SizedBox(width: Dimensions.width10),
+                                                      SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                                    ],
                                                   ),
-                                                  SizedBox(width: Dimensions.width10),
-                                                  SmallText(text: filteredPurchaseHistoryList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
                                                 ],
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                        SizedBox(height: Dimensions.height10),
+                                      ],
                                     ),
-                                    SizedBox(height: Dimensions.height10),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          contentChild: Column(
-                            children: [
-                              SizedBox(height: Dimensions.height10),
-                              AppTheme.divider,
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Deal Date', filteredPurchaseHistoryList[index]['dealDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Name', filteredPurchaseHistoryList[index]['yarnName']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Type', filteredPurchaseHistoryList[index]['yarnType']),
+                                  ),
                                 ],
                               ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
+                              contentChild: Column(
                                 children: [
-                                  _buildInfoColumn('Lot Number', filteredPurchaseHistoryList[index]['lotNumber']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Type', filteredPurchaseHistoryList[index]['paymentType']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Received', filteredPurchaseHistoryList[index]['boxReceived']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Rate', filteredPurchaseHistoryList[index]['rate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Net Weight', filteredPurchaseHistoryList[index]['netWeight']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill Amount', filteredPurchaseHistoryList[index]['billAmount']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('GST 12%', filteredPurchaseHistoryList[index]['GST12%']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Due Date', filteredPurchaseHistoryList[index]['dueDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Paid Date', filteredPurchaseHistoryList[index]['paidDate']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Amount Paid', filteredPurchaseHistoryList[index]['amountPaid']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Difference Amount', filteredPurchaseHistoryList[index]['differenceAmount']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Method', filteredPurchaseHistoryList[index]['paymentMethod']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Cops', filteredPurchaseHistoryList[index]['cops']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Diener', filteredPurchaseHistoryList[index]['diener']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill received', filteredPurchaseHistoryList[index]['billReceived']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
-                                      padding: EdgeInsets.all(Dimensions.height10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                        border: Border.all(color: AppTheme.primary),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          BigText(text: 'Box Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          RichText(
-                                            text: TextSpan(
-                                              style: TextStyle(
-                                                color: AppTheme.primary,
-                                                fontSize: Dimensions.font18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              children: [
-                                                TextSpan(text: filteredPurchaseHistoryList[index]['boxReceived'],),
-                                              ],
-                                            ),
+                                  SizedBox(height: Dimensions.height10),
+                                  AppTheme.divider,
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Deal Date', purchaseHistoryList[index].purchaseDate!.toString()),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Yarn Name', purchaseHistoryList[index].yarnName!),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Yarn Type', purchaseHistoryList[index].yarnTypeName!),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Lot Number', purchaseHistoryList[index].lotNumber!),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('', ''),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Box Received', purchaseHistoryList[index].totalDeliveryBox!.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Rate', purchaseHistoryList[index].rate!),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Net Weight', purchaseHistoryList[index].netWeight!),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Bill Amount', purchaseHistoryList[index].totalBillAmount!.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('', ''),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Payment Due Date', purchaseHistoryList[index].paymentDueDate!.toString()),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('', ''),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Amount Paid', purchaseHistoryList[index].totalPaidAmount!.toString()),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('', ''),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('', ''),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('', ''),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('', ''),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('', ''),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      Container(
+                                          width: MediaQuery.of(context).size.width/2.65,
+                                          height: Dimensions.height40*2,
+                                          padding: EdgeInsets.all(Dimensions.height10),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.white,
+                                            borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                            border: Border.all(color: AppTheme.primary),
                                           ),
-                                        ],
-                                      )
-                                  ),
-                                  SizedBox(width: Dimensions.width20),
-                                  Container(
-                                      width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
-                                      padding: EdgeInsets.all(Dimensions.height10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                        border: Border.all(color: AppTheme.primary),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              BigText(text: 'Total Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                              RichText(
+                                                text: TextSpan(
+                                                  style: TextStyle(
+                                                    color: AppTheme.primary,
+                                                    fontSize: Dimensions.font18,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                  children: [
+                                                    TextSpan(text: purchaseHistoryList[index].grossWeight!,),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          )
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          BigText(text: 'Bill Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '${filteredPurchaseHistoryList[index]['billAmount']}',color: AppTheme.primary, size: Dimensions.font18)
-                                        ],
-                                      )
+                                      SizedBox(width: Dimensions.width20),
+                                      Container(
+                                          width: MediaQuery.of(context).size.width/2.65,
+                                          height: Dimensions.height40*2,
+                                          padding: EdgeInsets.all(Dimensions.height10),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.white,
+                                            borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                            border: Border.all(color: AppTheme.primary),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              BigText(text: 'Total Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                              BigText(text: '${purchaseHistoryList[index].grossReceivedWeight}',color: AppTheme.primary, size: Dimensions.font18)
+                                            ],
+                                          )
+                                      ),
+                                    ],
                                   ),
+                                  SizedBox(height: Dimensions.height15),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      CustomElevatedButton(
+                                        onPressed: (){
+                                          // Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': filteredPurchaseHistoryList[index]});
+                                        },
+                                        buttonText: 'View Details',
+                                        isBackgroundGradient: false,
+                                        backgroundColor: AppTheme.primary,
+                                        textSize: Dimensions.font14,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
-                              SizedBox(height: Dimensions.height15),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  CustomElevatedButton(
-                                    onPressed: (){
-                                      // Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': filteredPurchaseHistoryList[index]});
-                                    },
-                                    buttonText: 'View Details',
-                                    isBackgroundGradient: false,
-                                    backgroundColor: AppTheme.primary,
-                                    textSize: Dimensions.font14,
-                                    visualDensity: VisualDensity.compact,
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        );
-                      },
+                            );
+                        },
+                      ),
                     ),
+
                   ),
                 ],
               ),
@@ -302,12 +325,21 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     );
   }
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Deal Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    } else if (title == 'Payment Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );
@@ -453,5 +485,48 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       },
     );
   }
-
+  Future<PurchaseHistoryModel?> getPurchaseHistory(int pageNo, String search,) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      PurchaseHistoryModel? model = await manageHistoryServices.showPurchaseHistory(
+        pageNo.toString(),
+        search,
+      );
+      if (model != null) {
+        if (model.success == true) {
+          if (model.data!.isNotEmpty) {
+            if (pageNo == 1) {
+              purchaseHistoryList.clear();
+            }
+            setState(() {
+              purchaseHistoryList.addAll(model.data!);
+              currentPage++;
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 }

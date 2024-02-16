@@ -17,6 +17,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
@@ -235,11 +236,11 @@ class _ClothSellListState extends State<ClothSellList> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Deal Date', clothSellList[index].sellDate!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Deal Date', clothSellList[index].sellDate!.toString())),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!)),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Total Than', clothSellList[index].totalThan!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Than', clothSellList[index].totalThan!)),
                                 ],
                               ),
                             ],
@@ -248,17 +249,21 @@ class _ClothSellListState extends State<ClothSellList> {
                             children: [
                               Row(
                                 children: [
-                                  _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!)),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!)),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Rate', clothSellList[index].rate!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Rate', clothSellList[index].rate!)),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Status', clothSellList[index].dealStatus!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Status', clothSellList[index].dealStatus!)),
+                                  SizedBox(width: Dimensions.width20),
+                                   Expanded(flex:1,child: _buildInfoColumn('Due Date', clothSellList[index].sellDueDate!.toString())),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('', '')),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
@@ -327,12 +332,21 @@ class _ClothSellListState extends State<ClothSellList> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Deal Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );

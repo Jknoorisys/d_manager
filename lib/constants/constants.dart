@@ -68,6 +68,12 @@ const String activePartiesWithoutPagination = '$baseUrl/api/party-list';
 const String yarnToBeReceivedForReminder = '$baseUrl/api/reminder-yarn-to-be-received';
 const String yarnPaymentToBePaidForReminder = '$baseUrl/api/reminder-yarn-purchase-payment-due';
 const String thansToBeDelivered = '$baseUrl/api/reminder-than-to-be-delivered';
+const String paymentToBeReceivedApi = '$baseUrl/api/reminder-cloth-payment-to-be-received';
+
+// History
+const String sellHistoryApi = '$baseUrl/api/sale-history';
+const String purchaseHistoryApi = '$baseUrl/api/purchase-history';
+
 
 
 
