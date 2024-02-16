@@ -199,8 +199,8 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                             children: [
                               CustomElevatedButton(
                                 onPressed: (){
-                                  //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView( purchaseId: reminderForYarnToBeReceived[index].purchaseId.toString())));
+                                  Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
+                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView()));
                                 },
                                 buttonText: 'View Details',
                                 isBackgroundGradient: false,

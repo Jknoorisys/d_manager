@@ -145,11 +145,11 @@ class AppRoutes {
       final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
       return YarnPurchaseAdd(yarnPurchaseData: yarnPurchaseData);
     },
-    // yarnPurchaseView: (context) {
-    //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    //   final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
-    //   return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData);
-    // },
+    yarnPurchaseView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
+      return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData);
+    },
 
     // Manage Delivery Details
     deliveryDetailAdd: (context) {

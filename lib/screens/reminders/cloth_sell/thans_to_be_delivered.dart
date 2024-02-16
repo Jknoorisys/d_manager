@@ -8,6 +8,7 @@ import '../../../api/manage_yarn_reminder_services.dart';
 import '../../../generated/l10n.dart';
 import '../../../helpers/helper_functions.dart';
 import '../../../models/reminder_models/thans_to_be_delivered_model.dart';
+import '../../manage_cloth_sell/cloth_sell_view.dart';
 import '../../widgets/body.dart';
 import '../../widgets/drawer/zoom_drawer.dart';
 
@@ -206,7 +207,7 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                               CustomElevatedButton(
                                 onPressed: (){
                                   //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
-                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView( purchaseId: reminderForYarnToBeReceived[index].purchaseId.toString())));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: thansToBeDelivered[index].sellId!,)));
                                 },
                                 buttonText: 'View Details',
                                 isBackgroundGradient: false,
