@@ -127,14 +127,14 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 CircleAvatar(
                                   backgroundColor: AppTheme.secondary,
                                   radius: Dimensions.height20,
-                                  child: BigText(text: getSellDealModel!.data!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                  child: BigText(text: getSellDealModel!.data!.partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
                                 ),
                                 SizedBox(width: Dimensions.height10),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    BigText(text: getSellDealModel!.data!.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                    BigText(text: getSellDealModel!.data!.partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
                                     Row(
                                       children: [
                                         CircleAvatar(
