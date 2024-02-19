@@ -113,7 +113,8 @@ class SellDealDetails{
       String partyID,
       String qualityID,
       String totalThan,
-      String rate)async{
+      String rate,
+      String sellDueDate)async{
     try{
       Map<String, dynamic> body = {
         "user_id":HelperFunctions.getUserID(),
@@ -124,6 +125,7 @@ class SellDealDetails{
         "quality_id": qualityID,
         "total_than": totalThan,
         "rate": rate,
+        "sell_due_date":sellDueDate
       };
       Response response = await dio.post(updateSellDeal, data: body,
         options: Options(

@@ -55,7 +55,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
       CustomDrawer(
         content: CustomBody(
             isLoading: _isLoading,
-            title: S.of(context).yarnToBeReceived,
+            title: S.of(context).boxToBeReceived,
             content:
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),
@@ -121,11 +121,11 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                           SizedBox(height: Dimensions.height10),
                           Row(
                             children: [
-                              _buildInfoColumn('Due Date', reminderForYarnToBeReceived[index].dueDate!.toString(),index),
+                              Expanded(flex:1,child: _buildInfoColumn('Due Date', reminderForYarnToBeReceived[index].dueDate!.toString(),index)),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Yarn Name', reminderForYarnToBeReceived[index].yarnName!,index),
+                              Expanded(flex:1,child: _buildInfoColumn('Yarn Name', reminderForYarnToBeReceived[index].yarnName!,index)),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Rate', '₹ ${reminderForYarnToBeReceived[index].rate!}', index),
+                              Expanded(flex:1,child: _buildInfoColumn('Rate', '₹ ${reminderForYarnToBeReceived[index].rate!}', index)),
                             ],
                           ),
                         ],
@@ -199,7 +199,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                               CustomElevatedButton(
                                 onPressed: (){
                                   //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
-                                   Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView()));
+                                   Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView(purchaseId:reminderForYarnToBeReceived[index].purchaseId!.toString())));
                                 },
                                 buttonText: 'View Details',
                                 isBackgroundGradient: false,

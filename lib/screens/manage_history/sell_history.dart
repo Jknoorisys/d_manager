@@ -17,6 +17,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../api/manage_history_services.dart';
 import '../../helpers/helper_functions.dart';
 import '../../models/history_models/sell_history_model.dart';
+import '../manage_cloth_sell/cloth_sell_view.dart';
 import '../widgets/snackbar.dart';
 
 class SellHistory extends StatefulWidget {
@@ -289,6 +290,7 @@ class _SellHistoryState extends State<SellHistory> {
                                     CustomElevatedButton(
                                       onPressed: (){
                                         // Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': filteredSellHistoryList[index]});
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: sellHistoryData[index].sellId!,)));
                                       },
                                       buttonText: 'View Details',
                                       isBackgroundGradient: false,

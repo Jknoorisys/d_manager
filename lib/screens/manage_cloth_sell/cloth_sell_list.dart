@@ -281,7 +281,14 @@ class _ClothSellListState extends State<ClothSellList> {
                                   IconButton(
                                       onPressed: () {
                                         // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: clothSellList[index].sellId!,sellListData: clothSellList[index])));
+                                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>
+                                            UpdateSellDeal(
+                                                sellID: clothSellList[index].sellId!,
+                                              sellListData:clothSellList[index],
+                                              selectedFirm: selectedFirm, // Pass the selected firm
+                                              selectedParty: selectedParty, // Pass the selected party
+                                              selectedClothQuality: selectedClothQuality,
+                                            )));
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                   ),
@@ -497,16 +504,16 @@ class _ClothSellListState extends State<ClothSellList> {
                       Navigator.pop(context);
                       setState((){
                         currentPage = 0;
-                        getSellDealList(currentPage, searchController.text  );
+                        getSellDealList(1, searchController.text  );
                         isFilterApplied = true;
                       });
                     },
                     buttonText: 'Submit',
                     ),
-                ),
+                  ),
                 ],
               ),
-          ),
+            ),
           );
         },
       )
@@ -724,6 +731,12 @@ class _ClothSellListState extends State<ClothSellList> {
     await HelperFunctions.setPartyID('');
     await HelperFunctions.setClothID('');
     await HelperFunctions.setDealStatus('');
+    setState(() {
+      selectedFirm = null;
+      selectedParty = null;
+      selectedClothQuality = null;
+      status = 'On Going'; // Assuming 'On Going' is the default status
+    });
 
     getSellDealList(1, ''); // Assuming you're resetting to the first page and empty search query
   }
