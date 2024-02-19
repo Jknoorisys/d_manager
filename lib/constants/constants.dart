@@ -64,6 +64,13 @@ const String statusSellDeal = '$baseUrl/api/update-sell-deal-status';
 const String activeFirmsList = '$baseUrl/api/firm-list';
 const String activePartiesWithoutPagination = '$baseUrl/api/party-list';
 
+// Manage Invoices
+const String addInvoiceUrl = '$baseUrl/api/add-invoice';
+const String invoiceListUrl = '$baseUrl/api/invoice';
+const String getInvoiceUrl = '$baseUrl/api/get-invoice';
+const String updateInvoiceUrl = '$baseUrl/api/update-invoice';
+const String updateInvoiceStatusUrl = '$baseUrl/api/update-invoice-status';
+
 // Reminders
 const String yarnToBeReceivedForReminder = '$baseUrl/api/reminder-yarn-to-be-received';
 const String yarnPaymentToBePaidForReminder = '$baseUrl/api/reminder-yarn-purchase-payment-due';
