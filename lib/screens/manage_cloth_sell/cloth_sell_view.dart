@@ -16,7 +16,6 @@ import 'package:intl/intl.dart';
 
 import '../../api/manage_sell_deals.dart';
 import '../../helpers/helper_functions.dart';
-import '../../models/invoices_models/invoices_list_model.dart';
 import '../../models/sell_models/get_sell_deal_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
 import '../widgets/snackbar.dart';
