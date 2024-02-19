@@ -521,10 +521,10 @@ class S {
   }
 
   /// `Manage Cloth Sell Deal`
-  String get manageClothSellDeal {
+  String get updateClothSellDeal {
     return Intl.message(
-      'Manage Cloth Sell Deal',
-      name: 'manageClothSellDeal',
+      'Update Cloth Sell Deal',
+      name: 'updateClothSellDeal',
       desc: '',
       args: [],
     );
@@ -551,10 +551,10 @@ class S {
   }
 
   /// `Box to be Received`
-  String get yarnToBeReceived {
+  String get boxToBeReceived {
     return Intl.message(
-      'Yarn to be Received',
-      name: 'yarnToBeReceived',
+      'Box to be Received',
+      name: 'boxToBeReceived',
       desc: '',
       args: [],
     );

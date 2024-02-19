@@ -17,6 +17,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
@@ -235,11 +236,11 @@ class _ClothSellListState extends State<ClothSellList> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Deal Date', clothSellList[index].sellDate!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Deal Date', clothSellList[index].sellDate!.toString())),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', clothSellList[index].qualityName!)),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Total Than', clothSellList[index].totalThan!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Than', clothSellList[index].totalThan!)),
                                 ],
                               ),
                             ],
@@ -248,17 +249,21 @@ class _ClothSellListState extends State<ClothSellList> {
                             children: [
                               Row(
                                 children: [
-                                  _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!)),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!)),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Rate', clothSellList[index].rate!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Rate', clothSellList[index].rate!)),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Status', clothSellList[index].dealStatus!),
+                                  Expanded(flex:1,child: _buildInfoColumn('Status', clothSellList[index].dealStatus!)),
+                                  SizedBox(width: Dimensions.width20),
+                                   Expanded(flex:1,child: _buildInfoColumn('Due Date', clothSellList[index].sellDueDate!.toString())),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('', '')),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
@@ -276,7 +281,14 @@ class _ClothSellListState extends State<ClothSellList> {
                                   IconButton(
                                       onPressed: () {
                                         // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSellDeal( sellID: clothSellList[index].sellId!,sellListData: clothSellList[index])));
+                                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>
+                                            UpdateSellDeal(
+                                                sellID: clothSellList[index].sellId!,
+                                              sellListData:clothSellList[index],
+                                              selectedFirm: selectedFirm, // Pass the selected firm
+                                              selectedParty: selectedParty, // Pass the selected party
+                                              selectedClothQuality: selectedClothQuality,
+                                            )));
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                   ),
@@ -327,12 +339,21 @@ class _ClothSellListState extends State<ClothSellList> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Deal Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );
@@ -483,16 +504,16 @@ class _ClothSellListState extends State<ClothSellList> {
                       Navigator.pop(context);
                       setState((){
                         currentPage = 0;
-                        getSellDealList(currentPage, searchController.text  );
+                        getSellDealList(1, searchController.text  );
                         isFilterApplied = true;
                       });
                     },
                     buttonText: 'Submit',
                     ),
-                ),
+                  ),
                 ],
               ),
-          ),
+            ),
           );
         },
       )
@@ -710,6 +731,12 @@ class _ClothSellListState extends State<ClothSellList> {
     await HelperFunctions.setPartyID('');
     await HelperFunctions.setClothID('');
     await HelperFunctions.setDealStatus('');
+    setState(() {
+      selectedFirm = null;
+      selectedParty = null;
+      selectedClothQuality = null;
+      status = 'On Going'; // Assuming 'On Going' is the default status
+    });
 
     getSellDealList(1, ''); // Assuming you're resetting to the first page and empty search query
   }

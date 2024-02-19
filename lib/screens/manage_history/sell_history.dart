@@ -12,6 +12,13 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '../../api/manage_history_services.dart';
+import '../../helpers/helper_functions.dart';
+import '../../models/history_models/sell_history_model.dart';
+import '../manage_cloth_sell/cloth_sell_view.dart';
+import '../widgets/snackbar.dart';
 
 class SellHistory extends StatefulWidget {
   const SellHistory({super.key});
@@ -22,7 +29,7 @@ class SellHistory extends StatefulWidget {
 
 class _SellHistoryState extends State<SellHistory> {
   final searchController = TextEditingController();
-  List<Map<String, dynamic>> sellHistory = [
+  List<Map<String, dynamic>> sellHistoryList = [
     {'no': 1, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Kalantri Cloth Traders', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
     {'no': 2, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Pooja Cloth Agency', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
     {'no': 3, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Harshad Textile', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
@@ -30,23 +37,39 @@ class _SellHistoryState extends State<SellHistory> {
     {'no': 5, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Aneesa Tex', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
     {'no': 6, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Sarika Textiles', 'clothQuality':'5-kilo', 'invoiceDate':'2024-01-29', 'invoiceNumber':'01', 'baleNumber':'10', 'than':'80', 'meter':'142.90', 'rate':'4990', 'gst':'12%', 'invoiceAmount':'10,09,000', 'paymentType':'Current', 'additionalDiscount':'1000', 'paymentReceived' : '10,08,500', 'differenceAmount':'500', 'paymentMethod':'Cheque', 'dueDate' : '2024-01-20', 'paymentReceivedDate':'2024-01-18', 'reason':'Sorry', 'transportDetails':'abc'},
   ];
-  List<Map<String, dynamic>> filteredSellHistoryList = [];
-
+  List<SellHistoryModelList> sellHistoryData = [];
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
   DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 30));
+  bool isLoading = false;
+  ManageHistoryServices manageHistoryServices = ManageHistoryServices();
+  int currentPage = 1;
+  final RefreshController _refreshController = RefreshController();
   @override
   void initState() {
     super.initState();
-    filteredSellHistoryList = sellHistory;
+    if (HelperFunctions.checkInternet() == false) {
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    } else {
+      setState(() {
+        isLoading = !isLoading;
+      });
+      getSellHistory(currentPage, searchController.text.trim());
+    }
   }
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
+          isLoading:isLoading,
             title: S.of(context).sellHistory,
             filterButton: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -79,22 +102,18 @@ class _SellHistoryState extends State<SellHistory> {
                             borderRadius: Dimensions.radius10,
                             borderColor: AppTheme.primary,
                             onSuffixTap: () {
-                              searchController.clear();
                               setState(() {
-                                filteredSellHistoryList = sellHistory;
+                                searchController.clear();
+                                sellHistoryData.clear();
+                                currentPage = 1;
+                                getSellHistory(currentPage, searchController.text.trim());
                               });
                             },
                             onChanged: (value) {
                               setState(() {
-                                filteredSellHistoryList = sellHistory
-                                    .where((firm) =>
-                                firm['partyName']
-                                    .toLowerCase()
-                                    .contains(value.toLowerCase()) ||
-                                    firm['myFirm']
-                                        .toLowerCase()
-                                        .contains(value.toLowerCase()))
-                                    .toList();
+                                sellHistoryData.clear();
+                                currentPage = 1;
+                                getSellHistory(currentPage, value);
                               });
                             }
                         ),
@@ -104,190 +123,190 @@ class _SellHistoryState extends State<SellHistory> {
                   SizedBox(height: Dimensions.height10),
                   AppTheme.divider,
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: filteredSellHistoryList.length,
-                      itemBuilder: (context, index) {
-                        return CustomAccordion(
-                          titleChild: Column(
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: Row(
-                                  children: [
-                                    SizedBox(height: Dimensions.height10),
-                                    Flexible(
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: Dimensions.width10),
-                                          CircleAvatar(
-                                            backgroundColor: AppTheme.secondary,
-                                            radius: Dimensions.height20,
-                                            child: BigText(text: filteredSellHistoryList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
-                                          ),
-                                          SizedBox(width: Dimensions.height10),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              BigText(text: filteredSellHistoryList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
-                                              Row(
-                                                children: [
-                                                  CircleAvatar(
-                                                    backgroundColor: AppTheme.black,
-                                                    radius: Dimensions.height10,
-                                                    child: BigText(text: filteredSellHistoryList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                                  ),
-                                                  SizedBox(width: Dimensions.width10),
-                                                  SmallText(text: filteredSellHistoryList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: Dimensions.height10),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          contentChild: Column(
-                            children: [
-                              SizedBox(height: Dimensions.height10),
-                              AppTheme.divider,
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Deal Date', filteredSellHistoryList[index]['dealDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Cloth Quality', filteredSellHistoryList[index]['clothQuality']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Invoice Date', filteredSellHistoryList[index]['invoiceDate']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Invoice Number', filteredSellHistoryList[index]['invoiceNumber']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bale Number', filteredSellHistoryList[index]['baleNumber']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Than', filteredSellHistoryList[index]['than']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Meter', filteredSellHistoryList[index]['meter']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Rate', filteredSellHistoryList[index]['rate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('GST', filteredSellHistoryList[index]['gst']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Invoice Amount', filteredSellHistoryList[index]['invoiceAmount']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Type', filteredSellHistoryList[index]['paymentType']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Additional Discount', filteredSellHistoryList[index]['additionalDiscount']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Due Date', filteredSellHistoryList[index]['dueDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Difference Amount', filteredSellHistoryList[index]['differenceAmount']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Method', filteredSellHistoryList[index]['paymentMethod']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Transport Details', filteredSellHistoryList[index]['transportDetails']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Received Date', filteredSellHistoryList[index]['paymentReceivedDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Reason(Notes)', filteredSellHistoryList[index]['reason']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
-                                      padding: EdgeInsets.all(Dimensions.height10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                        border: Border.all(color: AppTheme.primary),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          BigText(text: 'Invoice Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          RichText(
-                                            text: TextSpan(
-                                              style: TextStyle(
-                                                color: AppTheme.primary,
-                                                fontSize: Dimensions.font18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                    child:
+                    SmartRefresher(
+                      enablePullUp: true,
+                      controller: _refreshController,
+                      onRefresh: () async {
+                        setState(() {
+                          sellHistoryData.clear();
+                          currentPage = 1;
+                        });
+                        getSellHistory(currentPage, searchController.text.trim());
+                        _refreshController.refreshCompleted();
+                      },
+                      onLoading: () async {
+                        getSellHistory(currentPage, searchController.text.trim());
+                        _refreshController.loadComplete();
+                      },
+                      child:
+                      ListView.builder(
+                        itemCount: sellHistoryData.length,
+                        itemBuilder: (context, index) {
+                          return CustomAccordion(
+                            titleChild: Column(
+                              children: [
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: Row(
+                                    children: [
+                                      SizedBox(height: Dimensions.height10),
+                                      Flexible(
+                                        child: Row(
+                                          children: [
+                                            SizedBox(width: Dimensions.width10),
+                                            CircleAvatar(
+                                              backgroundColor: AppTheme.secondary,
+                                              radius: Dimensions.height20,
+                                              child: BigText(text: sellHistoryData[index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
+                                            ),
+                                            SizedBox(width: Dimensions.height10),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
                                               children: [
-                                                TextSpan(text: filteredSellHistoryList[index]['invoiceAmount'],),
+                                                BigText(text: sellHistoryData[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                                                Row(
+                                                  children: [
+                                                    CircleAvatar(
+                                                      backgroundColor: AppTheme.black,
+                                                      radius: Dimensions.height10,
+                                                      child: BigText(text: sellHistoryData[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                    ),
+                                                    SizedBox(width: Dimensions.width10),
+                                                    SmallText(text: sellHistoryData[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                                  ],
+                                                ),
                                               ],
                                             ),
-                                          ),
-                                        ],
-                                      )
-                                  ),
-                                  SizedBox(width: Dimensions.width20),
-                                  Container(
-                                      width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
-                                      padding: EdgeInsets.all(Dimensions.height10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                        border: Border.all(color: AppTheme.primary),
+                                          ],
+                                        ),
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          BigText(text: 'Payment Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '${filteredSellHistoryList[index]['paymentReceived']}',color: AppTheme.primary, size: Dimensions.font18)
-                                        ],
-                                      )
+                                      SizedBox(height: Dimensions.height10),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height15),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  CustomElevatedButton(
-                                    onPressed: (){
-                                      // Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': filteredSellHistoryList[index]});
-                                    },
-                                    buttonText: 'View Details',
-                                    isBackgroundGradient: false,
-                                    backgroundColor: AppTheme.primary,
-                                    textSize: Dimensions.font14,
-                                    visualDensity: VisualDensity.compact,
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        );
-                      },
+                                ),
+                              ],
+                            ),
+                            contentChild: Column(
+                              children: [
+                                SizedBox(height: Dimensions.height10),
+                                AppTheme.divider,
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Deal Date', sellHistoryData[index].sellDate!.toString())),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', sellHistoryData[index].qualityName!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Deal Rate',' ₹ ${sellHistoryData[index].rate!}')),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Total Thans', sellHistoryData[index].totalThan!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Than Delivered', sellHistoryData[index].thanDelivered!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Than Remaining', sellHistoryData[index].thanRemaining!)),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Total Meter', sellHistoryData[index].totalMeter!.toString())),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Difference Amount', ' ₹ ${sellHistoryData[index].totalDifferenceAmount!.toString()}')),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', sellHistoryData[index].sellDueDate!.toString())),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Total Invoice Amount', ' ₹ ${sellHistoryData[index].totalInvoiceAmount!.toString()}')),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Status', sellHistoryData[index].dealStatus!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Container(
+                                        width: MediaQuery.of(context).size.width/2.65,
+                                        height: Dimensions.height40*2,
+                                        padding: EdgeInsets.all(Dimensions.height10),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                          border: Border.all(color: AppTheme.primary),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            BigText(text: 'Total GST Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                            RichText(
+                                              text: TextSpan(
+                                                style: TextStyle(
+                                                  color: AppTheme.primary,
+                                                  fontSize: Dimensions.font18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                children: [
+                                                  TextSpan(text: ' ${sellHistoryData[index].totalGstAmount!.toString()}',),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                    ),
+                                    SizedBox(width: Dimensions.width20),
+                                    Container(
+                                        width: MediaQuery.of(context).size.width/2.65,
+                                        height: Dimensions.height40*2,
+                                        padding: EdgeInsets.all(Dimensions.height10),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                          border: Border.all(color: AppTheme.primary),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            BigText(text: 'Total Received Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                            BigText(text: '${sellHistoryData[index].totalReceivedAmount!.toString()}',color: AppTheme.primary, size: Dimensions.font18)
+                                          ],
+                                        )
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height15),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    CustomElevatedButton(
+                                      onPressed: (){
+                                        // Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': filteredSellHistoryList[index]});
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: sellHistoryData[index].sellId!,)));
+                                      },
+                                      buttonText: 'View Details',
+                                      isBackgroundGradient: false,
+                                      backgroundColor: AppTheme.primary,
+                                      textSize: Dimensions.font14,
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
+
                   ),
                 ],
               ),
@@ -296,12 +315,21 @@ class _SellHistoryState extends State<SellHistory> {
     );
   }
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Deal Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );
@@ -446,5 +474,49 @@ class _SellHistoryState extends State<SellHistory> {
         );
       },
     );
+  }
+  Future<SellHistoryModel?> getSellHistory(int pageNo, String search,) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      SellHistoryModel? model = await manageHistoryServices.showSellHistory(
+        pageNo.toString(),
+        search,
+      );
+      if (model != null) {
+        if (model.success == true) {
+          if (model.data!.isNotEmpty) {
+            if (pageNo == 1) {
+              sellHistoryData.clear();
+            }
+            setState(() {
+              sellHistoryData.addAll(model.data!);
+              currentPage++;
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }

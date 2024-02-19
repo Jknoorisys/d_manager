@@ -34,88 +34,76 @@ class GetSellDealModel {
 
 class Data {
   int? sellId;
-  String? sellDate;
-  String? firmId;
-  String? partyId;
-  String? qualityId;
+  DateTime? sellDate;
+  DateTime? sellDueDate;
   String? totalThan;
   String? rate;
   String? thanDelivered;
   String? thanRemaining;
   String? dealStatus;
   String? status;
-  String? createdAt;
-  String? createdBy;
-  String? updatedAt;
-  String? updatedBy;
+  String? firmId;
   String? firmName;
+  String? partyId;
   String? partyFirm;
   String? partyName;
+  String? qualityId;
   String? qualityName;
 
   Data({
     this.sellId,
     this.sellDate,
-    this.firmId,
-    this.partyId,
-    this.qualityId,
+    this.sellDueDate,
     this.totalThan,
     this.rate,
     this.thanDelivered,
     this.thanRemaining,
     this.dealStatus,
     this.status,
-    this.createdAt,
-    this.createdBy,
-    this.updatedAt,
-    this.updatedBy,
+    this.firmId,
     this.firmName,
+    this.partyId,
     this.partyFirm,
     this.partyName,
+    this.qualityId,
     this.qualityName,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     sellId: json["sell_id"],
-    sellDate: json["sell_date"],
-    firmId: json["firm_id"],
-    partyId: json["party_id"],
-    qualityId: json["quality_id"],
+    sellDate: json["sell_date"] == null ? null : DateTime.parse(json["sell_date"]),
+    sellDueDate: json["sell_due_date"] == null ? null : DateTime.parse(json["sell_due_date"]),
     totalThan: json["total_than"],
     rate: json["rate"],
     thanDelivered: json["than_delivered"],
     thanRemaining: json["than_remaining"],
     dealStatus: json["deal_status"],
     status: json["status"],
-    createdAt: json["created_at"],
-    createdBy: json["created_by"],
-    updatedAt: json["updated_at"],
-    updatedBy: json["updated_by"],
+    firmId: json["firm_id"],
     firmName: json["firm_name"],
+    partyId: json["party_id"],
     partyFirm: json["party_firm"],
     partyName: json["party_name"],
+    qualityId: json["quality_id"],
     qualityName: json["quality_name"],
   );
 
   Map<String, dynamic> toJson() => {
     "sell_id": sellId,
-    "sell_date": sellDate,
-    "firm_id": firmId,
-    "party_id": partyId,
-    "quality_id": qualityId,
+    "sell_date": "${sellDate!.year.toString().padLeft(4, '0')}-${sellDate!.month.toString().padLeft(2, '0')}-${sellDate!.day.toString().padLeft(2, '0')}",
+    "sell_due_date": "${sellDueDate!.year.toString().padLeft(4, '0')}-${sellDueDate!.month.toString().padLeft(2, '0')}-${sellDueDate!.day.toString().padLeft(2, '0')}",
     "total_than": totalThan,
     "rate": rate,
     "than_delivered": thanDelivered,
     "than_remaining": thanRemaining,
     "deal_status": dealStatus,
     "status": status,
-    "created_at": createdAt,
-    "created_by": createdBy,
-    "updated_at": updatedAt,
-    "updated_by": updatedBy,
+    "firm_id": firmId,
     "firm_name": firmName,
+    "party_id": partyId,
     "party_firm": partyFirm,
     "party_name": partyName,
+    "quality_id": qualityId,
     "quality_name": qualityName,
   };
 }

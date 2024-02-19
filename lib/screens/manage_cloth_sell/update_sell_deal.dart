@@ -1,3 +1,5 @@
+import 'package:d_manager/constants/constants.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:intl/intl.dart';
 import '../../api/manage_sell_deals.dart';
 import 'package:d_manager/constants/app_theme.dart';
@@ -27,12 +29,25 @@ import '../widgets/snackbar.dart';
 class UpdateSellDeal extends StatefulWidget {
   final int sellID;
   final SellDeal sellListData;
-  const UpdateSellDeal({super.key, required this.sellID,required this.sellListData});
+  ActiveFirmsList? selectedFirm;
+  ActivePartiesList? selectedParty;
+  ClothQuality? selectedClothQuality;
+   UpdateSellDeal({
+    super.key,
+    required this.sellID,
+    required this.sellListData,
+    this.selectedFirm,
+    this.selectedParty,
+    this.selectedClothQuality,
+  });
   @override
   State<UpdateSellDeal> createState() => _UpdateSellDealState();
 }
 
 class _UpdateSellDealState extends State<UpdateSellDeal> {
+  TextEditingController firmController = TextEditingController();
+  TextEditingController partyController = TextEditingController();
+  TextEditingController clothQualityController = TextEditingController();
   late SellDeal _sellListData;
   late TextEditingController totalThanController;
   late TextEditingController rateController;
@@ -44,6 +59,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
   bool isLoading = false;
   SellDealDetails sellDealDetails = SellDealDetails();
   DateTime selectedDate = DateTime.now();
+  DateTime selectedDueDate = DateTime.now();
 
   ManageFirmServices firmServices = ManageFirmServices();
   ManagePartyServices partyServices = ManagePartyServices();
@@ -59,7 +75,6 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
   String? partyID;
   String? clothID;
 
-
   void handleDateChanged(DateTime newDate) {
     setState(() {
       selectedDate = newDate;
@@ -71,15 +86,20 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
     _sellListData = widget.sellListData;
     totalThanController = TextEditingController(text: _sellListData.totalThan);
     rateController = TextEditingController(text: _sellListData.rate);
+    firmController.text = widget.selectedFirm?.firmName ?? '';
+    partyController.text = widget.selectedParty?.partyName ?? '';
+    clothQualityController.text = widget.selectedClothQuality?.qualityName ?? '';
+
     _loadData();
     _loadPartyData();
     _loadClothData();
   }
+
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          title:S.of(context).manageClothSellDeal,
+          title:S.of(context).updateClothSellDeal,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -99,99 +119,47 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select Deal Date', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDatePicker(selectedDate: DateTime.parse(selectedDate.toString())),
-                            ],
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Select Deal Date', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomDatePicker(selectedDate: DateTime.parse(_sellListData.sellDate.toString())),
+                              ],
+                            ),
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select My Firm', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDropdownNew<ActiveFirmsList>(
-                                hintText: 'Select Firm',
-                                dropdownItems:firms ?? [],
-                                selectedValue:selectedFirm,
-                                onChanged:(newValue){
-                                  setState(() {
-                                    selectedFirm = newValue;
-                                    if (newValue != null) {
-                                      firmID = newValue.firmId.toString();
-                                    } else {
-                                      firmID = null; // Reset firmID if selectedFirm is null
-                                    }
-                                  });
-                                } ,
-                                displayTextFunction: (ActiveFirmsList? firm){
-                                  return firm!.firmName!;
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Gap(Dimensions.height20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select Party Name', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDropdownNew<ActivePartiesList>(
-                                hintText: 'Select Party',
-                                dropdownItems:parties ?? [],
-                                selectedValue:selectedParty,
-                                onChanged:(newValue){
-                                  setState(() {
-                                    selectedParty = newValue;
-                                    if (newValue != null) {
-                                      partyID = newValue.partyId.toString();
-                                    } else {
-                                      partyID = null; // Reset firmID if selectedFirm is null
-                                    }
-                                  });
-                                } ,
-                                displayTextFunction: (ActivePartiesList? parties){
-                                  return parties!.partyName!;
-                                },
-                              ),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDropdownNew<ClothQuality>(
-                                hintText: 'Cloth Quality',
-                                dropdownItems:activeClothQuality ?? [],
-                                selectedValue:selectedClothQuality,
-                                onChanged:(newValue){
-                                  setState(() {
-                                    selectedClothQuality = newValue;
-                                    if (newValue != null) {
-                                      clothID = newValue.qualityId.toString();
-                                      print("ClothIDisselected===== $clothID");
-                                    } else {
-                                      clothID = null; // Reset firmID if selectedFirm is null
-                                    }
-                                  });
-                                } ,
-                                displayTextFunction: (ClothQuality? cloth){
-                                  return cloth!.qualityName!;
-                                },
-                              ),
-                            ],
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomDropdownNew<ActiveFirmsList>(
+                                  hintText: 'Select Firm',
+                                  dropdownItems:firms ?? [],
+                                  selectedValue:widget.selectedFirm,
+                                  onChanged:(newValue){
+                                    setState(() {
+                                      widget.selectedFirm = newValue;
+                                      firmController.text = newValue?.firmName ?? '';
+                                      if (newValue != null) {
+                                        firmID = newValue.firmId.toString();
+                                      } else {
+                                        firmID = null; // Reset firmID if selectedFirm is null
+                                      }
+                                    });
+                                  } ,
+                                  displayTextFunction: (ActiveFirmsList? firm){
+                                    return firm!.firmName!;
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -199,55 +167,146 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Total Than', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomTextField(
-                                controller: totalThanController,
-                                hintText: "Enter Total Than",
-                                keyboardType: TextInputType.number,
-                                borderRadius: Dimensions.radius10,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                // errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
-                              ),
-                            ],
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Select Party Name', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomDropdownNew<ActivePartiesList>(
+                                  hintText: 'Select Party',
+                                  dropdownItems:parties ?? [],
+                                  selectedValue:selectedParty,
+                                  onChanged:(newValue){
+                                    setState(() {
+                                      selectedParty = newValue;
+                                      if (newValue != null) {
+                                        partyID = newValue.partyId.toString();
+                                      } else {
+                                        partyID = null; // Reset firmID if selectedFirm is null
+                                      }
+                                    });
+                                  } ,
+                                  displayTextFunction: (ActivePartiesList? parties){
+                                    return parties!.partyName!;
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Rate', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomTextField(
-                                controller: rateController,
-                                hintText: "Enter Rate",
-                                keyboardType: TextInputType.number,
-                                borderRadius: Dimensions.radius10,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                //errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
-                              )
-                            ],
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Select Cloth Quality', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomDropdownNew<ClothQuality>(
+                                  hintText: 'Cloth Quality',
+                                  dropdownItems:activeClothQuality ?? [],
+                                  selectedValue:selectedClothQuality,
+                                  onChanged:(newValue){
+                                    setState(() {
+                                      selectedClothQuality = newValue;
+                                      if (newValue != null) {
+                                        clothID = newValue.qualityId.toString();
+                                        print("ClothIDisselected===== $clothID");
+                                      } else {
+                                        clothID = null; // Reset firmID if selectedFirm is null
+                                      }
+                                    });
+                                  } ,
+                                  displayTextFunction: (ClothQuality? cloth){
+                                    return cloth!.qualityName!;
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                       Gap(Dimensions.height20),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          BigText(text: 'Status', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          CustomDropdown(
-                            dropdownItems: ['On Going', 'Completed'],
-                            selectedValue: status,
-                            onChanged: (newValue) {
-                              setState(() {
-                                status = newValue!;
-                              });
-                            },
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Total Than', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomTextField(
+                                  controller: totalThanController,
+                                  hintText: "Enter Total Than",
+                                  keyboardType: TextInputType.number,
+                                  borderRadius: Dimensions.radius10,
+                                  width: MediaQuery.of(context).size.width/2.65,
+                                  // errorText: errorTotalThan.toString() != 'null' ? errorTotalThan.toString() : '',
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Rate', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomTextField(
+                                  controller: rateController,
+                                  hintText: "Enter Rate",
+                                  keyboardType: TextInputType.number,
+                                  borderRadius: Dimensions.radius10,
+                                  width: MediaQuery.of(context).size.width/2.65,
+                                  //errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Gap(Dimensions.height20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Status', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomDropdown(
+                                  dropdownItems: ['On Going', 'Completed'],
+                                  selectedValue: status,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      status = newValue!;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: 'Select Due Date', size: Dimensions.font12,),
+                                Gap(Dimensions.height10/2),
+                                CustomDatePicker(selectedDate: DateTime.parse(selectedDueDate.toString())),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -276,6 +335,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
       clothID!,
       totalThanController.text,
       rateController.text,
+        selectedDueDate
     );
   }
   Future<void> UpdateSellDeal(
@@ -286,9 +346,11 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
       String qualityID,
       String totalThan,
       String rate,
+      DateTime sellDueDate
       ) async {
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
+      String formattedSellDueDate = DateFormat('yyyy-MM-dd').format(sellDueDate);
       UpdateSellDealModel? model = await sellDealDetails.updateSellDealApi(
         widget.sellID.toString(),
         formattedSellDate,
@@ -297,6 +359,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
         qualityID,
         totalThan,
         rate,
+        formattedSellDueDate
       );
       if (model?.success == true) {
         Navigator.of(context).pushNamed(AppRoutes.clothSellList);
