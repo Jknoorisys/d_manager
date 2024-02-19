@@ -521,10 +521,10 @@ class S {
   }
 
   /// `Manage Cloth Sell Deal`
-  String get updateClothSellDeal {
+  String get manageClothSellDeal {
     return Intl.message(
-      'Update Cloth Sell Deal',
-      name: 'updateClothSellDeal',
+      'Manage Cloth Sell Deal',
+      name: 'manageClothSellDeal',
       desc: '',
       args: [],
     );

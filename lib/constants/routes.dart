@@ -142,8 +142,8 @@ class AppRoutes {
     yarnPurchaseList: (context) => const YarnPurchaseList(),
     yarnPurchaseAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
-      return YarnPurchaseAdd(yarnPurchaseData: yarnPurchaseData);
+      final int? purchaseId = args?['purchaseId'];
+      return YarnPurchaseAdd(purchaseId: purchaseId);
     },
     yarnPurchaseView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;

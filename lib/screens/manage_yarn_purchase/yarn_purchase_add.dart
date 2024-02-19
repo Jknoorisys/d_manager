@@ -2,6 +2,7 @@ import 'package:d_manager/api/dropdown_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_yarn_list_model.dart';
@@ -10,6 +11,7 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,8 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 class YarnPurchaseAdd extends StatefulWidget {
-  final Map<String, dynamic>? yarnPurchaseData;
-  const YarnPurchaseAdd({super.key, this.yarnPurchaseData});
+  final int? purchaseId;
+  const YarnPurchaseAdd({super.key, this.purchaseId});
 
   @override
   State<YarnPurchaseAdd> createState() => _YarnPurchaseAddState();
@@ -27,10 +29,12 @@ class YarnPurchaseAdd extends StatefulWidget {
 class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
+  DateTime selectedDueDate = DateTime.now();
   String paymentType = 'Current';
   var selectedFirm;
   var selectedParty;
   var selectedYarn;
+  var selectedStatus;
   String yarnType = 'Roto';
   String status = 'On Going';
   String dharaOption = '15 days';
@@ -57,18 +61,17 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     _getFirms();
     _getParties();
     _getYarns();
-    if (widget.yarnPurchaseData != null) {
-      selectedDate = DateFormat('yyyy-MM-dd').parse(widget.yarnPurchaseData!['dealDate']);
-      status = widget.yarnPurchaseData!['status'];
-      lotNumberController.text = widget.yarnPurchaseData!['lotNumber'];
-      netWeightController.text = widget.yarnPurchaseData!['totalNetWeight'];
-      yarnType = widget.yarnPurchaseData!['yarnType'];
-      boxOrderedController.text = widget.yarnPurchaseData!['boxOrdered'];
-      denyarController.text = widget.yarnPurchaseData!['Deiner'];
-      rateController.text = widget.yarnPurchaseData!['rate'];
-      copsController.text = widget.yarnPurchaseData!['cops'];
-      paymentType = widget.yarnPurchaseData!['paymentType'];
-    }
+  }
+
+  @override
+  void dispose() {
+    lotNumberController.dispose();
+    netWeightController.dispose();
+    boxOrderedController.dispose();
+    denyarController.dispose();
+    rateController.dispose();
+    copsController.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -81,7 +84,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
-          title: widget.yarnPurchaseData == null ? 'Create Yarn Purchase Deal' : 'Update Yarn Purchase Deal',
+          title: widget.purchaseId == null ? 'Create Yarn Purchase Deal' : 'Update Yarn Purchase Deal',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -158,15 +161,19 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Status', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['On Going', 'Completed'],
-                                selectedValue: status,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    status = newValue!;
-                                  });
-                                },
-                              ),
+                              CustomApiDropdown(
+                                  hintText: 'Select Status',
+                                  dropdownItems: [
+                                    DropdownMenuItem<dynamic>(value: 'ongoing', child: BigText(text: 'On Going', size: Dimensions.font14,)),
+                                    DropdownMenuItem<dynamic>(value: 'completed', child: BigText(text: 'Completed', size: Dimensions.font14,)),
+                                  ],
+                                  selectedValue: selectedStatus,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedStatus = newValue!;
+                                    });
+                                  }
+                              )
                             ],
                           ),
                         ],
@@ -366,7 +373,41 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.yarnTypeList);
+                            if (HelperFunctions.checkInternet() == false) {
+                              CustomApiSnackbar.show(
+                                context,
+                                'Warning',
+                                'No internet connection',
+                                mode: SnackbarMode.warning,
+                              );
+                            } else {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              Map<String, dynamic> body = {
+                                // 'id': widget.purchaseId ?? '',
+                                'lot_number': lotNumberController.text,
+                                'net_weight': netWeightController.text,
+                                'box_ordered': boxOrderedController.text,
+                                'denyar': denyarController.text,
+                                'rate': rateController.text,
+                                'cops': copsController.text,
+                                'yarn_type': yarnType,
+                                'status': selectedStatus,
+                                'payment_type': paymentType,
+                                'purchase_date': DateFormat('yyyy-MM-dd').format(selectedDate),
+                                'firm_id': selectedFirm,
+                                'party_id': selectedParty,
+                                'yarn_type_id': selectedYarn,
+                                'payment_due_date' : DateFormat('yyyy-MM-dd').format(selectedDueDate),
+                                'dhara_days': dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '',
+                              };
+                              if (widget.purchaseId == null) {
+                                // _addPurchaseDeal(body);
+                              } else {
+                                // _updatePurchaseDeal(body);
+                              }
+                            }
                           }
                         },
                         buttonText: 'Save',
