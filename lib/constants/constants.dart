@@ -88,6 +88,10 @@ const String paymentToBeReceivedApi = '$baseUrl/api/reminder-cloth-payment-to-be
 const String sellHistoryApi = '$baseUrl/api/sale-history';
 const String purchaseHistoryApi = '$baseUrl/api/purchase-history';
 
+// Invoice list
+
+const String invoiceListApi = '$baseUrl/api/sell-deal-details';
+
 
 
 
