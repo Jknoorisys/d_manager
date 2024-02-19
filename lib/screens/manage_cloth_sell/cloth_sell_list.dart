@@ -51,7 +51,6 @@ class _ClothSellListState extends State<ClothSellList> {
   String status = 'On Going';
   int currentPage = 1;
 
-
   ManageFirmServices firmServices = ManageFirmServices();
   ManagePartyServices partyServices = ManagePartyServices();
   DropdownServices dropdownServices = DropdownServices();
@@ -280,6 +279,10 @@ class _ClothSellListState extends State<ClothSellList> {
                                   ),
                                   IconButton(
                                       onPressed: () {
+                                        selectedFirm = ActiveFirmsList(firmName: clothSellList[index].firmName,firmId:int.tryParse(clothSellList[index]!.firmId!));
+                                        selectedParty = ActivePartiesList(partyName: clothSellList[index].partyFirm,partyId:int.tryParse(clothSellList[index]!.partyId!));
+                                        selectedClothQuality = ClothQuality(qualityName: clothSellList[index].qualityName,qualityId:int.tryParse(clothSellList[index]!.qualityId!));
+
                                         // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
                                         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>
                                             UpdateSellDeal(

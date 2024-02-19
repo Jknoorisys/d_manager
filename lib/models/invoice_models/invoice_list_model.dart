@@ -43,7 +43,7 @@ class invoiceList {
   String? sellId;
   String? paymentType;
   DateTime? paymentDueDate;
-  dynamic dharaDays;
+  String? dharaDays;
   String? rate;
   String? discount;
   String? invoiceAmount;
@@ -52,13 +52,14 @@ class invoiceList {
   String? paidStatus;
   String? receivedAmount;
   String? differenceAmount;
-  dynamic paymentDate;
-  dynamic paymentMethod;
-  dynamic reason;
+  String? paymentDate;
+  String? paymentMethod;
+  String? reason;
   String? status;
-  dynamic transportDate;
+  String? transportDate;
   String? transportName;
   String? hammalName;
+  List<BaleDetail>? baleDetails;
 
   invoiceList({
     this.invoiceId,
@@ -83,6 +84,7 @@ class invoiceList {
     this.transportDate,
     this.transportName,
     this.hammalName,
+    this.baleDetails,
   });
 
   factory invoiceList.fromJson(Map<String, dynamic> json) => invoiceList(
@@ -108,6 +110,7 @@ class invoiceList {
     transportDate: json["transport_date"],
     transportName: json["transport_name"],
     hammalName: json["hammal_name"],
+    baleDetails: json["bale_details"] == null ? [] : List<BaleDetail>.from(json["bale_details"]!.map((x) => BaleDetail.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -133,5 +136,30 @@ class invoiceList {
     "transport_date": transportDate,
     "transport_name": transportName,
     "hammal_name": hammalName,
+    "bale_details": baleDetails == null ? [] : List<dynamic>.from(baleDetails!.map((x) => x.toJson())),
+  };
+}
+
+class BaleDetail {
+  String? baleNumber;
+  String? than;
+  String? meter;
+
+  BaleDetail({
+    this.baleNumber,
+    this.than,
+    this.meter,
+  });
+
+  factory BaleDetail.fromJson(Map<String, dynamic> json) => BaleDetail(
+    baleNumber: json["bale_number"],
+    than: json["than"],
+    meter: json["meter"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "bale_number": baleNumber,
+    "than": than,
+    "meter": meter,
   };
 }

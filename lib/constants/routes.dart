@@ -184,11 +184,11 @@ class AppRoutes {
       final Map<String, dynamic>? invoiceData = args?['invoiceData'];
       return InvoiceAdd(invoiceData: invoiceData);
     },
-    invoiceView: (context) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? invoiceData = args?['invoiceData'];
-      return InvoiceView(invoiceData: invoiceData);
-    },
+    // invoiceView: (context) {
+    //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    //   final Map<String, dynamic>? invoiceData = args?['invoiceData'];
+    //   return InvoiceView(invoiceData: invoiceData);
+    // },
 
     //Manage Purchase Reminders
     boxToBeReceived: (context) => const BoxToBeReceived(),

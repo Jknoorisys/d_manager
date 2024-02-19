@@ -89,7 +89,12 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
     firmController.text = widget.selectedFirm?.firmName ?? '';
     partyController.text = widget.selectedParty?.partyName ?? '';
     clothQualityController.text = widget.selectedClothQuality?.qualityName ?? '';
-
+    print("firmvalue===== ${widget.selectedFirm!.firmName!}");
+    print("firmId===== ${widget.selectedFirm!.firmId!}");
+    print("partyValue===== ${widget.selectedParty!.partyName!}");
+    print("partyId===== ${widget.selectedParty!.partyId!}");
+    print("cloth===== ${widget.selectedClothQuality!.qualityName!}");
+    print("clothId===== ${widget.selectedClothQuality!.qualityId!}");
     _loadData();
     _loadPartyData();
     _loadClothData();
