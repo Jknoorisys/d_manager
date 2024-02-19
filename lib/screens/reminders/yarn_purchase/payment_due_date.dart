@@ -4,7 +4,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../api/manage_yarn_reminder_services.dart';
 import '../../../generated/l10n.dart';
 import '../../../helpers/helper_functions.dart';
-import '../../../models/reminder_models/yarnPayementDueDateModel.dart';
+import '../../../models/reminder_models/yarn_payement_due_date_model.dart';
 import '../../widgets/body.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/drawer/zoom_drawer.dart';

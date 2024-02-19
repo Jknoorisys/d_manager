@@ -1,7 +1,8 @@
 import '../constants/constants.dart';
 import '../helpers/helper_functions.dart';
+import '../models/reminder_models/payment_to_be_received_model.dart';
 import '../models/reminder_models/thans_to_be_delivered_model.dart';
-import '../models/reminder_models/yarnPayementDueDateModel.dart';
+import '../models/reminder_models/yarn_payement_due_date_model.dart';
 import '../models/reminder_models/yarn_to_be_received_model.dart';
 import 'manage_sell_deals.dart';
 import 'package:dio/dio.dart';
@@ -83,6 +84,33 @@ class ManageYarnReminderServices{
       }
       else {
         return ThansToBeDeliveredModel.fromJson(response.data);
+      }
+    }catch(e){
+      print(e.toString());
+    }
+  }
+
+  Future<PaymentToBeReceivedModel?> paymentToBeReceived(
+      String pageNo,
+      )async{
+    try{
+      Map<String, dynamic> body = {
+        "user_id":HelperFunctions.getUserID(),
+        "page_no": pageNo,
+      };
+      Response response = await dio.post(paymentToBeReceivedApi, data: body,
+        options: Options(
+          headers: {
+            "X-API-Key":"NYS03223"
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return PaymentToBeReceivedModel.fromJson(response.data);
+      }
+      else {
+        return PaymentToBeReceivedModel.fromJson(response.data);
       }
     }catch(e){
       print(e.toString());

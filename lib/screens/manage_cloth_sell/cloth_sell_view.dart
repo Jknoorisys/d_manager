@@ -12,6 +12,7 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:intl/intl.dart';
 
 import '../../api/manage_sell_deals.dart';
 import '../../helpers/helper_functions.dart';
@@ -20,7 +21,7 @@ import '../../models/sell_models/sell_deal_list_model.dart';
 import '../widgets/snackbar.dart';
 class ClothSellView extends StatefulWidget {
   final int sellID;
-  const ClothSellView({Key? key,required this.sellID }) : super(key: key);
+  const ClothSellView({Key? key,required this.sellID}) : super(key: key);
   @override
   _ClothSellViewState createState() => _ClothSellViewState();
 }
@@ -156,7 +157,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!),
+                            _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!.toString()),
                             SizedBox(width: Dimensions.width20),
                             _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
                             SizedBox(width: Dimensions.width20),
@@ -180,6 +181,8 @@ class _ClothSellViewState extends State<ClothSellView> {
                         Row(
                           children: [
                             _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus!),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
                           ],
                         ),
                       ],
@@ -252,11 +255,11 @@ class _ClothSellViewState extends State<ClothSellView> {
                         return CustomAccordion(
                           titleChild: Row(
                             children: [
-                              _buildInfoColumn('Invoice Date', invoiceDataList[index]['invoiceDate']),
+                              Expanded(flex:1,child: _buildInfoColumn('Invoice Date', invoiceDataList[index]['invoiceDate'])),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Invoice No', invoiceDataList[index]['invoiceNumber']),
+                              Expanded(flex:1,child: _buildInfoColumn('Invoice No', invoiceDataList[index]['invoiceNumber'])),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Rate', invoiceDataList[index]['rate']),
+                              Expanded(flex:1,child: _buildInfoColumn('Rate', invoiceDataList[index]['rate'])),
                             ],
                           ),
                           contentChild: Column(
@@ -377,12 +380,21 @@ class _ClothSellViewState extends State<ClothSellView> {
     );
   }
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Deal Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );

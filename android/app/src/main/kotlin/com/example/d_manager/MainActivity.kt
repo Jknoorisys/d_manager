@@ -1,4 +1,4 @@
-package com.example.d_manager
+package com.tims.d_manager
 
 import io.flutter.embedding.android.FlutterActivity
 

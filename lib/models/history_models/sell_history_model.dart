@@ -1,21 +1,21 @@
 // To parse this JSON data, do
 //
-//     final sellDealListModel = sellDealListModelFromJson(jsonString);
+//     final sellHistoryModel = sellHistoryModelFromJson(jsonString);
 
 import 'dart:convert';
 
-SellDealListModel sellDealListModelFromJson(String str) => SellDealListModel.fromJson(json.decode(str));
+SellHistoryModel sellHistoryModelFromJson(String str) => SellHistoryModel.fromJson(json.decode(str));
 
-String sellDealListModelToJson(SellDealListModel data) => json.encode(data.toJson());
+String sellHistoryModelToJson(SellHistoryModel data) => json.encode(data.toJson());
 
-class SellDealListModel {
+class SellHistoryModel {
   bool? success;
   String? message;
   int? total;
   Filter? filter;
-  List<SellDeal>? data;
+  List<SellHistoryModelList>? data;
 
-  SellDealListModel({
+  SellHistoryModel({
     this.success,
     this.message,
     this.total,
@@ -23,12 +23,12 @@ class SellDealListModel {
     this.data,
   });
 
-  factory SellDealListModel.fromJson(Map<String, dynamic> json) => SellDealListModel(
+  factory SellHistoryModel.fromJson(Map<String, dynamic> json) => SellHistoryModel(
     success: json["success"],
     message: json["message"],
     total: json["total"],
     filter: json["filter"] == null ? null : Filter.fromJson(json["filter"]),
-    data: json["data"] == null ? [] : List<SellDeal>.from(json["data"]!.map((x) => SellDeal.fromJson(x))),
+    data: json["data"] == null ? [] : List<SellHistoryModelList>.from(json["data"]!.map((x) => SellHistoryModelList.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -40,7 +40,7 @@ class SellDealListModel {
   };
 }
 
-class SellDeal {
+class SellHistoryModelList {
   int? sellId;
   DateTime? sellDate;
   DateTime? sellDueDate;
@@ -57,8 +57,14 @@ class SellDeal {
   String? thanRemaining;
   String? dealStatus;
   String? status;
+  int? invoiceCount;
+  int? totalMeter;
+  int? totalGstAmount;
+  int? totalInvoiceAmount;
+  int? totalReceivedAmount;
+  int? totalDifferenceAmount;
 
-  SellDeal({
+  SellHistoryModelList({
     this.sellId,
     this.sellDate,
     this.sellDueDate,
@@ -75,9 +81,15 @@ class SellDeal {
     this.thanRemaining,
     this.dealStatus,
     this.status,
+    this.invoiceCount,
+    this.totalMeter,
+    this.totalGstAmount,
+    this.totalInvoiceAmount,
+    this.totalReceivedAmount,
+    this.totalDifferenceAmount,
   });
 
-  factory SellDeal.fromJson(Map<String, dynamic> json) => SellDeal(
+  factory SellHistoryModelList.fromJson(Map<String, dynamic> json) => SellHistoryModelList(
     sellId: json["sell_id"],
     sellDate: json["sell_date"] == null ? null : DateTime.parse(json["sell_date"]),
     sellDueDate: json["sell_due_date"] == null ? null : DateTime.parse(json["sell_due_date"]),
@@ -94,6 +106,12 @@ class SellDeal {
     thanRemaining: json["than_remaining"],
     dealStatus: json["deal_status"],
     status: json["status"],
+    invoiceCount: json["invoice_count"],
+    totalMeter: json["total_meter"],
+    totalGstAmount: json["total_gst_amount"],
+    totalInvoiceAmount: json["total_invoice_amount"],
+    totalReceivedAmount: json["total_received_amount"],
+    totalDifferenceAmount: json["total_difference_amount"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -113,14 +131,20 @@ class SellDeal {
     "than_remaining": thanRemaining,
     "deal_status": dealStatus,
     "status": status,
+    "invoice_count": invoiceCount,
+    "total_meter": totalMeter,
+    "total_gst_amount": totalGstAmount,
+    "total_invoice_amount": totalInvoiceAmount,
+    "total_received_amount": totalReceivedAmount,
+    "total_difference_amount": totalDifferenceAmount,
   };
 }
 
 class Filter {
-  String? firmId;
-  String? partyId;
-  String? qualityId;
-  String? dealStatus;
+  dynamic firmId;
+  dynamic partyId;
+  dynamic qualityId;
+  dynamic dealStatus;
 
   Filter({
     this.firmId,
