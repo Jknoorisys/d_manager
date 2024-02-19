@@ -34,4 +34,23 @@ class ManageInvoiceServices{
       print(e.toString());
     }
   }
+    
+    class ManageInvoiceServices {
+  Future<AddInvoiceModel?> addInvoice(Map<String, dynamic> body) async {
+    try {
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      Response response = await post(Uri.parse(addInvoiceUrl), body: body, headers: headers);
+      var data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return AddInvoiceModel.fromJson(data);
+      } else {
+        return AddInvoiceModel.fromJson(data);
+      }
+    } catch (e) {
+      return null
+    }
+  }
+
 }
