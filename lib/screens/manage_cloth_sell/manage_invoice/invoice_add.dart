@@ -23,6 +23,7 @@ class InvoiceAdd extends StatefulWidget {
 class _InvoiceAddState extends State<InvoiceAdd> {
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
+  DateTime invoiceDate = DateTime.now();
   String myFirm = 'Danish Textiles';
   String partyName = 'Mahesh Textiles';
   bool isPaymentReceived = false;
@@ -44,6 +45,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
   }
   @override
   Widget build(BuildContext context) {
+    print('Invoice Date: $invoiceDate');
     return CustomDrawer(
         content: CustomBody(
           title: widget.invoiceData == null ? 'Add Invoice' : 'Edit Invoice',
@@ -72,7 +74,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                               BigText(text: 'Select Invoice Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomDatePicker(
-                                selectedDate: selectedDate,
+                                selectedDate: invoiceDate,
                               )
                             ],
                           ),
