@@ -550,11 +550,11 @@ class S {
     );
   }
 
-  /// `Yarn to be Received`
-  String get yarnToBeReceived {
+  /// `Box to be Received`
+  String get boxToBeReceived {
     return Intl.message(
-      'Yarn to be Received',
-      name: 'yarnToBeReceived',
+      'Box to be Received',
+      name: 'boxToBeReceived',
       desc: '',
       args: [],
     );
@@ -705,16 +705,6 @@ class S {
     return Intl.message(
       'Cloth Quality List',
       name: 'clothQualityList',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update cloth sell deal
-  String get updateSellDeal {
-    return Intl.message(
-      'Update Sell Deal',
-      name: 'updateSellDeal',
       desc: '',
       args: [],
     );
@@ -1069,18 +1059,17 @@ class S {
       args: [],
     );
   }
-  /// `Notification List`
-  String get notificationList {
+
+  /// `Update Sell Deal`
+  String get updateSellDeal {
     return Intl.message(
-      'Notifications',
-      name: 'notificationList',
+      'Update Sell Deal',
+      name: 'updateSellDeal',
       desc: '',
       args: [],
     );
   }
 }
-
-
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   const AppLocalizationDelegate();

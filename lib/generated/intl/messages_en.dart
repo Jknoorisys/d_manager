@@ -161,6 +161,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "updateClothQuality":
             MessageLookupByLibrary.simpleMessage("Update Cloth Quality"),
         "updateHammal": MessageLookupByLibrary.simpleMessage("Update Hammal"),
+        "updateSellDeal":
+            MessageLookupByLibrary.simpleMessage("Update Sell Deal"),
         "updateTransport":
             MessageLookupByLibrary.simpleMessage("Update Transport"),
         "updateYarnType":

@@ -99,5 +99,6 @@
   "updateTransport": "Update Transport",
   "updateYarnType": "Update Yarn Type",
   "updateClothQuality": "Update Cloth Quality",
-  "updateHammal": "Update Hammal"
+  "updateHammal": "Update Hammal",
+  "updateSellDeal": "Update Sell Deal"
 }

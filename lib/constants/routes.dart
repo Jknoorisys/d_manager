@@ -6,6 +6,7 @@ import 'package:d_manager/screens/change_password/change_password.dart';
 import 'package:d_manager/screens/dashboard/dashboard.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_add.dart';
 import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_list.dart';
+import 'package:d_manager/screens/manage_cloth_sell/cloth_sell_view.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_add.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_view.dart';
 import 'package:d_manager/screens/manage_history/purchase_history.dart';
@@ -148,8 +149,8 @@ class AppRoutes {
     yarnPurchaseList: (context) => const YarnPurchaseList(),
     yarnPurchaseAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
-      return YarnPurchaseAdd(yarnPurchaseData: yarnPurchaseData);
+      final int? purchaseId = args?['purchaseId'];
+      return YarnPurchaseAdd(purchaseId: purchaseId);
     },
     yarnPurchaseView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -176,19 +177,20 @@ class AppRoutes {
       final Map<String, dynamic>? clothSellData = args?['clothSellData'];
       return ClothSellAdd(clothSellData: clothSellData);
     },
-    // clothSellView: (context) {
-    //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    //   final Map<String, dynamic>? clothSellData = args?['clothSellData'];
-    //   return ClothSellView();
-    //   //clothSellData: clothSellData
-    // },
+    clothSellView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final int? sellID = args?['sellID'];
+      return ClothSellView(sellID: sellID!.toInt());
+      //clothSellData: clothSellData
+    },
 
 
     // Manage Invoices
     invoiceAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? invoiceData = args?['invoiceData'];
-      return InvoiceAdd(invoiceData: invoiceData);
+      final int? sellID = args?['sellID'];
+      final int? invoiceID = args?['invoiceID'];
+      return InvoiceAdd(sellID: sellID, invoiceID: invoiceID);
     },
     // invoiceView: (context) {
     //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
