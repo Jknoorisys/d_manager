@@ -1,15 +1,21 @@
 import 'package:d_manager/api/dropdown_services.dart';
+import 'package:d_manager/api/manage_purchase_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_yarn_list_model.dart';
+import 'package:d_manager/models/yarn_purchase_models/add_yarn_purchase_model.dart';
+import 'package:d_manager/models/yarn_purchase_models/update_yarn_purchase_model.dart';
+import 'package:d_manager/models/yarn_purchase_models/yarn_purchase_detail_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +23,8 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 class YarnPurchaseAdd extends StatefulWidget {
-  final Map<String, dynamic>? yarnPurchaseData;
-  const YarnPurchaseAdd({super.key, this.yarnPurchaseData});
+  final int? purchaseId;
+  const YarnPurchaseAdd({super.key, this.purchaseId});
 
   @override
   State<YarnPurchaseAdd> createState() => _YarnPurchaseAddState();
@@ -27,10 +33,12 @@ class YarnPurchaseAdd extends StatefulWidget {
 class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
+  DateTime selectedDueDate = DateTime.now();
   String paymentType = 'Current';
   var selectedFirm;
   var selectedParty;
   var selectedYarn;
+  var selectedStatus;
   String yarnType = 'Roto';
   String status = 'On Going';
   String dharaOption = '15 days';
@@ -41,10 +49,10 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   List<Yarn> yarns = [];
 
   DropdownServices dropdownServices = DropdownServices();
-
+  ManagePurchaseServices purchaseServices = ManagePurchaseServices();
 
   TextEditingController lotNumberController = TextEditingController();
-  TextEditingController netWeightController = TextEditingController();
+  TextEditingController grossWeightController = TextEditingController();
   TextEditingController boxOrderedController = TextEditingController();
   TextEditingController denyarController = TextEditingController();
   TextEditingController rateController = TextEditingController();
@@ -52,36 +60,42 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
 
   @override
   void initState() {
+    if (widget.purchaseId != null) {
+      _getDealDetails();
+    }
     super.initState();
     isLoading = true;
     _getFirms();
     _getParties();
     _getYarns();
-    if (widget.yarnPurchaseData != null) {
-      selectedDate = DateFormat('yyyy-MM-dd').parse(widget.yarnPurchaseData!['dealDate']);
-      status = widget.yarnPurchaseData!['status'];
-      lotNumberController.text = widget.yarnPurchaseData!['lotNumber'];
-      netWeightController.text = widget.yarnPurchaseData!['totalNetWeight'];
-      yarnType = widget.yarnPurchaseData!['yarnType'];
-      boxOrderedController.text = widget.yarnPurchaseData!['boxOrdered'];
-      denyarController.text = widget.yarnPurchaseData!['Deiner'];
-      rateController.text = widget.yarnPurchaseData!['rate'];
-      copsController.text = widget.yarnPurchaseData!['cops'];
-      paymentType = widget.yarnPurchaseData!['paymentType'];
-    }
+  }
+
+  @override
+  void dispose() {
+    lotNumberController.dispose();
+    grossWeightController.dispose();
+    boxOrderedController.dispose();
+    denyarController.dispose();
+    rateController.dispose();
+    copsController.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     var errorLotNumber = submitted == true ? _validateLotNumber(lotNumberController.text) : null,
-        errorNetWeight = submitted == true ? _validateNetWeight(netWeightController.text) : null,
+        errorGrossWeight = submitted == true ? _validateGrossWeight(grossWeightController.text) : null,
         errorBoxOrdered = submitted == true ? _validateBoxOrdered(boxOrderedController.text) : null,
         errorDenyar = submitted == true ? _validateDenyar(denyarController.text) : null,
         errorRate = submitted == true ? _validateRate(rateController.text) : null,
-        errorCops = submitted == true ? _validateCops(copsController.text) : null;
+        errorCops = submitted == true ? _validateCops(copsController.text) : null,
+        errorFirm = submitted == true ? selectedFirm == null ? 'Firm is required' : null : null,
+        errorParty = submitted == true ? selectedParty == null ? 'Party is required' : null : null,
+        errorYarn = submitted == true ? selectedYarn == null ? 'Yarn is required' : null : null,
+        errorStatus = submitted == true ? selectedStatus == null ? 'Status is required' : null : null;
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
-          title: widget.yarnPurchaseData == null ? 'Create Yarn Purchase Deal' : 'Update Yarn Purchase Deal',
+          title: widget.purchaseId == null ? 'Create Yarn Purchase Deal' : 'Update Yarn Purchase Deal',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -107,7 +121,14 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             children: [
                               BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDatePicker(selectedDate: selectedDate),
+                              CustomDatePicker(
+                                selectedDate: selectedDate,
+                                onDateSelected: (date) {
+                                  setState(() {
+                                    selectedDate = date;
+                                  });
+                                },
+                              ),
                             ],
                           ),
                           Column(
@@ -120,6 +141,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                   hintText: 'Select Firm',
                                   dropdownItems: firms.map((e) => DropdownMenuItem<dynamic>(value: e.firmId!, child: BigText(text: e.firmName!, size: Dimensions.font14,))).toList(),
                                   selectedValue: selectedFirm,
+                                  errorText: errorFirm.toString() != 'null' ? errorFirm.toString() : null,
                                   onChanged: (newValue) {
                                     setState(() {
                                       selectedFirm = newValue!;
@@ -144,29 +166,13 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                   hintText: 'Select Party',
                                   dropdownItems: parties.map((e) => DropdownMenuItem<dynamic>(value: e.partyId!, child: BigText(text: e.partyName!, size: Dimensions.font14,))).toList(),
                                   selectedValue: selectedParty,
+                                  errorText: errorParty.toString() != 'null' ? errorParty.toString() : null,
                                   onChanged: (newValue) {
                                     setState(() {
                                       selectedParty = newValue!;
                                     });
                                   }
                               )
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Status', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['On Going', 'Completed'],
-                                selectedValue: status,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    status = newValue!;
-                                  });
-                                },
-                              ),
                             ],
                           ),
                         ],
@@ -191,7 +197,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorLotNumber.toString() != 'null' ? errorLotNumber.toString() : '',
+                                // errorText: errorLotNumber.toString() != 'null' ? errorLotNumber.toString() : '',
                               ),
                             ],
                           ),
@@ -199,15 +205,15 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Net Weight', size: Dimensions.font12,),
+                              BigText(text: 'Gross Weight', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomTextField(
-                                controller: netWeightController,
-                                hintText: "Enter Net Weight",
+                                controller: grossWeightController,
+                                hintText: "Enter Gross Weight",
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorNetWeight.toString() != 'null' ? errorNetWeight.toString() : '',
+                                errorText: errorGrossWeight.toString() != 'null' ? errorGrossWeight.toString() : '',
                               )
                             ],
                           ),
@@ -227,6 +233,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                 hintText: 'Select Yarn',
                                   dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
                                   selectedValue: selectedYarn,
+                                  errorText: errorYarn.toString() != 'null' ? errorYarn.toString() : null,
                                   onChanged: (newValue) {
                                     setState(() {
                                       selectedYarn = newValue!;
@@ -239,29 +246,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Select Yarn Type', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDropdown(
-                                dropdownItems: ['Roto', 'Zero', 'dZero'],
-                                selectedValue: yarnType,
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    yarnType = newValue!;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Gap(Dimensions.height20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
                               BigText(text: 'Box Ordered', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomTextField(
@@ -270,23 +254,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorBoxOrdered.toString() != 'null' ? errorBoxOrdered.toString() : '',
-                              )
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Denyar', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomTextField(
-                                controller: denyarController,
-                                hintText: "Enter Denyar",
-                                keyboardType: TextInputType.number,
-                                borderRadius: Dimensions.radius10,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorDenyar.toString() != 'null' ? errorDenyar.toString() : '',
+                                // errorText: errorBoxOrdered.toString() != 'null' ? errorBoxOrdered.toString() : '',
                               )
                             ],
                           ),
@@ -296,6 +264,22 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Denier', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomTextField(
+                                controller: denyarController,
+                                hintText: "Enter Denier",
+                                keyboardType: TextInputType.number,
+                                borderRadius: Dimensions.radius10,
+                                width: MediaQuery.of(context).size.width/2.65,
+                                // errorText: errorDenyar.toString() != 'null' ? errorDenyar.toString() : '',
+                              )
+                            ],
+                          ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,6 +296,12 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                               )
                             ],
                           ),
+                        ],
+                      ),
+                      Gap(Dimensions.height20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,7 +314,29 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorCops.toString() != 'null' ? errorCops.toString() : '',
+                                // errorText: errorCops.toString() != 'null' ? errorCops.toString() : '',
+                              )
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Status', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomApiDropdown(
+                                  hintText: 'Select Status',
+                                  dropdownItems: [
+                                    DropdownMenuItem<dynamic>(value: 'ongoing', child: BigText(text: 'On Going', size: Dimensions.font14,)),
+                                    DropdownMenuItem<dynamic>(value: 'completed', child: BigText(text: 'Completed', size: Dimensions.font14,)),
+                                  ],
+                                  selectedValue: selectedStatus,
+                                  errorText: errorStatus.toString() != 'null' ? errorStatus.toString() : null,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedStatus = newValue!;
+                                    });
+                                  }
                               )
                             ],
                           ),
@@ -366,7 +378,41 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.yarnTypeList);
+                            if (HelperFunctions.checkInternet() == false) {
+                              CustomApiSnackbar.show(
+                                context,
+                                'Warning',
+                                'No internet connection',
+                                mode: SnackbarMode.warning,
+                              );
+                            } else {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              Map<String, dynamic> body = {
+                                'purchase_id': widget.purchaseId ?? '',
+                                'user_id': HelperFunctions.getUserID(),
+                                'lot_number': lotNumberController.text,
+                                'gross_weight': grossWeightController.text,
+                                'ordered_box_count': boxOrderedController.text,
+                                'denier': denyarController.text,
+                                'rate': rateController.text,
+                                'cops': copsController.text,
+                                'status': selectedStatus,
+                                'payment_type': paymentType == 'Current' ? 'current' : 'dhara',
+                                'purchase_date': DateFormat('yyyy-MM-dd').format(selectedDate),
+                                'firm_id': selectedFirm.toString(),
+                                'party_id': selectedParty.toString(),
+                                'yarn_type_id': selectedYarn.toString(),
+                                'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
+                                'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
+                              };
+                              if (widget.purchaseId == null) {
+                                _addPurchaseDeal(body);
+                              } else {
+                                _updatePurchaseDeal(body);
+                              }
+                            }
                           }
                         },
                         buttonText: 'Save',
@@ -389,7 +435,12 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         BigText(text: 'Select Due Date', size: Dimensions.font12,),
         Gap(Dimensions.height10/2),
         CustomDatePicker(
-          selectedDate: selectedDate,
+          selectedDate: selectedDueDate,
+          onDateSelected: (date) {
+            setState(() {
+              selectedDueDate = date;
+            });
+          },
         )
       ],
     );
@@ -425,7 +476,12 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         Gap(Dimensions.height10/2),
         CustomDatePicker(
           width: MediaQuery.of(context).size.width,
-          selectedDate: selectedDate,
+          selectedDate: selectedDueDate,
+          onDateSelected: (date) {
+            setState(() {
+              selectedDueDate = date;
+            });
+          },
         )
       ],
     );
@@ -438,9 +494,9 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     return null;
   }
 
-  String? _validateNetWeight(String? value) {
+  String? _validateGrossWeight(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Net Weight is required';
+      return 'Gross Weight is required';
     }
     return null;
   }
@@ -475,12 +531,12 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
 
   bool _isFormValid() {
     String lotNumberError = _validateLotNumber(lotNumberController.text) ?? '';
-    String netWeightError = _validateNetWeight(netWeightController.text) ?? '';
+    String grossWeightError = _validateGrossWeight(grossWeightController.text) ?? '';
     String boxOrderedError = _validateBoxOrdered(boxOrderedController.text) ?? '';
     String denyarError = _validateDenyar(denyarController.text) ?? '';
     String rateError = _validateRate(rateController.text) ?? '';
     String copsError = _validateCops(copsController.text) ?? '';
-    return lotNumberError.isEmpty && netWeightError.isEmpty && boxOrderedError.isEmpty && denyarError.isEmpty && rateError.isEmpty && copsError.isEmpty ? true : false;
+    return rateError.isEmpty && grossWeightError.isEmpty  ? true : false;
   }
   
   Future<void> _getFirms() async {
@@ -510,6 +566,120 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         yarns.addAll(response.data!);
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _addPurchaseDeal(Map<String, dynamic> body) async {
+    AddYarnPurchaseModel? addPurchaseModel = await purchaseServices.addPurchase(body);
+    if (addPurchaseModel?.message != null) {
+      if (addPurchaseModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addPurchaseModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addPurchaseModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updatePurchaseDeal(Map<String, dynamic> body) async {
+    UpdateYarnPurchaseModel? updateDealModel = await purchaseServices.updatePurchase(body);
+    if (updateDealModel?.message != null) {
+      if (updateDealModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updateDealModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updateDealModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getDealDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(widget.purchaseId!);
+
+    if (dealDetailModel?.message != null) {
+      if (dealDetailModel?.success == true) {
+        lotNumberController.text = dealDetailModel!.data!.lotNumber!;
+        grossWeightController.text = dealDetailModel.data!.grossWeight!;
+        boxOrderedController.text = dealDetailModel.data!.orderedBoxCount!;
+        denyarController.text = dealDetailModel.data!.denier!;
+        rateController.text = dealDetailModel.data!.rate!;
+        copsController.text = dealDetailModel.data!.cops!;
+        selectedDate = DateTime.parse(dealDetailModel.data!.purchaseDate!.toString());
+        selectedDueDate = DateTime.parse(dealDetailModel.data!.paymentDueDate!.toString());
+        selectedFirm = int.parse(dealDetailModel.data!.firmId!);
+        selectedParty = int.parse(dealDetailModel.data!.partyId!);
+        selectedYarn = int.parse(dealDetailModel.data!.yarnTypeId!);
+        selectedStatus = dealDetailModel.data!.dealStatus! == 'ongoing' ? 'ongoing' : 'completed';
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          dealDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
     }
   }
 }

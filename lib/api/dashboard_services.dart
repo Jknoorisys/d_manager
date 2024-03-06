@@ -1,3 +1,5 @@
+import 'package:d_manager/api/manage_sell_deals.dart';
+
 import '../constants/constants.dart';
 import '../helpers/helper_functions.dart';
 import '../models/dashboard_models/dashboard_models.dart';

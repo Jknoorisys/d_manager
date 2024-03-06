@@ -1,3 +1,4 @@
+import 'package:d_manager/api/manage_purchase_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
@@ -7,6 +8,7 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -25,6 +27,9 @@ class YarnPurchaseView extends StatefulWidget {
 class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   String billReceived = 'Yes'; 
   String paymentPaid = 'Yes';
+  bool isLoading = false;
+
+  ManagePurchaseServices purchaseServices = ManagePurchaseServices();
 
   List<Map<String, dynamic>> deliveryDetailList = [
     {'no': 1, 'dealDate': '2024-01-25', 'paymentType': 'Current', 'paymentMethod': 'Cheque', 'boxReceived': '500', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-10', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
@@ -33,6 +38,13 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
     {'no': 4, 'dealDate': '2024-01-28', 'paymentType': 'Dhara', 'paymentMethod': 'Cheque', 'boxReceived': '550', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-18', 'paid': true, 'paidDate': '2024-02-10', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'invoice.pdf', 'status': 'On Going'},
     {'no': 5, 'dealDate': '2024-01-29', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '600', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-20', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
   ];
+
+  void initState() {
+    super.initState();
+    if (widget.purchaseId != null) {
+      _getPurchaseDetails();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -467,6 +479,34 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
         ],
       ),
     );
+  }
+
+  Future<void> _getPurchaseDetails() async {
+    // setState(() {
+    //   isLoading = true;
+    // });
+    // FirmDetailModel? firmDetailModel = await manageFirmServices.viewFirm(widget.firmId!);
+    // if (firmDetailModel?.message != null) {
+    //   if (firmDetailModel?.success == true) {
+    //     setState(() {
+    //       isLoading = false;
+    //     });
+    //   } else {
+    //     CustomApiSnackbar.show(
+    //       context,
+    //       'Error',
+    //       firmDetailModel!.message.toString(),
+    //       mode: SnackbarMode.error,
+    //     );
+    //   }
+    // } else {
+    //   CustomApiSnackbar.show(
+    //     context,
+    //     'Error',
+    //     'Something went wrong, please try again',
+    //     mode: SnackbarMode.error,
+    //   );
+    // }
   }
 }
 

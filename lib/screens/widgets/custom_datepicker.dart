@@ -7,12 +7,15 @@ import 'package:intl/intl.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final DateTime selectedDate;
-
   final double? height;
   final double? width;
+  final void Function(DateTime)? onDateSelected; // Callback for selected date
 
   CustomDatePicker({
-    required this.selectedDate,this.height, this.width,
+    required this.selectedDate,
+    this.height,
+    this.width,
+    this.onDateSelected, // Add the callback parameter
   });
 
   @override
@@ -36,7 +39,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
           context: context,
           helpText: S.of(context).selectDate,
           initialDate: selectedDate,
-          firstDate:  DateTime(2000),
+          firstDate: DateTime(2000),
           lastDate: DateTime(2050),
         );
 
@@ -44,11 +47,14 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
           setState(() {
             selectedDate = pickedDate;
           });
+
+          // Call the callback function with the selected date
+          widget.onDateSelected!(pickedDate);
         }
       },
       child: Container(
         height: widget.height ?? Dimensions.height50,
-        width: widget.width ?? MediaQuery.of(context).size.width/2.65,
+        width: widget.width ?? MediaQuery.of(context).size.width / 2.65,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Dimensions.radius10),
           color: Colors.white,
@@ -59,7 +65,10 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              BigText(text: DateFormat('yyyy-MM-dd').format(selectedDate), size: Dimensions.font14,),
+              BigText(
+                text: DateFormat('yyyy-MM-dd').format(selectedDate),
+                size: Dimensions.font14,
+              ),
               Padding(
                 padding: EdgeInsets.zero,
                 child: Icon(

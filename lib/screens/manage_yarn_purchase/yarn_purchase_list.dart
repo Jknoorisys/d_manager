@@ -1,5 +1,13 @@
+import 'package:d_manager/api/dropdown_services.dart';
+import 'package:d_manager/api/manage_purchase_services.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_yarn_list_model.dart';
+import 'package:d_manager/models/yarn_purchase_models/update_yarn_purchase_status_model.dart';
+import 'package:d_manager/models/yarn_purchase_models/yarn_purchase_list_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -7,6 +15,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +23,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class YarnPurchaseList extends StatefulWidget {
   const YarnPurchaseList({Key? key}) : super(key: key);
@@ -24,32 +34,55 @@ class YarnPurchaseList extends StatefulWidget {
 
 class _YarnPurchaseListState extends State<YarnPurchaseList> {
   final searchController = TextEditingController();
-  List<Map<String, dynamic>> unFilteredYarnPurchaseList = [
-    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mehta and Sons Yarn Trades','yarnName':'Golden','yarnType':'Roto','paymentType':'Current','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.00','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},
-    {'no': 2, 'dealDate': '2024-01-26','myFirm': 'Danish Textiles','partyName': 'SS Textile','yarnName':'Golden','yarnType':'Roto','paymentType':'Dhara','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.12','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},
-    {'no': 3, 'dealDate': '2024-01-27','myFirm': 'Danish Textiles','partyName': 'Nageena Textile','yarnName':'Golden','yarnType':'Roto','paymentType':'Current','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'22.98','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'Completed'},
-    {'no': 4, 'dealDate': '2024-01-28','myFirm': 'Danish Textiles','partyName': 'Bluesky Cloth Sale','yarnName':'Golden','yarnType':'Roto','paymentType':'Current','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.45','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},
-    {'no': 5, 'dealDate': '2024-01-29','myFirm': 'Danish Textiles','partyName': 'Suntex Textiles','yarnName':'Golden','yarnType':'Roto','paymentType':'Dhara','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'24.62','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'Completed'},
-  ];
+  final RefreshController _refreshController = RefreshController();
+  List<PurchaseDetail> purchases = [];
+  int currentPage = 1;
+  bool isLoading = false;
+  bool isFilterApplied = false;
+  ManagePurchaseServices purchaseServices = ManagePurchaseServices();
+  var selectedFirm;
+  var selectedParty;
+  var selectedYarn;
+  var selectedStatus;
+  List<Firm> firms = [];
+  List<Party> parties = [];
+  List<Yarn> yarns = [];
 
-  List<Map<String, dynamic>> yarnPurchaseList = [];
-
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mehta and Sons Yarn Trades';
-  String yarnName = 'Golden';
-  String yarnType = 'Roto';
-  String status = 'On Going';
-
+  DropdownServices dropdownServices = DropdownServices();
   @override
   void initState() {
     super.initState();
-    yarnPurchaseList = unFilteredYarnPurchaseList;
+    if (HelperFunctions.checkInternet() == false) {
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    } else {
+      setState(() {
+        isLoading = true;
+        _getFirms();
+        _getParties();
+        _getYarns();
+      });
+      _loadData(currentPage, searchController.text.trim());
+    }
   }
+  @override
+  void dispose() {
+    searchController.dispose();
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
           title: S.of(context).yarnPurchasesList,
+          isLoading: isLoading,
           filterButton: GestureDetector(
             onTap: () {
               _showBottomSheet(context);
@@ -74,22 +107,18 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                           borderRadius: Dimensions.radius10,
                           borderColor: AppTheme.primary,
                           onSuffixTap: () {
-                            searchController.clear();
                             setState(() {
-                              yarnPurchaseList = unFilteredYarnPurchaseList;
+                              searchController.clear();
+                              purchases.clear();
+                              currentPage = 1;
+                              _loadData(currentPage, searchController.text.trim());
                             });
                           },
                           onChanged: (value) {
                             setState(() {
-                              yarnPurchaseList = unFilteredYarnPurchaseList
-                                  .where((firm) =>
-                              firm['partyName']
-                                  .toLowerCase()
-                                  .contains(value.toLowerCase()) ||
-                                  firm['myFirm']
-                                      .toLowerCase()
-                                      .contains(value.toLowerCase()))
-                                  .toList();
+                              purchases.clear();
+                              currentPage = 1;
+                              _loadData(currentPage, value);
                             });
                           }
                       ),
@@ -110,197 +139,213 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: yarnPurchaseList.length,
-                    itemBuilder: (context, index) {
-                      return CustomAccordion(
-                        titleChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    SizedBox(width: Dimensions.width10),
-                                    CircleAvatar(
-                                      backgroundColor: AppTheme.secondary,
-                                      radius: Dimensions.height20,
-                                      child: BigText(text: yarnPurchaseList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
-                                    ),
-                                    SizedBox(width: Dimensions.height10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        BigText(text: yarnPurchaseList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16),
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: AppTheme.black,
-                                              radius: Dimensions.height10,
-                                              child: BigText(text: yarnPurchaseList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                            ),
-                                            SizedBox(width: Dimensions.width10),
-                                            SmallText(text: yarnPurchaseList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            AppTheme.divider,
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Deal Date', yarnPurchaseList[index]['dealDate']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Yarn Name', yarnPurchaseList[index]['yarnName']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Yarn Type', yarnPurchaseList[index]['yarnType']),
-                              ],
-                            ),
-                          ],
-                        ),
-                        contentChild: Column(
-                          children: [
-                            Row(
-                              children: [
-                                _buildInfoColumn('Payment Type', yarnPurchaseList[index]['paymentType']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Lot Number', yarnPurchaseList[index]['lotNumber']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Box Ordered', yarnPurchaseList[index]['boxOrdered']),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Box Delivered', yarnPurchaseList[index]['boxDelivered']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Box Remaining', yarnPurchaseList[index]['boxRemaining']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Cops', yarnPurchaseList[index]['cops']),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                _buildInfoColumn('Deiner', yarnPurchaseList[index]['Deiner']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Status', yarnPurchaseList[index]['status']),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('', ''),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              children: [
-                                Container(
-                                    width: MediaQuery.of(context).size.width/2.65,
-                                    height: Dimensions.height40*2,
-                                    padding: EdgeInsets.all(Dimensions.height10),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.white,
-                                      borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                      border: Border.all(color: AppTheme.primary),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        BigText(text: 'Total Net Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                        RichText(
-                                          text: TextSpan(
-                                            style: TextStyle(
-                                              color: AppTheme.primary,
-                                              fontSize: Dimensions.font18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    enablePullUp: true,
+                    onRefresh: () async {
+                      setState(() {
+                        purchases.clear();
+                        currentPage = 1;
+                      });
+                      await _loadData(currentPage, searchController.text.trim());
+                      _refreshController.refreshCompleted();
+                    },
+                    onLoading: () async {
+                      await _loadData(currentPage, searchController.text.trim());
+                      _refreshController.loadComplete();
+                    },
+                    child: ListView.builder(
+                      itemCount: purchases.length,
+                      itemBuilder: (context, index) {
+                        var purchase = purchases[index];
+                        return CustomAccordion(
+                          titleChild: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      SizedBox(width: Dimensions.width10),
+                                      CircleAvatar(
+                                        backgroundColor: AppTheme.secondary,
+                                        radius: Dimensions.height20,
+                                        child: BigText(text: purchase.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                      ),
+                                      SizedBox(width: Dimensions.height10),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          BigText(text: purchase.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                          Row(
                                             children: [
-                                              TextSpan(
-                                                text: yarnPurchaseList[index]['totalNetWeight'],
+                                              CircleAvatar(
+                                                backgroundColor: AppTheme.black,
+                                                radius: Dimensions.height10,
+                                                child: BigText(text: purchase.partyFirm![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                               ),
-                                              TextSpan(
-                                                text: ' kg',
-                                                style: TextStyle(
-                                                  fontSize: Dimensions.font12,
-                                                ),
-                                              ),
+                                              SizedBox(width: Dimensions.width10),
+                                              SmallText(text: purchase.partyFirm!, color: AppTheme.black, size: Dimensions.font12),
                                             ],
                                           ),
-                                        ),
-                                        BigText(text: 'Gross Weight ${yarnPurchaseList[index]['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                      ],
-                                    )
-                                ),
-                                SizedBox(width: Dimensions.width20),
-                                Container(
-                                    width: MediaQuery.of(context).size.width/2.65,
-                                    height: Dimensions.height40*2,
-                                    padding: EdgeInsets.all(Dimensions.height10),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.white,
-                                      borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                      border: Border.all(color: AppTheme.primary),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                        BigText(text: '₹ ${yarnPurchaseList[index]['rate']}',color: AppTheme.primary, size: Dimensions.font18)
-                                      ],
-                                    )
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: Dimensions.height10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': yarnPurchaseList[index]});
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              AppTheme.divider,
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Deal Date', purchase.purchaseDate!.toString().split(' ')[0]),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Yarn Name', purchase.yarnName!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Yarn Type', purchase.yarnTypeName!),
+                                ],
+                              ),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Payment Type', purchase.paymentType!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Lot Number', purchase.lotNumber!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Box Ordered', purchase.orderedBoxCount!),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Gross Received', purchase.grossReceivedWeight!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Gross Remaining', (double.parse(purchase.grossWeight!) - double.parse(purchase.grossReceivedWeight!)).toString()),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Cops', purchase.cops!),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Deiner', purchase.denier!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Status', purchase.status! == 'active' ? 'On Going' : 'Completed'),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('', ''),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Container(
+                                      width: MediaQuery.of(context).size.width/2.65,
+                                      height: Dimensions.height40*2,
+                                      padding: EdgeInsets.all(Dimensions.height10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        border: Border.all(color: AppTheme.primary),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          BigText(text: 'Total Net Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          RichText(
+                                            text: TextSpan(
+                                              style: TextStyle(
+                                                color: AppTheme.primary,
+                                                fontSize: Dimensions.font18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              children: [
+                                                TextSpan(
+                                                  text: purchase.netWeight!,
+                                                ),
+                                                TextSpan(
+                                                  text: ' kg',
+                                                  style: TextStyle(
+                                                    fontSize: Dimensions.font12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          BigText(text: 'Gross Weight ${purchase.grossWeight} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                        ],
+                                      )
+                                  ),
+                                  SizedBox(width: Dimensions.width20),
+                                  Container(
+                                      width: MediaQuery.of(context).size.width/2.65,
+                                      height: Dimensions.height40*2,
+                                      padding: EdgeInsets.all(Dimensions.height10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        border: Border.all(color: AppTheme.primary),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: '₹ ${purchase.rate}',color: AppTheme.primary, size: Dimensions.font18)
+                                        ],
+                                      )
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': purchase.purchaseId});
+                                      },
+                                      icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
+                                  ),
+                                  IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd, arguments: {'purchaseId': purchase.purchaseId});
+                                      },
+                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
+                                  ),
+                                  // IconButton(
+                                  //     onPressed: () {
+                                  //       setState(() {
+                                  //         purchases.removeAt(index);
+                                  //       });
+                                  //     },
+                                  //     icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
+                                  // ),
+                                  GFCheckbox(
+                                    size: Dimensions.height20,
+                                    type: GFCheckboxType.custom,
+                                    inactiveBgColor: AppTheme.nearlyWhite,
+                                    inactiveBorderColor: AppTheme.primary,
+                                    customBgColor: AppTheme.primary,
+                                    activeBorderColor: AppTheme.primary,
+                                    onChanged: (value) {
+                                      String newStatus = value ? 'active' : 'inactive';
+                                      _updateStatus(purchase.purchaseId!, newStatus);
                                     },
-                                    icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
-                                ),
-                                IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseAdd, arguments: {'yarnPurchaseData': yarnPurchaseList[index]});
-                                    },
-                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
-                                ),
-                                IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        yarnPurchaseList.removeAt(index);
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                                ),
-                                GFCheckbox(
-                                  size: Dimensions.height20,
-                                  type: GFCheckboxType.custom,
-                                  inactiveBgColor: AppTheme.nearlyWhite,
-                                  inactiveBorderColor: AppTheme.primary,
-                                  customBgColor: AppTheme.primary,
-                                  activeBorderColor: AppTheme.primary,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      yarnPurchaseList[index]['status'] = value == true ? 'Completed' : 'On Going';
-                                    });
-                                  },
-                                  value: yarnPurchaseList[index]['status'] == 'Completed' ? true : false,
-                                  inactiveIcon: null,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                                    value: purchase.status == 'active' ? true : false,
+                                    inactiveIcon: null,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -339,6 +384,19 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        isLoading = true;
+                       _loadData(currentPage, '');
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.filter_alt, color: AppTheme.primary)
+                  ),
+                ],
+              ),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Column(
@@ -347,15 +405,16 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                     children: [
                       BigText(text: 'Select My Firm', size: Dimensions.font12,),
                       Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['Mahesh Textiles', 'Danish Textiles', 'SS Textiles and Sons', 'Laxmi Traders'],
-                        selectedValue: myFirm,
-                        onChanged: (newValue) {
-                          setState(() {
-                            myFirm = newValue!;
-                          });
-                        },
-                      ),
+                      CustomApiDropdown(
+                          hintText: 'Select Firm',
+                          dropdownItems: firms.map((e) => DropdownMenuItem<dynamic>(value: e.firmId!, child: BigText(text: e.firmName!, size: Dimensions.font14,))).toList(),
+                          selectedValue: selectedFirm,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedFirm = newValue!;
+                            });
+                          }
+                      )
                     ],
                   ),
                   Gap(Dimensions.height10),
@@ -365,15 +424,16 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                     children: [
                       BigText(text: 'Select Party Name', size: Dimensions.font12,),
                       Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['SS Textile', 'Nageena Textile', 'Mehta and Sons Yarn Trades', 'Bluesky Cloth Sale', 'Suntex Textiles'],
-                        selectedValue: partyName,
-                        onChanged: (newValue) {
-                          setState(() {
-                            partyName = newValue!;
-                          });
-                        },
-                      ),
+                      CustomApiDropdown(
+                          hintText: 'Select Party',
+                          dropdownItems: parties.map((e) => DropdownMenuItem<dynamic>(value: e.partyId!, child: BigText(text: e.partyName!, size: Dimensions.font14,))).toList(),
+                          selectedValue: selectedParty,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedParty = newValue!;
+                            });
+                          }
+                      )
                     ],
                   ),
                 ],
@@ -388,15 +448,17 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                     children: [
                       BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
                       Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['Bhilosa', 'Golden', 'Silver'],
-                        selectedValue: yarnName,
-                        onChanged: (newValue) {
-                          setState(() {
-                            yarnName = newValue!;
-                          });
-                        },
-                      ),
+                      CustomApiDropdown(
+                          hintText: 'Select Yarn',
+                          dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
+                          selectedValue: selectedYarn,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedYarn = newValue!;
+                              isFilterApplied = true;
+                            });
+                          }
+                      )
                     ],
                   ),
                   Gap(Dimensions.height10),
@@ -406,15 +468,20 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                     children: [
                       BigText(text: 'Status', size: Dimensions.font12,),
                       Gap(Dimensions.height10/2),
-                      CustomDropdown(
-                        dropdownItems: ['On Going', 'Completed'],
-                        selectedValue: status,
-                        onChanged: (newValue) {
-                          setState(() {
-                            status = newValue!;
-                          });
-                        },
-                      ),
+                      CustomApiDropdown(
+                          hintText: 'Select Status',
+                          dropdownItems: [
+                            DropdownMenuItem<dynamic>(value: 'ongoing', child: BigText(text: 'On Going', size: Dimensions.font14,)),
+                            DropdownMenuItem<dynamic>(value: 'completed', child: BigText(text: 'Completed', size: Dimensions.font14,)),
+                          ],
+                          selectedValue: selectedStatus,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedStatus = newValue!;
+                              isFilterApplied = true;
+                            });
+                          }
+                      )
                     ],
                   ),
                 ],
@@ -424,5 +491,125 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
         );
       },
     );
+  }
+
+  Future<void> _getFirms() async {
+    DropdownFirmListModel? response = await dropdownServices.firmList();
+    if (response != null) {
+      setState(() {
+        firms.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getParties() async {
+    DropdownPartyListModel? response = await dropdownServices.partyList();
+    if (response != null) {
+      setState(() {
+        parties.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getYarns() async {
+    DropdownYarnListModel? response = await dropdownServices.yarnList();
+    if (response != null) {
+      setState(() {
+        yarns.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadData(int pageNo, String search) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      YarnPurchaseListModel? purchaseListModel = await purchaseServices.purchaseList(
+          pageNo, search, selectedFirm, selectedParty, selectedYarn, selectedStatus
+      );
+      if (purchaseListModel != null) {
+        if (purchaseListModel.success == true) {
+          if (purchaseListModel.data!.isNotEmpty) {
+            if (pageNo == 1) {
+              purchases.clear();
+            }
+
+            setState(() {
+              purchases.addAll(purchaseListModel.data!);
+              isLoading = false;
+              currentPage++;
+            });
+          } else {
+            _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            purchaseListModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateStatus(int purchaseId, String status) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      UpdateYarnPurchaseStatusModel? updatePurchaseStatusModel = await purchaseServices.updatePurchaseStatus(purchaseId, status);
+      if (updatePurchaseStatusModel != null) {
+        if (updatePurchaseStatusModel.success == true) {
+          setState(() {
+            purchases.clear();
+            currentPage = 1;
+          });
+          await _loadData(currentPage, '');
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updatePurchaseStatusModel.message.toString(),
+            mode: SnackbarMode.success,
+          );
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updatePurchaseStatusModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
