@@ -10,6 +10,10 @@ import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import '../../api/dashboard_services.dart';
+import '../../constants/routes.dart';
+import '../../models/dashboard_models/dashboard_models.dart';
+import '../widgets/snackbar.dart';
 import 'dashboard_card.dart';
 
 
@@ -28,15 +32,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // cloth sells
     const ClothSells(),
   ];
+  bool isLoading = false;
+  DashboardServices dashboardServices = DashboardServices();
+  List<PurchaseDeal>? purchaseDeals = [];
 
-  List<Map<String, dynamic>> yarnPurchaseList = [
-    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mehta and Sons Yarn Trades','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25','totalNetWeight':'4950','Deiner':'30','status':'On Going'},
-    {'no': 2, 'dealDate': '2024-01-26','myFirm': 'Danish Textiles','partyName': 'SS Textile','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25','totalNetWeight':'4950','Deiner':'30','status':'On Going'},
-    {'no': 3, 'dealDate': '2024-01-27','myFirm': 'Danish Textiles','partyName': 'Nageena Tex','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25','totalNetWeight':'4950','Deiner':'30','status':'Completed'},
-    {'no': 4, 'dealDate': '2024-01-28','myFirm': 'Danish Textiles','partyName': 'Bluesky Cloth Sale','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25','totalNetWeight':'4950','Deiner':'30','status':'On Going'},
-    {'no': 5, 'dealDate': '2024-01-29','myFirm': 'Danish Textiles','partyName': 'Suntex Textiles','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25','totalNetWeight':'4950','Deiner':'30','status':'Completed'},
-  ];
-
+  @override
+  void initState() {
+    super.initState();
+    DateTime startDate = DateTime.now();
+    DateTime endDate = DateTime.now();
+    fetchData(startDate,endDate);
+  }
+  void fetchData(DateTime startDate, DateTime endDate) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DashboardModel? model = await GetDashboardData(startDate, endDate);
+      if (model?.success == true) {
+        setState(() {
+          purchaseDeals?.addAll(model!.data!.purchaseDeals!);
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          model!.message!,
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     Widget dynamicDashboardCard = const DashboardCard();
@@ -119,5 +148,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  Future<DashboardModel?> GetDashboardData(
+      DateTime startDate,
+      DateTime endDate
+      ) async {
+    try {
+      String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
+      String formattedEndDueDate = DateFormat('yyyy-MM-dd').format(endDate);
+      DashboardModel? model = await dashboardServices.showDashboardData(
+        formattedStartDate,
+        formattedEndDueDate
+      );
+      if (model != null && model.success == true) {
+        print("Api Call Successfull $model");
+        return model;
+      } else {
+        Navigator.of(context).pop(); // Close the loading dialog
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          model?.message ?? 'Unknown error occurred',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+    }
   }
 }

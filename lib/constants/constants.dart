@@ -85,6 +85,11 @@ const String purchaseHistoryApi = '$baseUrl/api/purchase-history';
 const String invoiceListApi = '$baseUrl/api/sell-deal-details';
 const String getInvoiceApi = '$baseUrl/api/get-invoice';
 
+// Dashboard
+
+const String dashBoardApi = '$baseUrl/api/dashboard';
+
+
 
 
 

@@ -17,11 +17,6 @@ class ManageInvoiceServices{
         "page_no":pageNo,
         "search":search,
       };
-      print("sellId ==== $sellId");
-      print("userID ==== ${HelperFunctions.getUserID()}");
-      print("pageNum ==== $pageNo");
-      print("search ==== $search");
-      print("invoicelistapiurl ==== $invoiceListApi");
       Response response = await dio.post(invoiceListApi, data: body,
         options: Options(
           headers: {
@@ -29,7 +24,6 @@ class ManageInvoiceServices{
           },
         ),
       );
-      print("response===== $response");
       if (response.statusCode == 200) {
         return InvoiceListModel.fromJson(response.data);
       }

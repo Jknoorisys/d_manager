@@ -123,7 +123,7 @@ class _ClothSellViewState extends State<ClothSellView> {
           content: _isLoading ? Container() : Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Column(
-              children: [
+               children: [
                 CustomAccordionWithoutExpanded(
                   titleChild: Column(
                     children: [
@@ -168,7 +168,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Rate', getSellDealModel!.data!.rate!),
+                          _buildInfoColumn('Rate', '₹ ${getSellDealModel!.data!.rate!}'),
                         ],
                       ),
                     ],
@@ -256,11 +256,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                 SizedBox(height: Dimensions.height10),
                 Expanded(
                   child: manageInvoiceList.isEmpty
-                      ? Center(
-                    child: Text(
-                      'No Data Found',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                      ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
                   )
                       :SmartRefresher(
                     enablePullUp: true,
@@ -279,7 +275,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                     },
                     child:
                     Expanded(
-                      child: ListView.builder(
+                      child:ListView.builder(
                         itemCount: manageInvoiceList.length,
                         itemBuilder: (context, index) {
                           return CustomAccordion(
@@ -298,61 +294,61 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    _buildInfoColumn('Bale Number', manageInvoiceList[index].baleDetails![index].baleNumber!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Bale Number', manageInvoiceList[index].baleDetails![index].baleNumber!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Than', manageInvoiceList[index].baleDetails![index].than!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Than', manageInvoiceList[index].baleDetails![index].than!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Meter', manageInvoiceList[index].baleDetails![index].meter!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Meter', manageInvoiceList[index].baleDetails![index].meter!)),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('GST', manageInvoiceList[index].gst!),
+                                    Expanded(flex:1,child: _buildInfoColumn('GST', manageInvoiceList[index].gst!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Invoice Amount', manageInvoiceList[index].invoiceAmount!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Invoice Amount', manageInvoiceList[index].invoiceAmount!)),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    _buildInfoColumn('Payment Type', manageInvoiceList[index].paymentType!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', manageInvoiceList[index].paymentType!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Additional Discount', manageInvoiceList[index].discount!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Additional Discount', manageInvoiceList[index].discount!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Payment Received', manageInvoiceList[index].receivedAmount!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received', manageInvoiceList[index].receivedAmount!)),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    _buildInfoColumn('Payment Amount Received', manageInvoiceList[index].receivedAmount!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Amount Received', manageInvoiceList[index].receivedAmount!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Difference in Amount', manageInvoiceList[index].differenceAmount!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Difference in Amount', manageInvoiceList[index].differenceAmount!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Payment Method', manageInvoiceList[index].differenceAmount!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Method', manageInvoiceList[index].differenceAmount!)),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    _buildInfoColumn('Due Date', manageInvoiceList[index].dueDate.toString()),
+                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', manageInvoiceList[index].dueDate.toString())),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Payment Received Date', manageInvoiceList[index].dueDate.toString()),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received Date', manageInvoiceList[index].dueDate.toString())),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Reason', manageInvoiceList[index].invoiceNumber!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Reason', manageInvoiceList[index].invoiceNumber!)),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    _buildInfoColumn('View PDF', manageInvoiceList[index].invoiceNumber!),
+                                    Expanded(flex:1,child: _buildInfoColumn('View PDF', manageInvoiceList[index].invoiceNumber!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('Status', manageInvoiceList[index].status!),
+                                    Expanded(flex:1,child: _buildInfoColumn('Status', manageInvoiceList[index].status!)),
                                     SizedBox(width: Dimensions.width20),
-                                    _buildInfoColumn('', ''),
+                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
@@ -496,13 +492,6 @@ class _ClothSellViewState extends State<ClothSellView> {
             mode: SnackbarMode.error,
           );
         }
-      } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
       }
     } finally {
       setState(() {

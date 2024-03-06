@@ -279,7 +279,6 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 'No internet connection',
                                 mode: SnackbarMode.warning,
                               );
-                              print("internetpermission");
                             } else {
                               setState(() {
                                 isLoading = !isLoading;

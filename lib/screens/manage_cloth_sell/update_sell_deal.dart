@@ -1,5 +1,6 @@
 import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../api/manage_sell_deals.dart';
 import 'package:d_manager/constants/app_theme.dart';
@@ -79,6 +80,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
     setState(() {
       selectedDate = newDate;
     });
+    print("selectedDatebefore===== $selectedDate");
   }
   @override
   void initState() {
@@ -86,26 +88,29 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
     _sellListData = widget.sellListData;
     totalThanController = TextEditingController(text: _sellListData.totalThan);
     rateController = TextEditingController(text: _sellListData.rate);
-    firmController.text = widget.selectedFirm?.firmName ?? '';
-    partyController.text = widget.selectedParty?.partyName ?? '';
-    clothQualityController.text = widget.selectedClothQuality?.qualityName ?? '';
-    print("firmvalue===== ${widget.selectedFirm!.firmName!}");
-    print("firmId===== ${widget.selectedFirm!.firmId!}");
-    print("partyValue===== ${widget.selectedParty!.partyName!}");
-    print("partyId===== ${widget.selectedParty!.partyId!}");
-    print("cloth===== ${widget.selectedClothQuality!.qualityName!}");
-    print("clothId===== ${widget.selectedClothQuality!.qualityId!}");
+
+    if (widget.selectedFirm != null) {
+      selectedFirm = widget.selectedFirm!;
+      firmID = selectedFirm!.firmId.toString();
+    }
+    if (widget.selectedParty != null) {
+      selectedParty = widget.selectedParty!;
+      partyID = selectedParty!.partyId.toString();
+    }
+
     _loadData();
     _loadPartyData();
     _loadClothData();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
-        content: CustomBody(
-          title:S.of(context).updateClothSellDeal,
-          content: Padding(
+        content:CustomBody(
+          isLoading: isLoading,
+          title:S.of(context).updateSellDeal,
+          content:isLoading ? Container() : Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
               elevation: 10,
@@ -132,7 +137,15 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                               children: [
                                 BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                                 Gap(Dimensions.height10/2),
-                                CustomDatePicker(selectedDate: DateTime.parse(_sellListData.sellDate.toString())),
+                                CustomDatePickerForUpdate(
+                                  selectedDate: selectedDate, // pass selectedDate
+                                  onDateChanged: (newDate) {
+                                    setState(() {
+                                      selectedDate = newDate; // update selectedDate when a new date is selected
+                                    });
+                                    print("selectedDatefor==== $selectedDate");
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -146,23 +159,23 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                 Gap(Dimensions.height10/2),
                                 CustomDropdownNew<ActiveFirmsList>(
                                   hintText: 'Select Firm',
-                                  dropdownItems:firms ?? [],
-                                  selectedValue:widget.selectedFirm,
-                                  onChanged:(newValue){
+                                  dropdownItems: firms ?? [],
+                                  selectedValue: selectedFirm,
+                                  onChanged: (newValue) {
                                     setState(() {
-                                      widget.selectedFirm = newValue;
-                                      firmController.text = newValue?.firmName ?? '';
+                                      selectedFirm = newValue;
                                       if (newValue != null) {
                                         firmID = newValue.firmId.toString();
                                       } else {
                                         firmID = null; // Reset firmID if selectedFirm is null
                                       }
                                     });
-                                  } ,
-                                  displayTextFunction: (ActiveFirmsList? firm){
+                                  },
+                                  displayTextFunction: (ActiveFirmsList? firm) {
                                     return firm!.firmName!;
                                   },
                                 ),
+
                               ],
                             ),
                           ),
@@ -182,20 +195,20 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                 Gap(Dimensions.height10/2),
                                 CustomDropdownNew<ActivePartiesList>(
                                   hintText: 'Select Party',
-                                  dropdownItems:parties ?? [],
-                                  selectedValue:selectedParty,
-                                  onChanged:(newValue){
+                                  dropdownItems: parties ?? [],
+                                  selectedValue: selectedParty,
+                                  onChanged: (newValue) {
                                     setState(() {
                                       selectedParty = newValue;
                                       if (newValue != null) {
                                         partyID = newValue.partyId.toString();
                                       } else {
-                                        partyID = null; // Reset firmID if selectedFirm is null
+                                        partyID = null; // Reset partyID if selectedParty is null
                                       }
                                     });
-                                  } ,
-                                  displayTextFunction: (ActivePartiesList? parties){
-                                    return parties!.partyName!;
+                                  },
+                                  displayTextFunction: (ActivePartiesList? party) {
+                                    return party!.partyName!;
                                   },
                                 ),
                               ],
@@ -211,20 +224,19 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                 Gap(Dimensions.height10/2),
                                 CustomDropdownNew<ClothQuality>(
                                   hintText: 'Cloth Quality',
-                                  dropdownItems:activeClothQuality ?? [],
-                                  selectedValue:selectedClothQuality,
-                                  onChanged:(newValue){
+                                  dropdownItems: activeClothQuality ?? [],
+                                  selectedValue: selectedClothQuality,
+                                  onChanged: (newValue) {
                                     setState(() {
                                       selectedClothQuality = newValue;
                                       if (newValue != null) {
                                         clothID = newValue.qualityId.toString();
-                                        print("ClothIDisselected===== $clothID");
                                       } else {
-                                        clothID = null; // Reset firmID if selectedFirm is null
+                                        clothID = null; // Reset clothID if selectedClothQuality is null
                                       }
                                     });
-                                  } ,
-                                  displayTextFunction: (ClothQuality? cloth){
+                                  },
+                                  displayTextFunction: (ClothQuality? cloth) {
                                     return cloth!.qualityName!;
                                   },
                                 ),
@@ -309,7 +321,15 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                               children: [
                                 BigText(text: 'Select Due Date', size: Dimensions.font12,),
                                 Gap(Dimensions.height10/2),
-                                CustomDatePicker(selectedDate: DateTime.parse(selectedDueDate.toString())),
+                               CustomDatePickerForUpdate(
+                                 selectedDate: selectedDate, // pass selectedDate
+                                 onDateChanged: (newDate) {
+                                   setState(() {
+                                     selectedDate = newDate; // update selectedDate when a new date is selected
+                                   });
+                                   print("selectedDatefor==== $selectedDate");
+                                 },
+                               )
                               ],
                             ),
                           ),
@@ -366,6 +386,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
         rate,
         formattedSellDueDate
       );
+
       if (model?.success == true) {
         Navigator.of(context).pushNamed(AppRoutes.clothSellList);
       }
@@ -385,6 +406,9 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
             setState(() {
               firms.clear();
               firms.addAll(activeFirms!.data!);
+              if (widget.selectedFirm != null) {
+                selectedFirm = firms.firstWhereOrNull((firm) => firm.firmId.toString() == widget.selectedFirm?.firmId.toString());
+              }
             });
           } else {
             _refreshController.loadNoData();
@@ -423,6 +447,9 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
             setState(() {
               parties.clear();
               parties.addAll(activePartiesModel.data!);
+              if (widget.selectedParty != null) {
+                selectedParty = parties.firstWhereOrNull((party) => party.partyId.toString() == widget.selectedParty?.partyId.toString());
+              }
             });
           } else {
             _refreshController.loadNoData();
@@ -461,6 +488,9 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
             setState(() {
               activeClothQuality.clear();
               activeClothQuality.addAll(activeClothQualityModel.data!);
+              if (widget.selectedClothQuality != null) {
+                selectedClothQuality = activeClothQuality.firstWhereOrNull((cloth) => cloth.qualityId.toString() == widget.selectedClothQuality?.qualityId.toString());
+              }
             });
           } else {
             _refreshController.loadNoData();

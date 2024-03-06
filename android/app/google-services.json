@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "25122724301",
+    "project_id": "dmanager-6b697",
+    "storage_bucket": "dmanager-6b697.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25122724301:android:57c928d17e862b5e878c84",
+        "android_client_info": {
+          "package_name": "com.tims.d_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMNleuPy98J5bAFOIK6O6sJ3T-gOq621w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:d_manager/api/auth_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/firebase_services.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/auth_models/login_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
@@ -13,6 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get_utils/src/get_utils/get_utils.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import '../../helpers/auth_interface.dart';
+import '../../helpers/fcm_services.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -23,10 +30,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool submitted = false;
+  bool isLoggedIn = false;
   bool isChecked = false;
   bool _obscureText = true;
 
   bool isLoading = false;
+  bool _googleLoading = false;
   AuthServices authServices = AuthServices();
 
   @override
@@ -49,6 +58,20 @@ class _LoginScreenState extends State<LoginScreen> {
       passwordController.text = storedCredentials['password'] ?? '';
     });
   }
+
+  // _loadGoogleStoredCredential() async {
+  //   Map<String, String> storedCredentials = await HelperFunctions.getGoogleCredentials();
+  //   if (storedCredentials.containsKey('gmail')) {
+  //     setState(() {
+  //       isLoggedIn = true;
+  //     });
+  //     Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+  //     } else {
+  //       print("Something went wrong");
+  //     }
+  // }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +196,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     OutlinedButton(
                       onPressed: () {
                         // Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+                        setState(() {
+                          _googleLoading = !_googleLoading;
+                        });
+                        callGoogleLoginAPI();
                       },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppTheme.primary),
@@ -207,6 +234,18 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: GFLoader(
+                  type: GFLoaderType.circle,
+                  loaderColorOne: AppTheme.primary,
+                  loaderColorTwo: AppTheme.secondary,
+                  loaderColorThree: AppTheme.secondaryLight,
+                ),
+              ),
+            ),
+          if (_googleLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
               child: const Center(
@@ -287,6 +326,45 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       setState(() {
         isLoading = false;
+      });
+    }
+  }
+
+  callGoogleLoginAPI() async {
+    setState(() {
+      _googleLoading = true; // Show loader when the button is tapped
+    });
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser != null) {
+        final String uid = googleUser.id;
+        final String email = googleUser.email ?? '';
+        // if (isLoggedIn) {
+        //   HelperFunctions.saveGoogleCredentials(email, uid);
+        // }
+        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+        print('Google Sign-In Successful:');
+        print('UID: $uid');
+        print('Email: $email');
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Warning',
+          'Google Sign-In Canceled',
+          mode: SnackbarMode.warning,
+        );
+      }
+    } catch (e) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Google Sign-In Error',
+        mode: SnackbarMode.error,
+      );
+    }
+    finally {
+      setState(() {
+        _googleLoading = false; // Hide loader after the process is completed
       });
     }
   }
