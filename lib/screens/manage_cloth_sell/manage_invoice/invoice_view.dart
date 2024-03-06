@@ -58,7 +58,7 @@ class _InvoiceViewState extends State<InvoiceView> {
   @override
   void initState() {
     super.initState();
-    getInvoiceDetails(widget.sellId,widget.invoiceId);
+    // getInvoiceDetails(widget.sellId,widget.invoiceId);
   }
 
   @override
@@ -298,7 +298,7 @@ class _InvoiceViewState extends State<InvoiceView> {
     );
   }
 
-  Future<GetInvoiceModel?> getInvoiceDetails(String sellID, int invoiceID) async {
+Future<GetInvoiceModel?> getInvoiceDetails(String sellID, int invoiceID) async {
     setState(() {
       _isLoading = true;
     });

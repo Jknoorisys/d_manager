@@ -14,13 +14,11 @@ import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
 import '../../api/manage_invoice_services.dart';
 import '../../api/manage_sell_deals.dart';
 import '../../helpers/helper_functions.dart';
 import '../../models/invoice_models/invoice_list_model.dart';
 import '../../models/sell_models/get_sell_deal_model.dart';
-import '../../models/sell_models/sell_deal_list_model.dart';
 import '../widgets/snackbar.dart';
 import 'manage_invoice/invoice_view.dart';
 class ClothSellView extends StatefulWidget {
