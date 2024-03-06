@@ -298,40 +298,40 @@ class _InvoiceViewState extends State<InvoiceView> {
     );
   }
 
-  // Future<GetInvoiceModel?> getInvoiceDetails(String sellID, int invoiceID) async {
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
-  //   try {
-  //     GetInvoiceModel? model = await manageInvoiceServices.getInvoice(
-  //       widget.sellId,
-  //       widget.invoiceId.toString()
-  //     );
-  //     if (model != null) {
-  //       if (model.success == true) {
-  //         getInvoiceModel = model;
-  //       } else {
-  //         CustomApiSnackbar.show(
-  //           context,
-  //           'Error',
-  //           model.message.toString(),
-  //           mode: SnackbarMode.error,
-  //         );
-  //       }
-  //     } else {
-  //       CustomApiSnackbar.show(
-  //         context,
-  //         'Error',
-  //         'Something went wrong, please try again later.',
-  //         mode: SnackbarMode.error,
-  //       );
-  //     }
-  //   } finally {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
+Future<GetInvoiceModel?> getInvoiceDetails(String sellID, int invoiceID) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      // GetInvoiceModel? model = await manageInvoiceServices.getInvoice(
+      //   widget.sellId,
+      //   widget.invoiceId.toString()
+      // );
+      // if (model != null) {
+      //   if (model.success == true) {
+      //     getInvoiceModel = model;
+      //   } else {
+      //     CustomApiSnackbar.show(
+      //       context,
+      //       'Error',
+      //       model.message.toString(),
+      //       mode: SnackbarMode.error,
+      //     );
+      //   }
+      // } else {
+      //   CustomApiSnackbar.show(
+      //     context,
+      //     'Error',
+      //     'Something went wrong, please try again later.',
+      //     mode: SnackbarMode.error,
+      //   );
+      // }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 }
 
 
