@@ -5,6 +5,11 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../../api/dashboard_services.dart';
+import '../../models/dashboard_models/dashboard_models.dart';
+import '../widgets/snackbar.dart';
 
 class Purchases extends StatefulWidget {
   const Purchases({Key? key}) : super(key: key);
@@ -13,6 +18,8 @@ class Purchases extends StatefulWidget {
   _PurchasesState createState() => _PurchasesState();
 }
 class _PurchasesState extends State<Purchases> {
+  DashboardServices dashboardServices = DashboardServices();
+  bool isLoading = false;
   List<Map<String, dynamic>> yarnPurchaseList = [
     {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mehta and Sons Yarn Trades','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.00','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},
     {'no': 2, 'dealDate': '2024-01-26','myFirm': 'Danish Textiles','partyName': 'SS Textile','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.12','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},
@@ -20,6 +27,39 @@ class _PurchasesState extends State<Purchases> {
     {'no': 4, 'dealDate': '2024-01-28','myFirm': 'Danish Textiles','partyName': 'Bluesky Cloth Sale','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'25.45','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'On Going'},
     {'no': 5, 'dealDate': '2024-01-29','myFirm': 'Danish Textiles','partyName': 'Suntex Textiles','yarnName':'Golden','yarnType':'Roto','paymentType':'Cheque','lotNumber':'25','boxOrdered':'300','boxDelivered':'100','boxRemaining':'200','cops':'2000','rate':'24.62','totalNetWeight':'4950', 'grossWeight' : '500', 'Deiner':'30','status':'Completed'},
   ];
+  List<PurchaseDeal>? purchaseDeals = [];
+
+  @override
+  void initState() {
+    super.initState();
+    DateTime startDate = DateTime.now();
+    DateTime endDate = DateTime.now();
+    fetchData(startDate,endDate);
+  }
+  void fetchData(DateTime startDate, DateTime endDate) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DashboardModel? model = await GetDashboardData(startDate, endDate);
+      if (model?.success == true) {
+        setState(() {
+          purchaseDeals?.addAll(model!.data!.purchaseDeals!);
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          model!.message!,
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +68,7 @@ class _PurchasesState extends State<Purchases> {
       padding: EdgeInsets.all(Dimensions.height15),
       child:
       ListView.builder(
-        itemCount: yarnPurchaseList.length,
+        itemCount: purchaseDeals?.length,
         itemBuilder: (context, index) {
           return CustomAccordion(
             titleChild: Column(
@@ -42,23 +82,23 @@ class _PurchasesState extends State<Purchases> {
                         CircleAvatar(
                           backgroundColor: AppTheme.secondary,
                           radius: Dimensions.height20,
-                          child: BigText(text: yarnPurchaseList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                          child: BigText(text: purchaseDeals![index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
                         ),
                         SizedBox(width: Dimensions.height10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            BigText(text: yarnPurchaseList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                            BigText(text: purchaseDeals![index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor: AppTheme.black,
                                   radius: Dimensions.height10,
-                                  child: BigText(text: yarnPurchaseList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                  child: BigText(text: purchaseDeals![index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                 ),
                                 SizedBox(width: Dimensions.width10),
-                                SmallText(text: yarnPurchaseList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                SmallText(text: purchaseDeals![index].firmName!, color: AppTheme.black, size: Dimensions.font12),
                               ],
                             ),
                           ],
@@ -73,11 +113,11 @@ class _PurchasesState extends State<Purchases> {
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    _buildInfoColumn('Deal Date', yarnPurchaseList[index]['dealDate']),
+                    _buildInfoColumn('Deal Date', purchaseDeals![index].purchaseDate!.toString()),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Rate', yarnPurchaseList[index]['rate']),
+                    _buildInfoColumn('Rate', purchaseDeals![index].rate!),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Yarn Type', yarnPurchaseList[index]['yarnType']),
+                    _buildInfoColumn('Yarn Type', purchaseDeals![index].yarnTypeName!),
                   ],
                 ),
               ],
@@ -86,29 +126,29 @@ class _PurchasesState extends State<Purchases> {
               children: [
                 Row(
                   children: [
-                    _buildInfoColumn('Payment Type', yarnPurchaseList[index]['paymentType']),
+                    _buildInfoColumn('Payment Type', purchaseDeals![index].paymentType!),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Lot Number', yarnPurchaseList[index]['lotNumber']),
+                    _buildInfoColumn('Lot Number', purchaseDeals![index].lotNumber!),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Box Ordered', yarnPurchaseList[index]['boxOrdered']),
+                    _buildInfoColumn('Box Ordered', purchaseDeals![index].orderedBoxCount!),
                   ],
                 ),
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    _buildInfoColumn('Box Delivered', yarnPurchaseList[index]['boxDelivered']),
+                    _buildInfoColumn('Box Delivered', purchaseDeals![index].deliveredBoxCount!),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Box Remaining', yarnPurchaseList[index]['boxRemaining']),
+                    _buildInfoColumn('Box Remaining', purchaseDeals![index].yarnTypeId!),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Cops', yarnPurchaseList[index]['cops']),
+                    _buildInfoColumn('Cops', purchaseDeals![index].cops!),
                   ],
                 ),
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    _buildInfoColumn('Deiner', yarnPurchaseList[index]['Deiner']),
+                    _buildInfoColumn('Deiner', purchaseDeals![index].denier!),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Status', yarnPurchaseList[index]['status']),
+                    _buildInfoColumn('Status', purchaseDeals![index].status!),
                     SizedBox(width: Dimensions.width20),
                     _buildInfoColumn('', ''),
                   ],
@@ -138,10 +178,10 @@ class _PurchasesState extends State<Purchases> {
                               ),
                               children: [
                                 TextSpan(
-                                  text: yarnPurchaseList[index]['totalNetWeight'],
+                                  text: purchaseDeals![index].netWeight!,
                                 ),
                                 TextSpan(
-                                  text: ' kg',
+                                  text: ' Ton',
                                   style: TextStyle(
                                     fontSize: Dimensions.font12,
                                   ),
@@ -149,7 +189,7 @@ class _PurchasesState extends State<Purchases> {
                               ],
                             ),
                           ),
-                          BigText(text: 'Gross Weight ${yarnPurchaseList[index]['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                          BigText(text: 'Gross Weight ${purchaseDeals![index].grossWeight!} Ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                         ],
                       )
                     ),
@@ -167,7 +207,7 @@ class _PurchasesState extends State<Purchases> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             BigText(text: 'Yarn Name', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                            BigText(text: '₹ ${yarnPurchaseList[index]['yarnName']}',color: AppTheme.primary, size: Dimensions.font18)
+                            BigText(text: '${purchaseDeals![index].yarnName!}',color: AppTheme.primary, size: Dimensions.font18)
                           ],
                         )
                     ),
@@ -207,5 +247,37 @@ class _PurchasesState extends State<Purchases> {
         ],
       ),
     );
+  }
+
+
+  Future<DashboardModel?> GetDashboardData(
+      DateTime startDate,
+      DateTime endDate
+      ) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
+      String formattedEndDueDate = DateFormat('yyyy-MM-dd').format(endDate);
+
+      DashboardModel? model = await dashboardServices.showDashboardData(
+          formattedStartDate,
+          formattedEndDueDate
+      );
+      if (model?.success == true) {
+        purchaseDeals?.addAll(model!.data!.purchaseDeals!);
+      } else {
+        Navigator.of(context).pop(); // Close the loading dialog
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          model!.message!,
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+    }
   }
 }

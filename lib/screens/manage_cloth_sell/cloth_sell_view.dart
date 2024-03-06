@@ -13,13 +13,16 @@ import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import '../../api/manage_invoice_services.dart';
 import '../../api/manage_sell_deals.dart';
 import '../../helpers/helper_functions.dart';
-import '../../models/invoices_models/invoices_list_model.dart';
+import '../../models/invoice_models/invoice_list_model.dart';
 import '../../models/sell_models/get_sell_deal_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
 import '../widgets/snackbar.dart';
+import 'manage_invoice/invoice_view.dart';
 class ClothSellView extends StatefulWidget {
   final int sellID;
   const ClothSellView({Key? key,required this.sellID}) : super(key: key);
@@ -78,17 +81,22 @@ class _ClothSellViewState extends State<ClothSellView> {
       'status': 'On Going'
     },
   ];
+  final RefreshController _refreshController = RefreshController();
+  final searchController = TextEditingController();
+  int currentPage = 1;
   bool _isLoading = true;
   List<Map<String, dynamic>> invoicesList = [];
+  List<invoiceList> manageInvoiceList = [];
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
   SellDealDetails sellDealDetails = SellDealDetails();
+  ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
   GetSellDealModel? getSellDealModel;
   @override
   void initState() {
     super.initState();
     getSellDealData();
-    invoicesList = invoiceDataList;
+    getInvoiceList(currentPage, searchController.text.trim());
   }
 
   Future<void> handleViewDeal()async{
@@ -99,11 +107,10 @@ class _ClothSellViewState extends State<ClothSellView> {
         'No internet connection',
         mode: SnackbarMode.warning,
       );
-    } else {
+    } else{
       await getSellDealData();
     }
   }
-
 
   //await getSellDealData();
   @override
@@ -113,268 +120,290 @@ class _ClothSellViewState extends State<ClothSellView> {
         content: CustomBody(
           isLoading:_isLoading,
           title: S.of(context).clothSellDealDetails,
-          content: _isLoading ? Container() : SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
-              child: Column(
-                children: [
-                  CustomAccordionWithoutExpanded(
-                    titleChild: Column(
+          content: _isLoading ? Container() : Padding(
+            padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
+            child: Column(
+               children: [
+                CustomAccordionWithoutExpanded(
+                  titleChild: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(width: Dimensions.width10),
+                              CircleAvatar(
+                                backgroundColor: AppTheme.secondary,
+                                radius: Dimensions.height20,
+                                child: BigText(text: getSellDealModel!.data!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                              ),
+                              SizedBox(width: Dimensions.height10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  BigText(text: getSellDealModel!.data!.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: AppTheme.black,
+                                        radius: Dimensions.height10,
+                                        child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                      ),
+                                      SizedBox(width: Dimensions.width10),
+                                      SmallText(text: getSellDealModel!.data!.firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      AppTheme.divider,
+                      SizedBox(height: Dimensions.height10),
+                      Row(
+                        children: [
+                          _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!.toString()),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Rate', '₹ ${getSellDealModel!.data!.rate!}'),
+                        ],
+                      ),
+                    ],
+                  ),
+                  contentChild: Column(
+                    children: [
+                      Row(
+                        children: [
+                          _buildInfoColumn('Total Than', getSellDealModel!.data!.totalThan!),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Than Delivered', getSellDealModel!.data!.thanDelivered!),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Than Remaining', getSellDealModel!.data!.thanRemaining!),
+                        ],
+                      ),
+                      SizedBox(height: Dimensions.height10),
+                      Row(
+                        children: [
+                          _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus!),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: Dimensions.height10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Invoice List', style: AppTheme.heading2),
+                    CustomIconButton(
+                        radius: Dimensions.radius10,
+                        backgroundColor: AppTheme.primary,
+                        iconColor: AppTheme.white,
+                        iconData: Icons.add,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(AppRoutes.invoiceAdd);
+                        }
+                    ),
+                  ],
+                ),
+                SizedBox(height: Dimensions.height10),
+                AppTheme.divider,
+                SizedBox(height: Dimensions.height10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Row(
+                        BigText(text: 'Bill Received', size: Dimensions.font12,),
+                        Gap(Dimensions.height10/2),
+                        CustomDropdown(
+                          dropdownItems: const ['Yes', 'No'],
+                          selectedValue: billReceived,
+                          onChanged: (newValue) {
+                            setState(() {
+                              billReceived = newValue!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BigText(text: 'Payment Paid', size: Dimensions.font12,),
+                        Gap(Dimensions.height10/2),
+                        CustomDropdown(
+                          dropdownItems: const ['Yes', 'No'],
+                          selectedValue: paymentPaid,
+                          onChanged: (newValue) {
+                            setState(() {
+                              paymentPaid = newValue!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: Dimensions.height10),
+                Expanded(
+                  child: manageInvoiceList.isEmpty
+                      ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
+                  )
+                      :SmartRefresher(
+                    enablePullUp: true,
+                    controller: _refreshController,
+                    onRefresh: () async {
+                      setState(() {
+                        manageInvoiceList.clear();
+                        currentPage = 1;
+                      });
+                      getInvoiceList(currentPage, searchController.text.trim());
+                      _refreshController.refreshCompleted();
+                    },
+                    onLoading: () async {
+                      getInvoiceList(currentPage, searchController.text.trim());
+                      _refreshController.loadComplete();
+                    },
+                    child:
+                    Expanded(
+                      child:ListView.builder(
+                        itemCount: manageInvoiceList.length,
+                        itemBuilder: (context, index) {
+                          return CustomAccordion(
+                            titleChild: Row(
                               children: [
-                                SizedBox(width: Dimensions.width10),
-                                CircleAvatar(
-                                  backgroundColor: AppTheme.secondary,
-                                  radius: Dimensions.height20,
-                                  child: BigText(text: getSellDealModel!.data!.partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
-                                ),
-                                SizedBox(width: Dimensions.height10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                                Expanded(flex:1,child: _buildInfoColumn('Invoice Date', manageInvoiceList[index].invoiceDate.toString())),
+                                SizedBox(width: Dimensions.width20),
+                                Expanded(flex:1,child: _buildInfoColumn('Invoice No', manageInvoiceList[index].invoiceNumber!)),
+                                SizedBox(width: Dimensions.width20),
+                                Expanded(flex:1,child: _buildInfoColumn('Rate', '₹ ${manageInvoiceList[index].rate!}')),
+                              ],
+                            ),
+                            contentChild: Column(
+                              children: [
+                                AppTheme.divider,
+                                SizedBox(height: Dimensions.height10),
+                                Row(
                                   children: [
-                                    BigText(text: getSellDealModel!.data!.partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
-                                    Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: AppTheme.black,
-                                          radius: Dimensions.height10,
-                                          child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                        ),
-                                        SizedBox(width: Dimensions.width10),
-                                        SmallText(text: getSellDealModel!.data!.firmName!, color: AppTheme.black, size: Dimensions.font12),
-                                      ],
+                                    Expanded(flex:1,child: _buildInfoColumn('Bale Number', manageInvoiceList[index].baleDetails![index].baleNumber!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Than', manageInvoiceList[index].baleDetails![index].than!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Meter', manageInvoiceList[index].baleDetails![index].meter!)),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('GST', manageInvoiceList[index].gst!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Invoice Amount', manageInvoiceList[index].invoiceAmount!)),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', manageInvoiceList[index].paymentType!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Additional Discount', manageInvoiceList[index].discount!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received', manageInvoiceList[index].receivedAmount!)),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Amount Received', manageInvoiceList[index].receivedAmount!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Difference in Amount', manageInvoiceList[index].differenceAmount!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Method', manageInvoiceList[index].differenceAmount!)),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', manageInvoiceList[index].dueDate.toString())),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received Date', manageInvoiceList[index].dueDate.toString())),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Reason', manageInvoiceList[index].invoiceNumber!)),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Expanded(flex:1,child: _buildInfoColumn('View PDF', manageInvoiceList[index].invoiceNumber!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('Status', manageInvoiceList[index].status!)),
+                                    SizedBox(width: Dimensions.width20),
+                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        // Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': invoiceDataList[index]});
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                                            InvoiceView( invoiceId: manageInvoiceList[index].invoiceId!,
+                                            sellId:manageInvoiceList[index].sellId.toString())));
+                                      },
+                                      icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
+                                      },
+                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          //unfilteredDeliveryDetailList.removeAt(index);
+                                        });
+                                      },
+                                      icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
+                                    ),
+                                    GFCheckbox(
+                                      size: Dimensions.height20,
+                                      type: GFCheckboxType.custom,
+                                      inactiveBgColor: AppTheme.nearlyWhite,
+                                      inactiveBorderColor: AppTheme.primary,
+                                      customBgColor: AppTheme.primary,
+                                      activeBorderColor: AppTheme.primary,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          invoiceDataList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                        });
+                                      },
+                                      value: invoiceDataList[index]['status'] == 'Completed' ? true : false,
+                                      inactiveIcon: null,
                                     ),
                                   ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                        AppTheme.divider,
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!.toString()),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Rate', getSellDealModel!.data!.rate!),
-                          ],
-                        ),
-                      ],
-                    ),
-                    contentChild: Column(
-                      children: [
-                        Row(
-                          children: [
-                            _buildInfoColumn('Total Than', getSellDealModel!.data!.totalThan!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than Delivered', getSellDealModel!.data!.thanDelivered!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than Remaining', getSellDealModel!.data!.thanRemaining!),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
-                          ],
-                        ),
-                      ],
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  SizedBox(height: Dimensions.height10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Invoice List', style: AppTheme.heading2),
-                      CustomIconButton(
-                          radius: Dimensions.radius10,
-                          backgroundColor: AppTheme.primary,
-                          iconColor: AppTheme.white,
-                          iconData: Icons.add,
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(AppRoutes.invoiceAdd);
-                          }
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  AppTheme.divider,
-                  SizedBox(height: Dimensions.height10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BigText(text: 'Bill Received', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          CustomDropdown(
-                            dropdownItems: const ['Yes', 'No'],
-                            selectedValue: billReceived,
-                            onChanged: (newValue) {
-                              setState(() {
-                                billReceived = newValue!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BigText(text: 'Payment Paid', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          CustomDropdown(
-                            dropdownItems: const ['Yes', 'No'],
-                            selectedValue: paymentPaid,
-                            onChanged: (newValue) {
-                              setState(() {
-                                paymentPaid = newValue!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 1.5,
-                    child: ListView.builder(
-                      itemCount: invoicesList.length,
-                      itemBuilder: (context, index) {
-                        return CustomAccordion(
-                          titleChild: Row(
-                            children: [
-                              Expanded(flex:1,child: _buildInfoColumn('Invoice Date', invoiceDataList[index]['invoiceDate'])),
-                              SizedBox(width: Dimensions.width20),
-                              Expanded(flex:1,child: _buildInfoColumn('Invoice No', invoiceDataList[index]['invoiceNumber'])),
-                              SizedBox(width: Dimensions.width20),
-                              Expanded(flex:1,child: _buildInfoColumn('Rate', invoiceDataList[index]['rate'])),
-                            ],
-                          ),
-                          contentChild: Column(
-                            children: [
-                              AppTheme.divider,
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Bale Number', invoiceDataList[index]['baleNumber']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Than', invoiceDataList[index]['than']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Meter', invoiceDataList[index]['meter']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Cloth Quality', invoiceDataList[index]['clothQuality']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('GST', invoiceDataList[index]['gst']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Invoice Amount', invoiceDataList[index]['invoiceAmount']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Payment Type', invoiceDataList[index]['paymentType']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Additional Discount', invoiceDataList[index]['additionalDiscount']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Received', invoiceDataList[index]['paymentReceived']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Payment Amount Received', invoiceDataList[index]['paymentAmountReceived']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Difference in Amount', invoiceDataList[index]['differenceInAmount']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Method', invoiceDataList[index]['paymentMethod']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Due Date', invoiceDataList[index]['dueDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Payment Received Date', invoiceDataList[index]['paymentReceivedDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Reason', invoiceDataList[index]['reason']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('View PDF', 'viewPDF'),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Status', 'status'),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('', ''),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': invoiceDataList[index]});
-                                    },
-                                    icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
-                                    },
-                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        //unfilteredDeliveryDetailList.removeAt(index);
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
-                                  ),
-                                  GFCheckbox(
-                                    size: Dimensions.height20,
-                                    type: GFCheckboxType.custom,
-                                    inactiveBgColor: AppTheme.nearlyWhite,
-                                    inactiveBorderColor: AppTheme.primary,
-                                    customBgColor: AppTheme.primary,
-                                    activeBorderColor: AppTheme.primary,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        invoiceDataList[index]['status'] = value == true ? 'Completed' : 'On Going';
-                                      });
-                                    },
-                                    value: invoiceDataList[index]['status'] == 'Completed' ? true : false,
-                                    inactiveIcon: null,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         )
@@ -382,10 +411,16 @@ class _ClothSellViewState extends State<ClothSellView> {
   }
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Deal Date') {
+    if (title == 'Invoice Date') {
       DateTime date = DateTime.parse(value);
       formattedValue = DateFormat('dd-MMM-yyyy').format(date);
     }else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Payment Received Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Deal Date') {
       DateTime date = DateTime.parse(value);
       formattedValue = DateFormat('dd-MMM-yyyy').format(date);
     }
@@ -426,6 +461,43 @@ class _ClothSellViewState extends State<ClothSellView> {
       });
     }
   }
-
+  Future<InvoiceListModel?> getInvoiceList(int pageNo, String search) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      InvoiceListModel? model = await manageInvoiceServices.showInvoiceList(
+        widget.sellID.toString(),
+        pageNo.toString(),
+        search,
+      );
+      if (model != null) {
+        if (model.success == true) {
+          if (model.data!.isNotEmpty) {
+            if (pageNo == 1) {
+              manageInvoiceList.clear();
+            }
+            setState(() {
+              manageInvoiceList.addAll(model.data!);
+              currentPage++;
+            });
+          } else {
+             _refreshController.loadNoData();
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 }
 

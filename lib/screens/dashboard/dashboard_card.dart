@@ -19,9 +19,13 @@ class DashboardCard extends StatefulWidget {
 }
 
 class _DashboardCardState extends State<DashboardCard> {
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now();
+  DateTime selectedEndDate = DateTime.now();
+
   DateTime firstDate = DateTime(2000);
   DateTime lastDate = DateTime(2050);
+  String startDateString = "2024-02-01";
+  String endDateString = "2024-02-19";
 
   @override
   Widget build(BuildContext context) {
@@ -59,25 +63,36 @@ class _DashboardCardState extends State<DashboardCard> {
                             visualDensity: VisualDensity.comfortable,
                           ),
                           onPressed: () async {
-                            DateTime? pickedDate = (
-                              await showDateRangePicker(
-                                initialEntryMode: DatePickerEntryMode.input,
-                                helpText: S.of(context).selectDate,
-                                context: context,
-                                initialDateRange: DateTimeRange(
-                                  start: DateTime.now(),
-                                  end: DateTime.now().add(const Duration(days: 7)),
-                                ),
-                                firstDate: firstDate,
-                                lastDate: lastDate,
-                              )
-                            ) as DateTime?;
-                            if (pickedDate != null && pickedDate != selectedDate) {
+                            DateTimeRange? pickedDateRange = await showDateRangePicker(
+                              initialEntryMode: DatePickerEntryMode.input,
+                              helpText: S.of(context).selectDate,
+                              context: context,
+                              initialDateRange: DateTimeRange(
+                                start: DateTime.now(),
+                                end: DateTime.now().add(const Duration(days: 7)),
+                              ),
+                              firstDate: firstDate,
+                              lastDate: lastDate,
+                            );
+                            if (pickedDateRange != null) {
+                              // Extract the start or end date from the selected range
+
+                              DateTime startDate = DateTime.parse(startDateString); // Or use pickedDateRange.end
                               setState(() {
-                                selectedDate = pickedDate;
+                                selectedStartDate = startDate;
                               });
+                              DateTime endDate = DateTime.parse(endDateString); // Or use pickedDateRange.end
+                              setState(() {
+                                selectedEndDate = endDate;
+                              });
+                              String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
+                              String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
+
+                              print("selectedStartDate## $formattedStartDate");
+                              print("selectedEndDate##  $formattedEndDate");
                             }
                           },
+
                           child: Row(
                             children: [
                               SmallText(text: S.of(context).selectDate, color: AppTheme.white,),

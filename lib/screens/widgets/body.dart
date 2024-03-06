@@ -8,12 +8,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:getwidget/components/loader/gf_loader.dart';
 import 'package:getwidget/types/gf_loader_type.dart';
 
+import '../../constants/routes.dart';
+
 class CustomBody extends StatelessWidget {
   final Widget content;
   final bool? isAppBarTitle;
   final isBackgroundGradient;
   final Widget? bottomNavigationBar;
-
   final String? title;
   final Widget? filterButton;
   final Widget? dashboardCard;
@@ -21,7 +22,7 @@ class CustomBody extends StatelessWidget {
   final bool? isLoading;
 
   const CustomBody({super.key, required this.content, this.isAppBarTitle = true, this.isBackgroundGradient = false, this.bottomNavigationBar, this.title, this.filterButton, this.dashboardCard, this.isLoading = false});
-
+  final int pendingNotifications = 2;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,9 +39,35 @@ class CustomBody extends StatelessWidget {
           icon: FaIcon(FontAwesomeIcons.barsStaggered, color: AppTheme.primary, size: Dimensions.iconSize24),
         ),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: FaIcon(FontAwesomeIcons.bell, color: AppTheme.primary, size: Dimensions.iconSize24),
+          Stack(
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(AppRoutes.notificationList);
+                },
+                icon: FaIcon(FontAwesomeIcons.bell, color: AppTheme.primary, size: Dimensions.iconSize16*2),
+              ),
+              if (pendingNotifications > 0)
+                Positioned(
+                  top: Dimensions.height10,
+                  right:Dimensions.width15,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      pendingNotifications.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: Dimensions.font12,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
         title: isAppBarTitle == true ? Image.asset(AppImages.appLogoHorizontal, width: Dimensions.width50*5, height: Dimensions.height50*5,) : null,

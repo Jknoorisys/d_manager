@@ -8,6 +8,7 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 
+import '../../../helpers/firebase_services.dart';
 import '../../gst_return/gst_return_amount.dart';
 
 class DrawerItems extends StatelessWidget {
@@ -81,7 +82,7 @@ class DrawerItems extends StatelessWidget {
                 children: [
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.boxToBeReceived);
-                  }, S.of(context).boxToBeReceived),
+                  }, S.of(context).yarnToBeReceived),
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.paymentDueDate);
                   }, S.of(context).paymentDueDate),
@@ -146,24 +147,39 @@ class DrawerItems extends StatelessWidget {
               }),
 
               // Logout
-              buildTitle(S.of(context).logout, Icons.logout, () {
+              buildTitle(S.of(context).logout, Icons.logout, ()async {
                 HelperFunctions.setLoginStatus(false);
-                Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+                // Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+                handleLogout(context);
               }),
+
             ],
           ),
         ),
       ),
     );
   }
+  Future<void> handleLogout(BuildContext context) async {
+    // Sign out
+    await firebaseService.signOut();
 
-  Widget buildTitle(String title, IconData icon, Function() onTap, [String? subTitle]) {
-    return ListTile(
-      leading: Icon(icon, color: AppTheme.secondaryLight, size: Dimensions.font22,),
-      title: SmallText(text: title, color: AppTheme.secondaryLight, size: Dimensions.font15),
-      subtitle: subTitle != null ? SmallText(text: subTitle, color: AppTheme.secondaryLight, size: Dimensions.font12) : null,
-      onTap: onTap,
+    // Set login status to false if needed
+    HelperFunctions.setLoginStatus(false);
+
+    // Navigate to the login page and remove all other routes from the stack
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.login,
+          (route) => false,
     );
   }
+
+    Widget buildTitle(String title, IconData icon, Function() onTap, [String? subTitle]) {
+      return ListTile(
+        leading: Icon(icon, color: AppTheme.secondaryLight, size: Dimensions.font22,),
+        title: SmallText(text: title, color: AppTheme.secondaryLight, size: Dimensions.font15),
+        subtitle: subTitle != null ? SmallText(text: subTitle, color: AppTheme.secondaryLight, size: Dimensions.font12) : null,
+        onTap: onTap,
+      );
+    }
 
 }
