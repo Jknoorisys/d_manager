@@ -4,6 +4,7 @@ import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/yarn_purchase_models/add_yarn_purchase_model.dart';
 import 'package:d_manager/models/yarn_purchase_models/update_yarn_purchase_model.dart';
 import 'package:d_manager/models/yarn_purchase_models/update_yarn_purchase_status_model.dart';
+import 'package:d_manager/models/yarn_purchase_models/yarn_purchase_detail_model.dart';
 import 'package:d_manager/models/yarn_purchase_models/yarn_purchase_list_model.dart';
 import 'package:http/http.dart';
 class ManagePurchaseServices {
@@ -12,14 +13,15 @@ class ManagePurchaseServices {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
+
       Response response = await post(Uri.parse(addYarnPurchaseDealUrl), body: body, headers: headers);
-      var data = json.decode(response.body);
       if (response.statusCode == 200) {
-        return AddYarnPurchaseModel.fromJson(data);
+        return addYarnPurchaseModelFromJson(response.body);
       } else {
-        return AddYarnPurchaseModel.fromJson(data);
+        return addYarnPurchaseModelFromJson(response.body);
       }
     } catch (e) {
+      print(e);
       return null;
     }
   }
@@ -51,26 +53,26 @@ class ManagePurchaseServices {
     }
   }
 
-  // Future<PurchaseDetailModel?> viewPurchase(int firmId) async {
-  //   try {
-  //     Map<String, String> body = {
-  //       "user_id" : HelperFunctions.getUserID(),
-  //       "firm_id": firmId.toString(),
-  //     };
-  //
-  //     Map<String, String> headers = {
-  //       "X-API-Key": HelperFunctions.getApiKey(),
-  //     };
-  //     Response response = await post(Uri.parse(getPurchaseUrl), body: body, headers: headers);
-  //     if (response.statusCode == 200) {
-  //       return firmDetailModelFromJson(response.body);
-  //     } else {
-  //       return firmDetailModelFromJson(response.body);
-  //     }
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
+  Future<YarnPurchaseDetailModel?> viewPurchase(int purchaseId) async {
+    try {
+      Map<String, String> body = {
+        "user_id" : HelperFunctions.getUserID(),
+        "purchase_id": purchaseId.toString(),
+      };
+
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      Response response = await post(Uri.parse(getYarnPurchaseDealUrl), body: body, headers: headers);
+      if (response.statusCode == 200) {
+        return yarnPurchaseDetailModelFromJson(response.body);
+      } else {
+        return yarnPurchaseDetailModelFromJson(response.body);
+      }
+    } catch (e) {
+      return null;
+    }
+  }
 
   Future<UpdateYarnPurchaseModel?> updatePurchase(Map<String, dynamic> body) async {
     try {

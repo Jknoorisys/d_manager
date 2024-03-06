@@ -200,7 +200,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            Navigator.of(context).pushNamed(AppRoutes.invoiceAdd);
+                            Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID.toString()});
                           }
                       ),
                     ],

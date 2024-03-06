@@ -99,7 +99,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          title:S.of(context).updateClothSellDeal,
+          title: 'Update Sell Deal',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
