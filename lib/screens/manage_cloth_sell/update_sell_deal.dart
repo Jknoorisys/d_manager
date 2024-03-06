@@ -109,7 +109,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
     return CustomDrawer(
         content:CustomBody(
           isLoading: isLoading,
-          title:S.of(context).updateSellDeal,
+          title: S.of(context).updateSellDeal,
           content:isLoading ? Container() : Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
