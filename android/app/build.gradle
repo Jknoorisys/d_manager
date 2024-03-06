@@ -21,7 +21,9 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
-
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 android {
     namespace "com.tims.d_manager"
     compileSdkVersion flutter.compileSdkVersion
@@ -60,9 +62,12 @@ android {
     }
 }
 
+
 flutter {
     source '../..'
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.firebase:firebase-messaging:23.1.0'
 }

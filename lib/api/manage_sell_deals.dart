@@ -60,8 +60,6 @@ class SellDealDetails{
         "quality_id":HelperFunctions.getClothID() ?? "",
         "deal_status":HelperFunctions.getDealStatus() ?? "",
       };
-      print("partyid==== ${HelperFunctions.getPartyID()}");
-      print("dealStatus==== ${body}");
       Response response = await dio.post(sellDealList, data: body,
         options: Options(
           headers: {

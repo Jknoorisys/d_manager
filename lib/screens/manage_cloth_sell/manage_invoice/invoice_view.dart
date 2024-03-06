@@ -6,11 +6,17 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import '../../../api/manage_invoice_services.dart';
+import '../../../models/invoice_models/invoice_detail_model.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/snackbar.dart';
 import '../../widgets/texts.dart';
 class InvoiceView extends StatefulWidget {
   final Map<String, dynamic>? invoiceData;
-  const InvoiceView({Key? key, this.invoiceData}) : super(key: key);
+  final int invoiceId;
+  final String sellId;
+  const InvoiceView({Key? key, this.invoiceData, required this.invoiceId,required this.sellId}) : super(key: key);
 
   @override
   _InvoiceViewState createState() => _InvoiceViewState();
@@ -19,13 +25,16 @@ class InvoiceView extends StatefulWidget {
 class _InvoiceViewState extends State<InvoiceView> {
   //
   List<DeliveryDetails> transportDetails = [];
-
   DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 365));
 
   String transportName = 'Dharma Transport';
   String hammalName = 'Prakash';
+  GetInvoiceModel? getInvoiceModel;
+
+  bool _isLoading = true;
+  ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
 
   void _addTransportDetails(
       String deliveryDate, String transportName, String hammalName) {
@@ -44,6 +53,12 @@ class _InvoiceViewState extends State<InvoiceView> {
     setState(() {
       transportDetails.removeAt(index);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getInvoiceDetails(widget.sellId,widget.invoiceId);
   }
 
   @override
@@ -68,12 +83,12 @@ class _InvoiceViewState extends State<InvoiceView> {
                   titleChild: Row(
                     children: [
                       _buildInfoColumn(
-                          'Invoice Date', widget.invoiceData?['invoiceDate']),
+                          'Invoice Date', getInvoiceModel!.data!.invoiceDate!.toString()),
                       SizedBox(width: Dimensions.width20),
                       _buildInfoColumn(
-                          'Invoice No', widget.invoiceData?['invoiceNumber']),
+                          'Invoice No', getInvoiceModel!.data!.invoiceNumber!),
                       SizedBox(width: Dimensions.width20),
-                      _buildInfoColumn('Rate', widget.invoiceData?['rate']),
+                      _buildInfoColumn('Rate', getInvoiceModel!.data!.rate!),
                     ],
                   ),
                   contentChild: Column(
@@ -259,18 +274,67 @@ class _InvoiceViewState extends State<InvoiceView> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Invoice Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Payment Received Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(
-              text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );
   }
+
+  Future<GetInvoiceModel?> getInvoiceDetails(String sellID, int invoiceID) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      GetInvoiceModel? model = await manageInvoiceServices.getInvoice(
+        widget.sellId,
+        widget.invoiceId.toString()
+      );
+      if (model != null) {
+        if (model.success == true) {
+          getInvoiceModel = model;
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 }
+
+
 
 class DeliveryDetails {
   String deliveryDate;

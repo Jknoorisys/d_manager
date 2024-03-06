@@ -550,11 +550,11 @@ class S {
     );
   }
 
-  /// `Box to be Received`
-  String get boxToBeReceived {
+  /// `Yarn to be Received`
+  String get yarnToBeReceived {
     return Intl.message(
-      'Box to be Received',
-      name: 'boxToBeReceived',
+      'Yarn to be Received',
+      name: 'yarnToBeReceived',
       desc: '',
       args: [],
     );
@@ -705,6 +705,16 @@ class S {
     return Intl.message(
       'Cloth Quality List',
       name: 'clothQualityList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update cloth sell deal
+  String get updateSellDeal {
+    return Intl.message(
+      'Update Sell Deal',
+      name: 'updateSellDeal',
       desc: '',
       args: [],
     );
@@ -1059,7 +1069,18 @@ class S {
       args: [],
     );
   }
+  /// `Notification List`
+  String get notificationList {
+    return Intl.message(
+      'Notifications',
+      name: 'notificationList',
+      desc: '',
+      args: [],
+    );
+  }
 }
+
+
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   const AppLocalizationDelegate();

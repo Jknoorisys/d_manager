@@ -31,6 +31,8 @@ import 'package:d_manager/screens/reminders/yarn_purchase/payment_due_date.dart'
 import 'package:d_manager/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/dashboard/notification_list.dart';
+
 class AppRoutes {
   static const String splashScreen = '/';
 
@@ -92,6 +94,10 @@ class AppRoutes {
   // History
   static const String purchaseHistory = '/purchase-history';
   static const String sellHistory = '/sell-history';
+
+  // Notifications
+
+  static const String notificationList = '/notification-list';
 
 
   static final Map<String, WidgetBuilder> routes = {
@@ -186,11 +192,11 @@ class AppRoutes {
       final int? invoiceID = args?['invoiceID'];
       return InvoiceAdd(sellID: sellID, invoiceID: invoiceID);
     },
-    invoiceView: (context) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? invoiceData = args?['invoiceData'];
-      return InvoiceView(invoiceData: invoiceData);
-    },
+    // invoiceView: (context) {
+    //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    //   final Map<String, dynamic>? invoiceData = args?['invoiceData'];
+    //   return InvoiceView(invoiceData: invoiceData);
+    // },
 
     //Manage Purchase Reminders
     boxToBeReceived: (context) => const BoxToBeReceived(),
@@ -203,6 +209,9 @@ class AppRoutes {
     // Manage History
     purchaseHistory: (context) => const PurchaseHistory(),
     sellHistory: (context) => const SellHistory(),
+
+    // Notification List
+    notificationList: (context) => const NotificationList(),
 
   };
 }
