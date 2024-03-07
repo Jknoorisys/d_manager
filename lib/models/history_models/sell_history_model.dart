@@ -59,10 +59,10 @@ class SellHistoryModelList {
   String? status;
   int? invoiceCount;
   int? totalMeter;
-  int? totalGstAmount;
-  int? totalInvoiceAmount;
+  double? totalGstAmount;
+  double? totalInvoiceAmount;
   int? totalReceivedAmount;
-  int? totalDifferenceAmount;
+  double? totalDifferenceAmount;
 
   SellHistoryModelList({
     this.sellId,
@@ -108,10 +108,10 @@ class SellHistoryModelList {
     status: json["status"],
     invoiceCount: json["invoice_count"],
     totalMeter: json["total_meter"],
-    totalGstAmount: json["total_gst_amount"],
-    totalInvoiceAmount: json["total_invoice_amount"],
+    totalGstAmount: json["total_gst_amount"]?.toDouble(),
+    totalInvoiceAmount: json["total_invoice_amount"]?.toDouble(),
     totalReceivedAmount: json["total_received_amount"],
-    totalDifferenceAmount: json["total_difference_amount"],
+    totalDifferenceAmount: json["total_difference_amount"]?.toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -144,26 +144,30 @@ class Filter {
   dynamic firmId;
   dynamic partyId;
   dynamic qualityId;
-  dynamic dealStatus;
+  dynamic startDate;
+  dynamic endDate;
 
   Filter({
     this.firmId,
     this.partyId,
     this.qualityId,
-    this.dealStatus,
+    this.startDate,
+    this.endDate,
   });
 
   factory Filter.fromJson(Map<String, dynamic> json) => Filter(
     firmId: json["firm_id"],
     partyId: json["party_id"],
     qualityId: json["quality_id"],
-    dealStatus: json["deal_status"],
+    startDate: json["start_date"],
+    endDate: json["end_date"],
   );
 
   Map<String, dynamic> toJson() => {
     "firm_id": firmId,
     "party_id": partyId,
     "quality_id": qualityId,
-    "deal_status": dealStatus,
+    "start_date": startDate,
+    "end_date": endDate,
   };
 }

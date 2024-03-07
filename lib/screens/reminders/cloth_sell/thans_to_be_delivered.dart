@@ -60,7 +60,8 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
         content: CustomBody(
             isLoading:_isLoading,
             title: S.of(context).thansToBeDelivered,
-            content:
+            content:thansToBeDelivered.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
+            ) :
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:

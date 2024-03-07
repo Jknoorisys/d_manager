@@ -26,79 +26,119 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
-  final List<Widget> _pages = [
-    // yarn purchases
-    const Purchases(),
-    // cloth sells
-    const ClothSells(),
-  ];
+  late List<Widget> _pages;
+  late List<PurchaseDeal> purchaseDeals;
+  late List<SellDeal> sellDeal;
   bool isLoading = false;
   DashboardServices dashboardServices = DashboardServices();
-  List<PurchaseDeal>? purchaseDeals = [];
+  late Widget dynamicDashboardCard;
+  DashboardModel? dashboardModel;
 
   @override
   void initState() {
     super.initState();
-    DateTime startDate = DateTime.now();
-    DateTime endDate = DateTime.now();
-    fetchData(startDate,endDate);
+    fetchData();
   }
-  void fetchData(DateTime startDate, DateTime endDate) async {
+
+  void fetchData() async {
     setState(() {
       isLoading = true;
     });
     try {
+      DateTime startDate = DateTime.now();
+      DateTime endDate = DateTime.now();
+      purchaseDeals = await fetchPurchaseDeals(startDate,endDate);
+      sellDeal = await fetchSellDeals(startDate,endDate);
+
+      // Wait for purchaseDeals and sellDeal to be fetched before initializing _pages
+      _pages = [
+        Purchases(purchaseDeals: purchaseDeals),
+        ClothSells(sellDeal: sellDeal),
+      ];
+      updateDashboardCard(purchaseDeals, sellDeal);
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Error occurred: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+
+  Future<List<PurchaseDeal>> fetchPurchaseDeals(DateTime startDate, DateTime endDate) async {
+    try {
       DashboardModel? model = await GetDashboardData(startDate, endDate);
-      if (model?.success == true) {
-        setState(() {
-          purchaseDeals?.addAll(model!.data!.purchaseDeals!);
-          isLoading = false;
-        });
+      if (model != null && model.success == true) {
+        return model.data!.purchaseDeals ?? [];
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          model!.message!,
-          mode: SnackbarMode.error,
-        );
+        // Handle error
+        return [];
       }
     } catch (e) {
       print("Error occurred: $e");
+      return [];
     }
   }
+
+  Future<List<SellDeal>> fetchSellDeals(DateTime startDate, DateTime endDate) async {
+    try {
+      DashboardModel? model = await GetDashboardData(startDate, endDate);
+      if (model != null && model.success == true) {
+        return model.data!.sellDeal ?? [];
+      } else {
+        // Handle error
+        return [];
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+      return [];
+    }
+  }
+
+  void updateDashboardCard(List<PurchaseDeal> purchaseDeals, List<SellDeal> sellDeal) {
+    if (_currentIndex == 0) {
+      // Update DashboardCard for purchases
+      setState(() {
+        dynamicDashboardCard = DashboardCard(
+          title: 'Total Yarn Purchases',
+          value: purchaseDeals.length.toString(), // You can update this with the actual data
+          date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+          image: AppImages.purchaseIcon,
+        );
+      });
+    } else if (_currentIndex == 1) {
+      // Update DashboardCard for cloth sells
+      setState(() {
+        dynamicDashboardCard = DashboardCard(
+          title: 'Total Cloth Sells Deals',
+          value: sellDeal.length.toString(), // You can update this with the actual data
+          date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+          image: AppImages.salesIcon,
+        );
+      });
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
-    Widget dynamicDashboardCard = const DashboardCard();
-    if (_currentIndex == 0) {
-      // Total Yarn Purchases card
-      dynamicDashboardCard = DashboardCard(
-        title: 'Total Yarn Purchases',
-        value: '1,00,000',
-        date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
-        image: AppImages.purchaseIcon,
-      );
-    } else if (_currentIndex == 1) {
-      // Other card for Cloth Sells
-      dynamicDashboardCard = DashboardCard(
-        title: 'Total Cloth Sells Deals',
-        value: '500,000',
-        date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
-        image: AppImages.salesIcon,
-      );
-    }
     return CustomDrawer(
       content: CustomBody(
         dashboardCard: dynamicDashboardCard,
         content: _pages[_currentIndex],
-        // BottomNavigationBar
         bottomNavigationBar: Container(
-          padding: EdgeInsets.all( Dimensions.width20),
+          padding: EdgeInsets.all(Dimensions.width20),
           height: Dimensions.height60 + Dimensions.height10,
           decoration: BoxDecoration(
             color: AppTheme.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(Dimensions.radius20),
-              topRight: Radius.circular(Dimensions.radius20),),
+              topRight: Radius.circular(Dimensions.radius20),
+            ),
             boxShadow: [
               BoxShadow(
                 color: AppTheme.grey.withOpacity(0.4),
@@ -112,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               CustomElevatedButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     _currentIndex = 0;
                   });
@@ -120,15 +160,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 buttonText: S.of(context).purchases,
                 image: SvgPicture.asset(
                   AppImages.purchaseFillIcon,
-                  color: _currentIndex == 0 ? AppTheme.white : AppTheme.primary,
+                  color: _currentIndex == 0
+                      ? AppTheme.white
+                      : AppTheme.primary,
                   width: Dimensions.iconSize24,
                   height: Dimensions.iconSize24,
                 ),
-                isBackgroundGradient: _currentIndex == 0 ? true : false,
-                color: _currentIndex == 0 ? AppTheme.white : AppTheme.primary,
+                isBackgroundGradient: _currentIndex == 0,
+                color: _currentIndex == 0
+                    ? AppTheme.white
+                    : AppTheme.primary,
               ),
               CustomElevatedButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     _currentIndex = 1;
                   });
@@ -136,12 +180,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 buttonText: S.of(context).clothSells,
                 image: SvgPicture.asset(
                   AppImages.salesFillIcon,
-                  color: _currentIndex == 1 ? AppTheme.white : AppTheme.primary,
+                  color: _currentIndex == 1
+                      ? AppTheme.white
+                      : AppTheme.primary,
                   width: Dimensions.iconSize24,
                   height: Dimensions.iconSize24,
                 ),
-                isBackgroundGradient: _currentIndex == 1 ? true : false,
-                color: _currentIndex == 1 ? AppTheme.white : AppTheme.primary,
+                isBackgroundGradient: _currentIndex == 1,
+                color: _currentIndex == 1
+                    ? AppTheme.white
+                    : AppTheme.primary,
               ),
             ],
           ),
@@ -149,32 +197,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
   Future<DashboardModel?> GetDashboardData(
       DateTime startDate,
       DateTime endDate
       ) async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
       String formattedEndDueDate = DateFormat('yyyy-MM-dd').format(endDate);
+
       DashboardModel? model = await dashboardServices.showDashboardData(
-        formattedStartDate,
-        formattedEndDueDate
+          formattedStartDate,
+          formattedEndDueDate
       );
-      if (model != null && model.success == true) {
-        print("Api Call Successfull $model");
-        return model;
+      if (model?.success == true) {
+        // purchaseDeals?.addAll(model!.data!.purchaseDeals!);
+        setState(() {
+          dashboardModel = model;
+          purchaseDeals.addAll(model!.data!.purchaseDeals!);
+          sellDeal.addAll(model.data!.sellDeal!);
+        });
       } else {
         Navigator.of(context).pop(); // Close the loading dialog
         CustomApiSnackbar.show(
           context,
           'Error',
-          model?.message ?? 'Unknown error occurred',
+          model!.message!,
           mode: SnackbarMode.error,
         );
       }
     } catch (e) {
       print("Error occurred: $e");
+    }finally {
+      // Update isLoading state regardless of success or failure
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }
+

@@ -90,12 +90,14 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
 
 class CustomDatePickerForUpdate extends StatefulWidget {
   final DateTime selectedDate;
-
+  final ValueChanged<DateTime> onDateChanged;
   final double? height;
   final double? width;
 
-  CustomDatePickerForUpdate({
-    required this.selectedDate,this.height, this.width, required Null Function(dynamic newDate) onDateChanged,
+  const CustomDatePickerForUpdate({
+    required this.selectedDate,
+    required this.onDateChanged,
+    this.height, this.width,
   });
 
   @override
@@ -103,29 +105,28 @@ class CustomDatePickerForUpdate extends StatefulWidget {
 }
 
 class _CustomDatePickerForUpdateState extends State<CustomDatePickerForUpdate> {
-  late DateTime selectedDate;
+  late DateTime _selectedDate;
 
   @override
   void initState() {
     super.initState();
-    selectedDate = widget.selectedDate;
+    _selectedDate = widget.selectedDate;
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
+        final DateTime? picked = await showDatePicker(
           context: context,
-          helpText: S.of(context).selectDate,
-          initialDate: selectedDate,
-          firstDate:  DateTime(2000),
-          lastDate: DateTime(2050),
+          initialDate: _selectedDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2101),
         );
-
-        if (pickedDate != null && pickedDate != selectedDate) {
+        if (picked != null && picked != _selectedDate) {
           setState(() {
-            selectedDate = pickedDate;
+            _selectedDate = picked;
+            widget.onDateChanged(_selectedDate);
           });
         }
       },
@@ -141,8 +142,8 @@ class _CustomDatePickerForUpdateState extends State<CustomDatePickerForUpdate> {
           padding: EdgeInsets.all(Dimensions.height10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              BigText(text: DateFormat('yyyy-MM-dd').format(selectedDate), size: Dimensions.font14,),
+            children:[
+              BigText(text: DateFormat('yyyy-MM-dd').format(_selectedDate), size: Dimensions.font14,),
               Padding(
                 padding: EdgeInsets.zero,
                 child: Icon(
@@ -158,3 +159,4 @@ class _CustomDatePickerForUpdateState extends State<CustomDatePickerForUpdate> {
     );
   }
 }
+

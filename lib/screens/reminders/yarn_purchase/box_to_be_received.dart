@@ -55,8 +55,9 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
       CustomDrawer(
         content: CustomBody(
             isLoading: _isLoading,
-            title: S.of(context).boxToBeReceived,
-            content:
+            title: S.of(context).yarnToBeReceived,
+            content:reminderForYarnToBeReceived.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
+            ) :
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:

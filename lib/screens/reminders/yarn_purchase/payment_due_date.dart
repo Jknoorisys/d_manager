@@ -53,7 +53,8 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
         content: CustomBody(
           isLoading:_isLoading,
             title: S.of(context).paymentDueDate,
-            content:
+            content:yarnPaymentTobePaid.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
+            ) :
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child: SmartRefresher(

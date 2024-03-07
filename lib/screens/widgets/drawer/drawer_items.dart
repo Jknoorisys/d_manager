@@ -160,13 +160,8 @@ class DrawerItems extends StatelessWidget {
     );
   }
   Future<void> handleLogout(BuildContext context) async {
-    // Sign out
     await firebaseService.signOut();
-
-    // Set login status to false if needed
     HelperFunctions.setLoginStatus(false);
-
-    // Navigate to the login page and remove all other routes from the stack
     Navigator.of(context).pushNamedAndRemoveUntil(
       AppRoutes.login,
           (route) => false,
