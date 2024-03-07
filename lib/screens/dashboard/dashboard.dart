@@ -130,6 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       content: CustomBody(
         dashboardCard: dynamicDashboardCard,
         content: _pages[_currentIndex],
+        isLoading: isLoading,
         bottomNavigationBar: Container(
           padding: EdgeInsets.all(Dimensions.width20),
           height: Dimensions.height60 + Dimensions.height10,

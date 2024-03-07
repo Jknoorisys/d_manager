@@ -100,5 +100,6 @@
   "updateYarnType": "Update Yarn Type",
   "updateClothQuality": "Update Cloth Quality",
   "updateHammal": "Update Hammal",
-  "updateSellDeal": "Update Sell Deal"
+  "updateSellDeal": "Update Sell Deal",
+  "yarnToBeReceived": "Yarn To Be Received"
 }

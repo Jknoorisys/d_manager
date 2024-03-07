@@ -154,8 +154,8 @@ class AppRoutes {
     },
     yarnPurchaseView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? yarnPurchaseData = args?['yarnPurchaseData'];
-      return YarnPurchaseView(yarnPurchaseData: yarnPurchaseData, purchaseId: '',);
+      final String purchaseId = args?['purchaseId'];
+      return YarnPurchaseView(purchaseId: purchaseId);
     },
 
     // Manage Delivery Details

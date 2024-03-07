@@ -3,11 +3,13 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/models/yarn_purchase_models/yarn_purchase_detail_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +18,8 @@ import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 
 class YarnPurchaseView extends StatefulWidget {
-  final Map<String, dynamic>? yarnPurchaseData;
   final String purchaseId;
-  const YarnPurchaseView({Key? key, this.yarnPurchaseData,required this.purchaseId}) : super(key: key);
+  const YarnPurchaseView({Key? key, required this.purchaseId}) : super(key: key);
 
   @override
   _YarnPurchaseViewState createState() => _YarnPurchaseViewState();
@@ -28,6 +29,8 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   String billReceived = 'Yes'; 
   String paymentPaid = 'Yes';
   bool isLoading = false;
+  Data? yarnPurchaseData;
+  bool noRecordFound = true;
 
   ManagePurchaseServices purchaseServices = ManagePurchaseServices();
 
@@ -39,11 +42,11 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
     {'no': 5, 'dealDate': '2024-01-29', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '600', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-20', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
   ];
 
+  @override
   void initState() {
+    isLoading = true;
+    _getPurchaseDetails();
     super.initState();
-    if (widget.purchaseId != null) {
-      _getPurchaseDetails();
-    }
   }
 
   @override
@@ -51,8 +54,10 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
     return CustomDrawer(
         content: CustomBody(
           title: S.of(context).yarnPurchaseDealDetails,
+          isLoading: isLoading,
+          noRecordFound: noRecordFound,
           content: SingleChildScrollView(
-            child: Padding(
+            child: yarnPurchaseData == null ? const NoRecordFound() : Padding(
               padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -73,23 +78,23 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                               CircleAvatar(
                                 backgroundColor: AppTheme.secondary,
                                 radius: Dimensions.height20,
-                                child: BigText(text: widget.yarnPurchaseData!['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                                child: BigText(text: yarnPurchaseData!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
                               ),
                               SizedBox(width: Dimensions.height10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  BigText(text: widget.yarnPurchaseData!['partyName'], color: AppTheme.primary, size: Dimensions.font16),
+                                  BigText(text: yarnPurchaseData!.partyName!, color: AppTheme.primary, size: Dimensions.font16),
                                   Row(
                                     children: [
                                       CircleAvatar(
                                         backgroundColor: AppTheme.black,
                                         radius: Dimensions.height10,
-                                        child: BigText(text: widget.yarnPurchaseData!['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                        child: BigText(text: yarnPurchaseData!.firmName![0] ?? '', color: AppTheme.secondaryLight, size: Dimensions.font12),
                                       ),
                                       SizedBox(width: Dimensions.width10),
-                                      SmallText(text: widget.yarnPurchaseData!['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                      SmallText(text: yarnPurchaseData!.firmName!, color: AppTheme.black, size: Dimensions.font12),
                                     ],
                                   ),
                                 ],
@@ -101,40 +106,40 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                           SizedBox(height: Dimensions.height10),
                           Row(
                             children: [
-                              _buildInfoColumn('Deal Date', widget.yarnPurchaseData!['dealDate']),
+                              _buildInfoColumn('Deal Date', yarnPurchaseData!.purchaseDate!.toString().split(' ')[0]),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Payment Type', widget.yarnPurchaseData!['paymentType']),
-                              // _buildInfoColumn('Yarn Name', widget.yarnPurchaseData!['yarnName']),
+                              _buildInfoColumn('Payment Type', yarnPurchaseData!.paymentType!.toUpperCase()),
+                              // _buildInfoColumn('Yarn Name', yarnPurchaseData!['yarnName']),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Yarn Type', widget.yarnPurchaseData!['yarnType']),
+                              _buildInfoColumn('Yarn Type', yarnPurchaseData!.typeName!),
                             ],
                           ),
                           SizedBox(height: Dimensions.height10),
                           Row(
                             children: [
-                              _buildInfoColumn('Yarn Name', widget.yarnPurchaseData!['paymentType']),
+                              _buildInfoColumn('Yarn Name', yarnPurchaseData!.yarnName!),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Lot Number', widget.yarnPurchaseData!['lotNumber']),
+                              _buildInfoColumn('Lot Number', yarnPurchaseData!.lotNumber!),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Box Ordered', widget.yarnPurchaseData!['boxOrdered']),
+                              _buildInfoColumn('Box Ordered', yarnPurchaseData!.orderedBoxCount!),
                             ],
                           ),
                           SizedBox(height: Dimensions.height10),
                           Row(
                             children: [
-                              _buildInfoColumn('Box Delivered', widget.yarnPurchaseData!['boxDelivered']),
+                              _buildInfoColumn('Gross Received', yarnPurchaseData!.grossReceivedWeight!),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Box Remaining', widget.yarnPurchaseData!['boxRemaining']),
+                              _buildInfoColumn('Gross Remaining', (double.parse(yarnPurchaseData!.grossWeight!) - double.parse(yarnPurchaseData!.grossReceivedWeight!)).toString()),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Cops', widget.yarnPurchaseData!['cops']),
+                              _buildInfoColumn('Cops', yarnPurchaseData!.cops!),
                             ],
                           ),
                           SizedBox(height: Dimensions.height10),
                           Row(
                             children: [
-                              _buildInfoColumn('Deiner', widget.yarnPurchaseData!['Deiner']),
+                              _buildInfoColumn('Deiner', yarnPurchaseData!.denier!),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Status', widget.yarnPurchaseData!['status']),
+                              _buildInfoColumn('Status', yarnPurchaseData!.dealStatus! == 'completed' ? 'Completed' : 'On Going'),
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('', ''),
                             ],
@@ -144,7 +149,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                             children: [
                               Container(
                                   width: MediaQuery.of(context).size.width/2.65,
-                                  height: Dimensions.height40*2,
+                                  height: Dimensions.height40*2.5,
                                   padding: EdgeInsets.all(Dimensions.height10),
                                   decoration: BoxDecoration(
                                     color: AppTheme.white,
@@ -164,10 +169,10 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                           ),
                                           children: [
                                             TextSpan(
-                                              text: widget.yarnPurchaseData!['totalNetWeight'],
+                                              text: yarnPurchaseData!.netWeight!,
                                             ),
                                             TextSpan(
-                                              text: ' kg',
+                                              text: ' ton',
                                               style: TextStyle(
                                                 fontSize: Dimensions.font12,
                                               ),
@@ -175,14 +180,14 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                           ],
                                         ),
                                       ),
-                                      BigText(text: 'Gross Weight ${widget.yarnPurchaseData!['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                      BigText(text: 'Gross Weight\n ${yarnPurchaseData!.grossWeight} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                     ],
                                   )
                               ),
                               SizedBox(width: Dimensions.width20),
                               Container(
                                   width: MediaQuery.of(context).size.width/2.65,
-                                  height: Dimensions.height40*2,
+                                  height: Dimensions.height40*2.5,
                                   padding: EdgeInsets.all(Dimensions.height10),
                                   decoration: BoxDecoration(
                                     color: AppTheme.white,
@@ -193,7 +198,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                      BigText(text: '₹ ${widget.yarnPurchaseData!['rate']}',color: AppTheme.primary, size: Dimensions.font18)
+                                      BigText(text: '₹ ${yarnPurchaseData!.rate}',color: AppTheme.primary, size: Dimensions.font18)
                                     ],
                                   )
                               ),
@@ -284,11 +289,11 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Box Ordered', widget.yarnPurchaseData!['boxOrdered']),
+                                  _buildInfoColumn('Box Ordered', yarnPurchaseData!.orderedBoxCount!),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Box Received', deliveryDetailList[index]['boxReceived']),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Remaining', widget.yarnPurchaseData!['boxRemaining']),
+                                  _buildInfoColumn('Box Remaining', yarnPurchaseData!.deliveredBoxCount!),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
@@ -390,7 +395,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                               ],
                                             ),
                                           ),
-                                          BigText(text: 'Gross Weight ${widget.yarnPurchaseData!['grossWeight']} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: 'Gross Weight ${yarnPurchaseData!.grossWeight!} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                         ],
                                       )
                                   ),
@@ -408,7 +413,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '₹ ${widget.yarnPurchaseData!['rate']}',color: AppTheme.primary, size: Dimensions.font18)
+                                          BigText(text: '₹ ${yarnPurchaseData!.rate!}',color: AppTheme.primary, size: Dimensions.font18)
                                         ],
                                       )
                                   ),
@@ -482,31 +487,34 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   }
 
   Future<void> _getPurchaseDetails() async {
-    // setState(() {
-    //   isLoading = true;
-    // });
-    // FirmDetailModel? firmDetailModel = await manageFirmServices.viewFirm(widget.firmId!);
-    // if (firmDetailModel?.message != null) {
-    //   if (firmDetailModel?.success == true) {
-    //     setState(() {
-    //       isLoading = false;
-    //     });
-    //   } else {
-    //     CustomApiSnackbar.show(
-    //       context,
-    //       'Error',
-    //       firmDetailModel!.message.toString(),
-    //       mode: SnackbarMode.error,
-    //     );
-    //   }
-    // } else {
-    //   CustomApiSnackbar.show(
-    //     context,
-    //     'Error',
-    //     'Something went wrong, please try again',
-    //     mode: SnackbarMode.error,
-    //   );
-    // }
+    setState(() {
+      isLoading = true;
+    });
+    YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(int.parse(widget.purchaseId));
+
+    if (dealDetailModel?.message != null) {
+      if (dealDetailModel?.success == true) {
+        setState(() {
+          isLoading = false;
+          yarnPurchaseData = dealDetailModel!.data;
+          noRecordFound = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          dealDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    }
   }
 }
 

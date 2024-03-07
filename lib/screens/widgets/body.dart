@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
@@ -20,8 +21,9 @@ class CustomBody extends StatelessWidget {
   final Widget? dashboardCard;
 
   final bool? isLoading;
+  final bool? noRecordFound;
 
-  const CustomBody({super.key, required this.content, this.isAppBarTitle = true, this.isBackgroundGradient = false, this.bottomNavigationBar, this.title, this.filterButton, this.dashboardCard, this.isLoading = false});
+  const CustomBody({super.key, required this.content, this.isAppBarTitle = true, this.isBackgroundGradient = false, this.bottomNavigationBar, this.title, this.filterButton, this.dashboardCard, this.isLoading = false, this.noRecordFound = false});
   final int pendingNotifications = 2;
   @override
   Widget build(BuildContext context) {
@@ -132,7 +134,7 @@ class CustomBody extends StatelessWidget {
                 child: AppTheme.divider,
             ) : Container(),
             Expanded(
-              child: content,
+              child: noRecordFound == false ? content : const NoRecordFound(),
             ),
           ],
         ),

@@ -245,7 +245,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                 children: [
                                   Container(
                                       width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
+                                      height: Dimensions.height40*2.5,
                                       padding: EdgeInsets.all(Dimensions.height10),
                                       decoration: BoxDecoration(
                                         color: AppTheme.white,
@@ -276,14 +276,14 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                               ],
                                             ),
                                           ),
-                                          BigText(text: 'Gross Weight ${purchase.grossWeight} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: 'Gross Weight\n ${purchase.grossWeight} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                         ],
                                       )
                                   ),
                                   SizedBox(width: Dimensions.width20),
                                   Container(
                                       width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
+                                      height: Dimensions.height40*2.5,
                                       padding: EdgeInsets.all(Dimensions.height10),
                                       decoration: BoxDecoration(
                                         color: AppTheme.white,
@@ -306,7 +306,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                 children: [
                                   IconButton(
                                       onPressed: () {
-                                        Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': purchase.purchaseId});
+                                        Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': purchase.purchaseId.toString()});
                                       },
                                       icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
                                   ),

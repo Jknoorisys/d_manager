@@ -175,6 +175,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Yarn Purchase Deal Details"),
         "yarnPurchasesList":
             MessageLookupByLibrary.simpleMessage("Yarn Purchases List"),
+        "yarnToBeReceived":
+            MessageLookupByLibrary.simpleMessage("Yarn To Be Received"),
         "yarnType": MessageLookupByLibrary.simpleMessage("Yarn Type"),
         "yarnTypeList": MessageLookupByLibrary.simpleMessage("Yarn Type List")
       };

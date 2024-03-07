@@ -82,7 +82,7 @@ class DrawerItems extends StatelessWidget {
                 children: [
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.boxToBeReceived);
-                  }, S.of(context).boxToBeReceived),
+                  }, 'Box to be Received'),
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.paymentDueDate);
                   }, S.of(context).paymentDueDate),

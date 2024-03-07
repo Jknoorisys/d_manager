@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:d_manager/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class HelperFunctions {
   static bool trustSelfSigned = true;
@@ -139,5 +141,37 @@ class HelperFunctions {
 
   static Future<bool> setSellId(String id) async {
     return pref.setString("dealStatus", id);
+  }
+
+  static Future<bool> isNetworkResponsive() async {
+    final url = Uri.parse('https://google.com');
+    try {
+      final response = await http.head(url);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } on TimeoutException catch (e) {
+      return false;
+    } catch (e) {
+      // Handle other errors
+      return false;
+    }
+  }
+
+  static Future<bool> isInternetAvailable() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      // No internet connection
+      return false;
+    } else {
+      // Internet connection is available
+      return true;
+    }
+  }
+
+  static Future<bool> isPossiblyNetworkAvailable() async {
+    return await isInternetAvailable() && await isNetworkResponsive();
   }
 }

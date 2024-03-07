@@ -32,8 +32,13 @@ class Data {
   int? purchaseId;
   DateTime? purchaseDate;
   String? firmId;
+  String? firmName;
   String? partyId;
+  String? partyFirm;
+  String? partyName;
   String? yarnTypeId;
+  String? yarnName;
+  String? typeName;
   String? lotNumber;
   String? orderedBoxCount;
   String? deliveredBoxCount;
@@ -48,22 +53,18 @@ class Data {
   String? dharaDays;
   String? status;
   String? dealStatus;
-  String? createdAt;
-  String? createdBy;
-  String? updatedAt;
-  String? updatedBy;
-  String? firmName;
-  String? partyName;
-  String? partyFirmName;
-  String? yarnName;
-  String? typeName;
 
   Data({
     this.purchaseId,
     this.purchaseDate,
     this.firmId,
+    this.firmName,
     this.partyId,
+    this.partyFirm,
+    this.partyName,
     this.yarnTypeId,
+    this.yarnName,
+    this.typeName,
     this.lotNumber,
     this.orderedBoxCount,
     this.deliveredBoxCount,
@@ -78,23 +79,19 @@ class Data {
     this.dharaDays,
     this.status,
     this.dealStatus,
-    this.createdAt,
-    this.createdBy,
-    this.updatedAt,
-    this.updatedBy,
-    this.firmName,
-    this.partyName,
-    this.partyFirmName,
-    this.yarnName,
-    this.typeName,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     purchaseId: json["purchase_id"],
     purchaseDate: json["purchase_date"] == null ? null : DateTime.parse(json["purchase_date"]),
     firmId: json["firm_id"],
+    firmName: json["firm_name"],
     partyId: json["party_id"],
+    partyFirm: json["party_firm"],
+    partyName: json["party_name"],
     yarnTypeId: json["yarn_type_id"],
+    yarnName: json["yarn_name"],
+    typeName: json["type_name"],
     lotNumber: json["lot_number"],
     orderedBoxCount: json["ordered_box_count"],
     deliveredBoxCount: json["delivered_box_count"],
@@ -109,23 +106,19 @@ class Data {
     dharaDays: json["dhara_days"],
     status: json["status"],
     dealStatus: json["deal_status"],
-    createdAt: json["created_at"],
-    createdBy: json["created_by"],
-    updatedAt: json["updated_at"],
-    updatedBy: json["updated_by"],
-    firmName: json["firm_name"],
-    partyName: json["party_name"],
-    partyFirmName: json["party_firm_name"],
-    yarnName: json["yarn_name"],
-    typeName: json["type_name"],
   );
 
   Map<String, dynamic> toJson() => {
     "purchase_id": purchaseId,
     "purchase_date": "${purchaseDate!.year.toString().padLeft(4, '0')}-${purchaseDate!.month.toString().padLeft(2, '0')}-${purchaseDate!.day.toString().padLeft(2, '0')}",
     "firm_id": firmId,
+    "firm_name": firmName,
     "party_id": partyId,
+    "party_firm": partyFirm,
+    "party_name": partyName,
     "yarn_type_id": yarnTypeId,
+    "yarn_name": yarnName,
+    "type_name": typeName,
     "lot_number": lotNumber,
     "ordered_box_count": orderedBoxCount,
     "delivered_box_count": deliveredBoxCount,
@@ -140,14 +133,5 @@ class Data {
     "dhara_days": dharaDays,
     "status": status,
     "deal_status": dealStatus,
-    "created_at": createdAt,
-    "created_by": createdBy,
-    "updated_at": updatedAt,
-    "updated_by": updatedBy,
-    "firm_name": firmName,
-    "party_name": partyName,
-    "party_firm_name": partyFirmName,
-    "yarn_name": yarnName,
-    "type_name": typeName,
   };
 }

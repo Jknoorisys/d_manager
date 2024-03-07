@@ -550,11 +550,11 @@ class S {
     );
   }
 
-  /// `Yarn to be Received`
-  String get yarnToBeReceived {
+  /// `Box to be Received`
+  String get boxToBeReceived {
     return Intl.message(
-      'Yarn to be Received',
-      name: 'yarnToBeReceived',
+      'Box to be Received',
+      name: 'boxToBeReceived',
       desc: '',
       args: [],
     );
@@ -1069,11 +1069,12 @@ class S {
       args: [],
     );
   }
-  /// `Notification List`
-  String get notificationList {
+
+  /// `Yarn To Be Received`
+  String get yarnToBeReceived {
     return Intl.message(
-      'Notifications',
-      name: 'notificationList',
+      'Yarn To Be Received',
+      name: 'yarnToBeReceived',
       desc: '',
       args: [],
     );
