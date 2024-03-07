@@ -97,6 +97,10 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
       selectedParty = widget.selectedParty!;
       partyID = selectedParty!.partyId.toString();
     }
+    if (widget.selectedClothQuality != null) {
+      selectedClothQuality = widget.selectedClothQuality!;
+      clothID = selectedClothQuality!.qualityId.toString();
+    }
 
     _loadData();
     _loadPartyData();
@@ -138,12 +142,12 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                 BigText(text: 'Select Deal Date', size: Dimensions.font12,),
                                 Gap(Dimensions.height10/2),
                                 CustomDatePickerForUpdate(
-                                  selectedDate: selectedDate, // pass selectedDate
+                                  selectedDate: widget.sellListData.sellDate!, // pass selectedDate
                                   onDateChanged: (newDate) {
                                     setState(() {
                                       selectedDate = newDate; // update selectedDate when a new date is selected
                                     });
-                                    print("selectedDatefor==== $selectedDate");
+                                    print("Deal Date==== $selectedDate");
                                   },
                                 ),
                               ],
@@ -322,12 +326,12 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
                                 BigText(text: 'Select Due Date', size: Dimensions.font12,),
                                 Gap(Dimensions.height10/2),
                                CustomDatePickerForUpdate(
-                                 selectedDate: selectedDate, // pass selectedDate
+                                 selectedDate: widget.sellListData.sellDueDate!, // pass selectedDate
                                  onDateChanged: (newDate) {
                                    setState(() {
-                                     selectedDate = newDate; // update selectedDate when a new date is selected
+                                     selectedDueDate = newDate; // update selectedDate when a new date is selected
                                    });
-                                   print("selectedDatefor==== $selectedDate");
+                                   print("Due Date=== $selectedDueDate");
                                  },
                                )
                               ],

@@ -56,7 +56,8 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
         content: CustomBody(
             isLoading: _isLoading,
             title: S.of(context).yarnToBeReceived,
-            content:
+            content:reminderForYarnToBeReceived.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
+            ) :
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:

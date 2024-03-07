@@ -77,14 +77,10 @@ class _DashboardCardState extends State<DashboardCard> {
                             if (pickedDateRange != null) {
                               // Extract the start or end date from the selected range
 
-                              DateTime startDate = DateTime.parse(startDateString); // Or use pickedDateRange.end
-                              setState(() {
-                                selectedStartDate = startDate;
-                              });
-                              DateTime endDate = DateTime.parse(endDateString); // Or use pickedDateRange.end
-                              setState(() {
-                                selectedEndDate = endDate;
-                              });
+                              DateTime startDate = pickedDateRange.start;
+                              DateTime endDate = pickedDateRange.end;
+
+                              // Format the dates as needed (e.g., yyyy-MM-dd)
                               String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
                               String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
 
@@ -177,6 +173,7 @@ class _DashboardCardState extends State<DashboardCard> {
       ),
     );
   }
+
 }
 
 

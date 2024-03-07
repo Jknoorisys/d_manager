@@ -284,9 +284,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                               selectedParty: selectedParty, // Pass the selected party
                                               selectedClothQuality: selectedClothQuality,
                                             )));
-                                        print("selectedFirmName===== $selectedFirm");
-                                        print("selectedPartyName===== $selectedParty");
-                                        print("selectedClothQulityName===== $selectedClothQuality");
+
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                   ),
@@ -367,8 +365,9 @@ class _ClothSellListState extends State<ClothSellList> {
       elevation: 10,
       context: context,
       builder: (context) =>
-    StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-    return Padding(
+      StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+      return
+      Padding(
           padding: EdgeInsets.all(Dimensions.height20),
           child: Column(
             mainAxisSize: MainAxisSize.min,

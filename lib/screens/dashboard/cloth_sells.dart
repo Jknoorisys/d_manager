@@ -5,29 +5,27 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../../api/dashboard_services.dart';
+import '../../models/dashboard_models/dashboard_models.dart';
+import '../widgets/snackbar.dart';
 
 class ClothSells extends StatefulWidget {
-  const ClothSells({Key? key}) : super(key: key);
+  final List<SellDeal> sellDeal;
+  const ClothSells({Key? key, required this.sellDeal}) : super(key: key);
 
   @override
   _ClothSellsState createState() => _ClothSellsState();
 }
 
 class _ClothSellsState extends State<ClothSells> {
-
-  List<Map<String, dynamic>> clothSellList = [
-    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 2, 'dealDate': '2024-01-26','myFirm': 'Danish Textiles','partyName': 'Tulsi Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 3, 'dealDate': '2024-01-27','myFirm': 'Danish Textiles','partyName': 'Laxmi Traders','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 4, 'dealDate': '2024-01-28','myFirm': 'Danish Textiles','partyName': 'Mahalaxmi Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-    {'no': 5, 'dealDate': '2024-01-29','myFirm': 'Danish Textiles','partyName': 'Veenapani Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'150', 'status': 'On Going'},
-  ];
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(Dimensions.height15),
       child: ListView.builder(
-        itemCount: clothSellList.length,
+        itemCount: widget.sellDeal.length,
         itemBuilder: (context, index) {
           return CustomAccordion(
             titleChild: Column(
@@ -41,23 +39,23 @@ class _ClothSellsState extends State<ClothSells> {
                         CircleAvatar(
                           backgroundColor: AppTheme.secondary,
                           radius: Dimensions.height20,
-                          child: BigText(text: clothSellList[index]['partyName'][0], color: AppTheme.primary, size: Dimensions.font18),
+                          child: BigText(text: widget.sellDeal[index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
                         ),
                         SizedBox(width: Dimensions.height10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            BigText(text: clothSellList[index]['partyName'], color: AppTheme.primary, size: Dimensions.font16),
+                            BigText(text: widget.sellDeal[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor: AppTheme.black,
                                   radius: Dimensions.height10,
-                                  child: BigText(text: clothSellList[index]['myFirm'][0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                  child: BigText(text: widget.sellDeal[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                 ),
                                 SizedBox(width: Dimensions.width10),
-                                SmallText(text: clothSellList[index]['myFirm'], color: AppTheme.black, size: Dimensions.font12),
+                                SmallText(text: widget.sellDeal[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
                               ],
                             ),
                           ],
@@ -72,11 +70,11 @@ class _ClothSellsState extends State<ClothSells> {
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    _buildInfoColumn('Deal Date', clothSellList[index]['dealDate']),
+                    Expanded(flex:1,child: _buildInfoColumn('Deal Date', widget.sellDeal[index].sellDate!.toString())),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Cloth Quality', clothSellList[index]['clothQuality']),
+                    Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', widget.sellDeal[index].qualityName!)),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Total Than', clothSellList[index]['totalThan']),
+                    Expanded(flex:1,child: _buildInfoColumn('Total Than', widget.sellDeal[index].totalThan!)),
                   ],
                 ),
               ],
@@ -85,17 +83,21 @@ class _ClothSellsState extends State<ClothSells> {
               children: [
                 Row(
                   children: [
-                    _buildInfoColumn('Than Delivered', clothSellList[index]['thanDelivered']),
+                    Expanded(flex:1,child: _buildInfoColumn('Than Delivered', widget.sellDeal[index].thanDelivered!)),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Than Remaining', clothSellList[index]['thanRemaining']),
+                    Expanded(flex:1,child: _buildInfoColumn('Than Remaining', widget.sellDeal[index].thanRemaining!)),
                     SizedBox(width: Dimensions.width20),
-                    _buildInfoColumn('Rate', clothSellList[index]['rate']),
+                    Expanded(flex:1,child: _buildInfoColumn('Rate', widget.sellDeal[index].rate!)),
                   ],
                 ),
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    _buildInfoColumn('Status', clothSellList[index]['status']),
+                    Expanded(flex:1,child: _buildInfoColumn('Status', widget.sellDeal[index].dealStatus!)),
+                    SizedBox(width: Dimensions.width20),
+                    Expanded(flex:1,child: _buildInfoColumn('', '')),
+                    SizedBox(width: Dimensions.width20),
+                    Expanded(flex:1,child: _buildInfoColumn('', '')),
                   ],
                 ),
                 SizedBox(height: Dimensions.height15),
@@ -104,7 +106,7 @@ class _ClothSellsState extends State<ClothSells> {
                   children: [
                     CustomElevatedButton(
                       onPressed: (){
-                        Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': clothSellList[index]});
+                        //Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': clothSellList[index]});
                       },
                       buttonText: 'View Details',
                       isBackgroundGradient: false,
@@ -123,12 +125,21 @@ class _ClothSellsState extends State<ClothSells> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
-    return Expanded(
+    String formattedValue = value;
+    if (title == 'Deal Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }else if (title == 'Due Date') {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+    }
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );

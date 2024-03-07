@@ -550,11 +550,11 @@ class S {
     );
   }
 
-  /// `Box to be Received`
-  String get boxToBeReceived {
+  /// `Yarn to be Received`
+  String get yarnToBeReceived {
     return Intl.message(
-      'Box to be Received',
-      name: 'boxToBeReceived',
+      'Yarn to be Received',
+      name: 'yarnToBeReceived',
       desc: '',
       args: [],
     );
@@ -1065,6 +1065,15 @@ class S {
     return Intl.message(
       'Update Sell Deal',
       name: 'updateSellDeal',
+      desc: '',
+      args: [],
+    );
+  }
+  /// `Notification List`
+  String get notificationList {
+    return Intl.message(
+      'Notifications',
+      name: 'notificationList',
       desc: '',
       args: [],
     );

@@ -62,8 +62,8 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
         content: CustomBody(
           isLoading: _isLoading,
             title: S.of(context).paymentToBeReceived,
-            content:
-            Padding(
+            content: paymentToBeReceivedList.isEmpty ?Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
+            ) : Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:
               SmartRefresher(
