@@ -263,9 +263,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                 children: [
                                   IconButton(
                                       onPressed: () {
-                                        //Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'clothSellData': sellDealListModel});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView( sellID: clothSellList[index].sellId!)));
-                                        //Navigator.of(context).pushNamed(AppRoutes.clothSellView);
+                                        Navigator.of(context).pushNamed(AppRoutes.clothSellView, arguments: {'sellID': clothSellList[index].sellId});
                                       },
                                       icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary)
                                   ),

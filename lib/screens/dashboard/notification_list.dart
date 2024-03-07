@@ -34,7 +34,7 @@ class _NotificationListState extends State<NotificationList> {
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          title: S.of(context).notificationList,
+          title: 'Notifications',
           content: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListView.builder(

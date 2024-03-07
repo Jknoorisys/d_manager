@@ -4,6 +4,8 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/invoice_models/add_invoice_model.dart';
+import 'package:d_manager/models/invoice_models/invoice_detail_model.dart';
+import 'package:d_manager/models/invoice_models/update_invoice_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -27,7 +29,6 @@ class InvoiceAdd extends StatefulWidget {
 }
 
 class _InvoiceAddState extends State<InvoiceAdd> {
-
   ManageInvoiceServices invoiceServices = ManageInvoiceServices();
   bool submitted = false;
   DateTime selectedDate = DateTime.now();
@@ -46,16 +47,14 @@ class _InvoiceAddState extends State<InvoiceAdd> {
   List<String> thanList = [];
   List<String> meterList = [];
 
-  TextEditingController baleNumberController = TextEditingController();
-  TextEditingController thanController = TextEditingController();
-  TextEditingController meterController = TextEditingController();
+  List<TextEditingController> baleNumberControllers = [];
+  List<TextEditingController> thanControllers = [];
+  List<TextEditingController> meterControllers = [];
   TextEditingController invoiceNumberController = TextEditingController();
   TextEditingController rateController = TextEditingController();
   TextEditingController amountReceivedController = TextEditingController();
-  TextEditingController differenceAmountController = TextEditingController();
   TextEditingController paymentRemarkController = TextEditingController();
   TextEditingController discountController = TextEditingController();
-
 
   void openFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.any);
@@ -72,8 +71,14 @@ class _InvoiceAddState extends State<InvoiceAdd> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    isLoading = true;
     discountController.text = '9';
+    baleNumberControllers = [TextEditingController()];
+    thanControllers = [TextEditingController()];
+    meterControllers = [TextEditingController()];
+    _getInvoiceDetails();
+    if (widget.invoiceID != null && widget.sellID != null) {
+      _getInvoiceDetails();
+    }
   }
 
   @override
@@ -81,13 +86,18 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     // TODO: implement dispose
     rateController.dispose();
     invoiceNumberController.dispose();
-    baleNumberController.dispose();
-    thanController.dispose();
-    meterController.dispose();
     amountReceivedController.dispose();
-    differenceAmountController.dispose();
     paymentRemarkController.dispose();
     discountController.dispose();
+    for (var controller in baleNumberControllers) {
+      controller.dispose();
+    }
+    for (var controller in thanControllers) {
+      controller.dispose();
+    }
+    for (var controller in meterControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
   @override
@@ -95,12 +105,11 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     var errorRate = submitted == true ? _validateRate(rateController.text) : null,
         errorInvoiceNumber = submitted == true ? _validateInvoiceNumber(invoiceNumberController.text) : null,
         errorAmountReceived = (submitted == true && isPaymentReceived == true) ? _validateAmountReceived(amountReceivedController.text) : null,
-        errorDifferenceAmount = (submitted == true && isPaymentReceived == true) ? _validateDifferenceAmount(differenceAmountController.text) : null,
         errorPaymentRemark = submitted == true ? _validatePaymentRemark(paymentRemarkController.text) : null;
     return CustomDrawer(
         content: CustomBody(
           title: widget.invoiceID == null ? 'Add Invoice' : 'Edit Invoice',
-          // isLoading: isLoading,
+          isLoading: isLoading,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -185,7 +194,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorInvoiceNumber.toString() != 'null' ? errorInvoiceNumber.toString() : '',
                               )
                             ],
                           ),
@@ -334,36 +342,19 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                BigText(text: 'Difference in Amount', size: Dimensions.font12,),
+                                Gap(Dimensions.height20),
+                                BigText(text: 'Select Paid Date', size: Dimensions.font12,),
                                 Gap(Dimensions.height10/2),
-                                CustomTextField(
-                                  hintText: "Enter Difference",
-                                  controller: differenceAmountController,
-                                  keyboardType: TextInputType.number,
-                                  borderRadius: Dimensions.radius10,
+                                CustomDatePicker(
+                                  selectedDate: selectedPaidDate,
                                   width: MediaQuery.of(context).size.width/2.65,
-                                  errorText: errorDifferenceAmount.toString() != 'null' ? errorDifferenceAmount.toString() : '',
-                                )
+                                  onDateSelected: (date) {
+                                    setState(() {
+                                      selectedPaidDate = date;
+                                    });
+                                  },
+                                ),
                               ],
-                            ),
-                          ],
-                        ),
-                      if (isPaymentReceived)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Gap(Dimensions.height20),
-                            BigText(text: 'Select Paid Date', size: Dimensions.font12,),
-                            Gap(Dimensions.height10/2),
-                            CustomDatePicker(
-                              selectedDate: selectedPaidDate,
-                              width: MediaQuery.of(context).size.width,
-                              onDateSelected: (date) {
-                                setState(() {
-                                  selectedPaidDate = date;
-                                });
-                              },
                             ),
                           ],
                         ),
@@ -382,6 +373,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                               borderRadius: Dimensions.radius10,
                               maxLines: 3,
                               width: MediaQuery.of(context).size.width,
+                              errorText: errorPaymentRemark.toString() != 'null' ? errorPaymentRemark.toString() : '',
                             )
                           ],
                         ),
@@ -405,32 +397,36 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                                 isLoading = !isLoading;
                               });
 
+                              for (int i = 0; i < rowsData.length; i++) {
+                                baleNumbersList.add(baleNumberControllers[i].text);
+                                thanList.add(thanControllers[i].text);
+                                meterList.add(meterControllers[i].text);
+                              }
+
+                              Map<String, dynamic> body = {
+                                "invoice_id": "${widget.invoiceID}",
+                                "user_id": HelperFunctions.getUserID(),
+                                "sell_id":  '${widget.sellID}',
+                                "invoice_date": DateFormat('yyyy-MM-dd').format(invoiceDate),
+                                "rate": rateController.text,
+                                "invoice_number": invoiceNumberController.text,
+                                "bale_number": baleNumbersList,
+                                "than": thanList,
+                                "meter": meterList,
+                                "discount": discountController.text,
+                                "payment_type": paymentType == 'Current' ? 'current' : 'dhara',
+                                'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
+                                'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
+                                "paid_status": isPaymentReceived ? 'yes' : 'no',
+                                "payment_method": isPaymentReceived ? paymentMethod : '',
+                                "received_amount": isPaymentReceived ? amountReceivedController.text : '',
+                                "payment_date": isPaymentReceived ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
+                                "reason": paymentRemarkController.text ?? '',
+                              };
                               if (widget.invoiceID == null) {
-                                Map<String, dynamic> body = {
-                                  "invoice_id" : widget.invoiceID ?? '',
-                                  "user_id": HelperFunctions.getUserID(),
-                                  "sell_id": widget.sellID ?? '',
-                                  "invoice_date": DateFormat('yyyy-MM-dd').format(invoiceDate),
-                                  "rate": rateController.text,
-                                  "invoice_number": invoiceNumberController.text,
-                                  "bill_number": baleNumbersList,
-                                  "than": thanList,
-                                  "meter": meterList,
-                                  "discount": discountController.text,
-                                  "payment_type": paymentType == 'Current' ? 'current' : 'dhara',
-                                  'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
-                                  'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
-                                  "paid_status": isPaymentReceived ? 'yes' : 'no',
-                                  "payment_method": paymentMethod,
-                                  "received_amount": amountReceivedController.text,
-                                  "difference_amount": differenceAmountController.text,
-                                  "payment_date": DateFormat('yyyy-MM-dd').format(selectedPaidDate),
-                                  "reason": paymentRemarkController.text,
-                                };
-                                print('Body: $body');
                                 _addInvoice(body);
                               } else {
-                                // _updateInvoice(body);
+                                _updateInvoice(body);
                               }
                             }
                           }
@@ -447,13 +443,15 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     );
   }
   Widget _buildDynamicRow(int index) {
-    var  errorBaleNumber = submitted == true ? _validateBaleNumber(baleNumberController.text) : null,
-        errorThan = submitted == true ? _validateThan(thanController.text) : null,
-        errorMeter = submitted == true ? _validateMeter(meterController.text) : null;
+    var  errorBaleNumber = submitted == true ? _validateBaleNumber(baleNumberControllers[0].text) : null,
+        errorThan = submitted == true ? _validateThan(thanControllers[0].text) : null,
+        errorMeter = submitted == true ? _validateMeter(meterControllers[0].text) : null;
 
-    baleNumbersList.add(baleNumberController.text);
-    thanList.add(thanController.text);
-    meterList.add(meterController.text);
+    if (index >= baleNumberControllers.length) {
+      baleNumberControllers.add(TextEditingController());
+      thanControllers.add(TextEditingController());
+      meterControllers.add(TextEditingController());
+    }
 
     return Column(
       children: [
@@ -467,7 +465,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                 BigText(text: 'Bale Number', size: Dimensions.font12,),
                 Gap(Dimensions.height10/2),
                 CustomTextField(
-                  controller: baleNumberController,
+                  controller: baleNumberControllers[index],
                   hintText: "Bale Number",
                   keyboardType: TextInputType.number,
                   borderRadius: Dimensions.radius10,
@@ -484,7 +482,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                 Gap(Dimensions.height10/2),
                 CustomTextField(
                   hintText: "Than",
-                  controller: thanController,
+                  controller: thanControllers[index],
                   keyboardType: TextInputType.number,
                   borderRadius: Dimensions.radius10,
                   width: MediaQuery.of(context).size.width/6,
@@ -500,7 +498,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                 Gap(Dimensions.height10/2),
                 CustomTextField(
                   hintText: "Meter",
-                  controller: meterController,
+                  controller: meterControllers[index],
                   keyboardType: TextInputType.number,
                   borderRadius: Dimensions.radius10,
                   width: MediaQuery.of(context).size.width/6,
@@ -632,46 +630,108 @@ class _InvoiceAddState extends State<InvoiceAdd> {
   }
 
   bool _isFormValid() {
-
     String rateError = _validateRate(rateController.text) ?? '';
     String invoiceNumberError = _validateInvoiceNumber(invoiceNumberController.text) ?? '';
-    String baleNumberError = _validateBaleNumber(baleNumberController.text) ?? '';
-    String thanError = _validateThan(thanController.text) ?? '';
-    String meterError = _validateMeter(meterController.text) ?? '';
+    String baleNumberError = _validateBaleNumber(baleNumberControllers[0].text) ?? '';
+    String thanError = _validateThan(thanControllers[0].text) ?? '';
+    String meterError = _validateMeter(meterControllers[0].text) ?? '';
     String amountReceivedError = _validateAmountReceived(amountReceivedController.text) ?? '';
-    String differenceAmountError = _validateDifferenceAmount(differenceAmountController.text) ?? '';
+    // String differenceAmountError = _validateDifferenceAmount(differenceAmountController.text) ?? '';
     String paymentRemarkError = _validatePaymentRemark(paymentRemarkController.text) ?? '';
     if (isPaymentReceived == true) {
-      return rateError.isEmpty && invoiceNumberError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty && amountReceivedError.isEmpty && differenceAmountError.isEmpty ? true : false;
+      return rateError.isEmpty && invoiceNumberError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty && amountReceivedError.isEmpty && paymentRemarkError.isEmpty ? true : false;
     } else {
       return rateError.isEmpty && invoiceNumberError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty ? true : false;
     }
   }
 
   Future<void> _addInvoice(Map<String, dynamic> body) async {
-    print('Body: $body');
-    AddInvoiceModel? addInvoiceModel = await invoiceServices.addInvoice(body);
-    if (addInvoiceModel?.message != null) {
-      if (addInvoiceModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addInvoiceModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellView, arguments: {'sellID': widget.sellID});
-      }  else {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      AddInvoiceModel? addInvoiceModel = await invoiceServices.addInvoice((body));
+      if (addInvoiceModel?.message != null) {
+        if (addInvoiceModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addInvoiceModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellView, arguments: {'sellID': widget.sellID});
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addInvoiceModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addInvoiceModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
-
+    } catch (error) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'An error occurred: $error',
+        mode: SnackbarMode.error,
+      );
+    } finally {
       setState(() {
         isLoading = false;
+       baleNumbersList = [];
+        thanList = [];
+        meterList = [];
       });
+    }
+  }
+
+  Future<void> _getInvoiceDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(3, 1);
+    if (invoiceDetailModel?.message != null) {
+      if (invoiceDetailModel?.success == true) {
+        invoiceDate = DateFormat('yyyy-MM-dd').parse(invoiceDetailModel!.data!.invoiceDate.toString());
+        rateController.text = invoiceDetailModel.data!.rate.toString();
+        invoiceNumberController.text = invoiceDetailModel.data!.invoiceNumber.toString();
+        discountController.text = invoiceDetailModel.data!.discount.toString();
+        amountReceivedController.text = invoiceDetailModel.data!.receivedAmount.toString();
+        paymentRemarkController.text = invoiceDetailModel.data!.reason.toString();
+        selectedPaidDate = invoiceDetailModel.data!.paymentDate == null ? DateTime.now() : DateFormat('yyyy-MM-dd').parse(invoiceDetailModel.data!.paymentDate.toString());
+        selectedDueDate = DateFormat('yyyy-MM-dd').parse(invoiceDetailModel.data!.dueDate.toString());
+        isPaymentReceived = invoiceDetailModel.data!.paidStatus == 'yes' ? true : false;
+        paymentMethod = invoiceDetailModel.data!.paymentMethod.toString();
+        paymentType = invoiceDetailModel.data!.paymentType.toString();
+        dharaOption = invoiceDetailModel.data!.dharaDays.toString();
+       for (int i = 0; i < invoiceDetailModel.data!.baleDetails!.length; i++) {
+          rowsData.add(RowData(
+            baleNumber: invoiceDetailModel.data!.baleDetails![i].baleNumber.toString(),
+            than: invoiceDetailModel.data!.baleDetails![i].than.toString(),
+            meter: invoiceDetailModel.data!.baleDetails![i].meter.toString(),
+          ));
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          invoiceDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
     } else {
       CustomApiSnackbar.show(
         context,
@@ -679,11 +739,60 @@ class _InvoiceAddState extends State<InvoiceAdd> {
         'Something went wrong, please try again',
         mode: SnackbarMode.error,
       );
+    }
+  }
+
+  Future<void> _updateInvoice(Map<String, dynamic> body) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      UpdateInvoiceModel? updateInvoiceModel = await invoiceServices.updateInvoice(body);
+      print(updateInvoiceModel?.toJson());
+
+      if (updateInvoiceModel?.message != null) {
+        if (updateInvoiceModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateInvoiceModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellView, arguments: {'sellID': widget.sellID});
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateInvoiceModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (error) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'An error occurred: $error',
+        mode: SnackbarMode.error,
+      );
+    } finally {
       setState(() {
         isLoading = false;
+        baleNumbersList = [];
+        thanList = [];
+        meterList = [];
       });
     }
   }
+
 }
 
 class RowData {

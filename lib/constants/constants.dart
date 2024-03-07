@@ -56,11 +56,11 @@ const String dropdownHammalListUrl = '$baseUrl/api/hammal-list';
 const String dropdownTransportListUrl = '$baseUrl/api/transport-list';
 
 // Manage Yarn Purchase Deals
-const String addYarnPurchaseDealUrl = '$baseUrl/api/add-yarn-purchase';
-const String yarnPurchaseDealListUrl = '$baseUrl/api/yarn-purchase-list';
-const String getYarnPurchaseDealUrl = '$baseUrl/api/get-purchase-yarn-deal';
-const String updateYarnPurchaseDealUrl = '$baseUrl/api/update-yarn-purchase';
-const String updateYarnPurchaseDealStatusUrl = '$baseUrl/api/update-yarn-purchase-status';
+const String addYarnPurchaseDealUrl = '$baseUrl/api/add-purchase-deal';
+const String yarnPurchaseDealListUrl = '$baseUrl/api/yarn-purchase';
+const String getYarnPurchaseDealUrl = '$baseUrl/api/get-purchase-deal';
+const String updateYarnPurchaseDealUrl = '$baseUrl/api/update-purchase-deal';
+const String updateYarnPurchaseDealStatusUrl = '$baseUrl/api/update-purchase-status';
 
 // Manage Sell Deals
 const String createSellDeal = '$baseUrl/api/add-sell-deal';

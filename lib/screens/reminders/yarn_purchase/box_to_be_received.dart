@@ -55,7 +55,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
       CustomDrawer(
         content: CustomBody(
             isLoading: _isLoading,
-            title: S.of(context).yarnToBeReceived,
+            title: S.of(context).boxToBeReceived,
             content:
             Padding(
               padding: EdgeInsets.all(Dimensions.height15),

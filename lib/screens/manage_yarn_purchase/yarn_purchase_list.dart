@@ -76,7 +76,6 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
@@ -205,7 +204,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Yarn Name', purchase.yarnName!),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Type', purchase.yarnTypeName!),
+                                  _buildInfoColumn('Yarn Type', 'N/A'),
                                 ],
                               ),
                             ],
@@ -269,7 +268,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                                   text: purchase.netWeight!,
                                                 ),
                                                 TextSpan(
-                                                  text: ' kg',
+                                                  text: ' ton',
                                                   style: TextStyle(
                                                     fontSize: Dimensions.font12,
                                                   ),
@@ -277,7 +276,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                               ],
                                             ),
                                           ),
-                                          BigText(text: 'Gross Weight ${purchase.grossWeight} kg', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: 'Gross Weight ${purchase.grossWeight} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                         ],
                                       )
                                   ),
