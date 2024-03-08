@@ -101,17 +101,15 @@ class _ClothSellListState extends State<ClothSellList> {
           filterButton: GestureDetector(
             onTap: () {
               if (isFilterApplied) {
-                // If filters are applied, clear the filters
                 clearFilters();
                 setState(() {
-                  isFilterApplied = false; // Reset the filter applied flag
+                  isFilterApplied = false;
                 });
               } else {
-                // Otherwise, show the filter bottom sheet
                 _showBottomSheet(context);
               }
             },
-            child: isFilterApplied ?Text(
+            child: isFilterApplied ? Text(
               'Clear',
               style: TextStyle(color: AppTheme.black,fontWeight: FontWeight.bold),
             ): FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),

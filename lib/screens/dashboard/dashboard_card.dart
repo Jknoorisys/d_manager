@@ -2,6 +2,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,7 +13,14 @@ class DashboardCard extends StatefulWidget {
   final String? value;
   final String? date;
   final String? image;
-  const DashboardCard({Key? key, this.title, this.value, this.date, this.image}) : super(key: key);
+  final void Function() fetchDataCallback;// Define the callback function
+
+  const DashboardCard({Key? key,
+    this.title,
+    this.value,
+    this.date,
+    this.image,
+    required this.fetchDataCallback,}) : super(key: key);
 
   @override
   State<DashboardCard> createState() => _DashboardCardState();
@@ -75,20 +83,15 @@ class _DashboardCardState extends State<DashboardCard> {
                               lastDate: lastDate,
                             );
                             if (pickedDateRange != null) {
-                              // Extract the start or end date from the selected range
-
                               DateTime startDate = pickedDateRange.start;
                               DateTime endDate = pickedDateRange.end;
-
-                              // Format the dates as needed (e.g., yyyy-MM-dd)
                               String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
                               String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
-
-                              print("selectedStartDate## $formattedStartDate");
-                              print("selectedEndDate##  $formattedEndDate");
+                              await HelperFunctions.setStartDate(formattedStartDate);
+                              await HelperFunctions.setEndDate(formattedEndDate);
+                              widget.fetchDataCallback();
                             }
                           },
-
                           child: Row(
                             children: [
                               SmallText(text: S.of(context).selectDate, color: AppTheme.white,),
@@ -143,7 +146,7 @@ class _DashboardCardState extends State<DashboardCard> {
                                 children: [
                                   const Icon(Icons.currency_rupee,
                                     color: AppTheme.secondary,),
-                                  Text(widget.value ?? "1,50,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                  Text(widget.value ?? "" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                 ],
                               )
                             ],
