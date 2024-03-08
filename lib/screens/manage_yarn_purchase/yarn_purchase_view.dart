@@ -219,7 +219,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd);
+                            Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd, arguments: {'purchaseID': widget.purchaseId});
                           }
                       ),
                     ],

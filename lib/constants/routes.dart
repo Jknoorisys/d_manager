@@ -161,8 +161,8 @@ class AppRoutes {
     // Manage Delivery Details
     deliveryDetailAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? deliveryDetailData = args?['deliveryDetailData'];
-      return DeliveryDetailAdd(deliveryDetailData: deliveryDetailData);
+      final String? purchaseID = args?['purchaseID'];
+      return DeliveryDetailAdd(purchaseID: purchaseID);
     },
     deliveryDetailView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;

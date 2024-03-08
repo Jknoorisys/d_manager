@@ -62,6 +62,10 @@ const String getYarnPurchaseDealUrl = '$baseUrl/api/get-purchase-deal';
 const String updateYarnPurchaseDealUrl = '$baseUrl/api/update-purchase-deal';
 const String updateYarnPurchaseDealStatusUrl = '$baseUrl/api/update-purchase-status';
 
+// Manage Delivery Details
+const String addDeliveryDetailUrl = '$baseUrl/api/add-delivery';
+const String deliveryDetailListUrl = '$baseUrl/api/purchase-deal-details';
+
 // Manage Sell Deals
 const String createSellDeal = '$baseUrl/api/add-sell-deal';
 const String sellDealList = '$baseUrl/api/cloth-sell-deal';

@@ -1,6 +1,9 @@
+import 'package:d_manager/api/manage_delivery_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/delivery_models/AddDeliveryModel.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -15,8 +18,8 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 class DeliveryDetailAdd extends StatefulWidget {
-  final Map<String, dynamic>? deliveryDetailData;
-  const DeliveryDetailAdd({Key? key, this.deliveryDetailData}) : super(key: key);
+  final String? purchaseID;
+  const DeliveryDetailAdd({Key? key, this.purchaseID}) : super(key: key);
 
   @override
   _DeliveryDetailAddState createState() => _DeliveryDetailAddState();
@@ -24,44 +27,47 @@ class DeliveryDetailAdd extends StatefulWidget {
 
 class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
   bool submitted = false;
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDueDate = DateTime.now();
+  DateTime selectedDeliveryDate = DateTime.now();
+  DateTime selectedPaidDate = DateTime.now();
   String paymentType = 'Current';
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mehta and Sons Yarn Trades';
-  String yarnName = 'Golden';
-  String yarnType = 'Roto';
-  String status = 'On Going';
   String dharaOption = '15 days';
 
   bool isPaid = false;
   String paymentMethod = 'RTGS';
-  DateTime paidDate = DateTime.now();
   double amountPaid = 0.0;
   bool isBillReceived = false;
   FilePickerResult? billImageResult;
+  bool isLoading = false;
+  ManageDeliveryServices deliveryServices = ManageDeliveryServices();
 
 
   TextEditingController amountPaidController = TextEditingController();
   TextEditingController netWeightController = TextEditingController();
-  TextEditingController boxReceivedController = TextEditingController();
-  TextEditingController denyarController = TextEditingController();
+  TextEditingController grossReceivedController = TextEditingController();
+  TextEditingController denierController = TextEditingController();
   TextEditingController rateController = TextEditingController();
   TextEditingController copsController = TextEditingController();
+  TextEditingController paymentRemarkController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    if (widget.deliveryDetailData != null) {
-      selectedDate = DateFormat('dd-MM-yyyy').parse(widget.deliveryDetailData!['dealDate']);
-      status = widget.deliveryDetailData!['status'];
-      amountPaidController.text = widget.deliveryDetailData!['amountPaid'];
-      netWeightController.text = widget.deliveryDetailData!['netWeight'];
-      boxReceivedController.text = widget.deliveryDetailData!['boxReceived'];
-      denyarController.text = widget.deliveryDetailData!['denyar'];
-      rateController.text = widget.deliveryDetailData!['rate'];
-      copsController.text = widget.deliveryDetailData!['cops'];
-      paymentType = widget.deliveryDetailData!['paymentType'];
+    isLoading = true;
+    if (widget.purchaseID != null) {
+      // Fetch data from API
     }
+  }
+
+  @override
+  void dispose() {
+    amountPaidController.dispose();
+    netWeightController.dispose();
+    grossReceivedController.dispose();
+    denierController.dispose();
+    rateController.dispose();
+    copsController.dispose();
+    super.dispose();
   }
 
   void openFiles() async {
@@ -77,14 +83,15 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
   @override
   Widget build(BuildContext context) {
     var errorNetWeight = submitted == true ? _validateNetWeight(netWeightController.text) : null,
-        errorBoxReceived = submitted == true ? _validateBoxOrdered(boxReceivedController.text) : null,
-        errorDenyar = submitted == true ? _validateDenyar(denyarController.text) : null,
+        errorBoxReceived = submitted == true ? _validateGrossReceived(grossReceivedController.text) : null,
+        errorDenier = submitted == true ? _validateDenier(denierController.text) : null,
         errorRate = submitted == true ? _validateRate(rateController.text) : null,
         errorAmountPaid = submitted == true ? _validateAmountPaid(amountPaidController.text) : null,
+        errorPaymentRemark = submitted == true ? _validatePaymentRemark(paymentRemarkController.text) : null,
         errorCops = submitted == true ? _validateCops(copsController.text) : null;
     return CustomDrawer(
         content: CustomBody(
-          title: widget.deliveryDetailData == null ? 'Create Delivery Detail' : 'Update Delivery Detail',
+          title: widget.purchaseID == null ? 'Create Delivery Detail' : 'Update Delivery Detail',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -110,18 +117,25 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                             children: [
                               BigText(text: 'Select Delivery Date', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
-                              CustomDatePicker(selectedDate: selectedDate),
+                              CustomDatePicker(
+                                selectedDate: selectedDeliveryDate,
+                                onDateSelected: (date) {
+                                  setState(() {
+                                    selectedDeliveryDate = date;
+                                  });
+                                },
+                              )
                             ],
                           ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Box Received', size: Dimensions.font12,),
+                              BigText(text: 'Gross Received', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomTextField(
-                                controller: boxReceivedController,
-                                hintText: "Enter Box Received",
+                                controller: grossReceivedController,
+                                hintText: "Enter Gross Received",
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
@@ -177,15 +191,15 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: 'Denyar', size: Dimensions.font12,),
+                              BigText(text: 'Denier', size: Dimensions.font12,),
                               Gap(Dimensions.height10/2),
                               CustomTextField(
-                                controller: denyarController,
-                                hintText: "Enter Denyar",
+                                controller: denierController,
+                                hintText: "Enter Denier",
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorDenyar.toString() != 'null' ? errorDenyar.toString() : '',
+                                errorText: errorDenier.toString() != 'null' ? errorDenier.toString() : '',
                               )
                             ],
                           ),
@@ -309,7 +323,14 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                               children: [
                                 BigText(text: 'Select Paid Date', size: Dimensions.font12,),
                                 Gap(Dimensions.height10/2),
-                                CustomDatePicker(selectedDate: selectedDate)
+                                CustomDatePicker(
+                                  selectedDate: selectedPaidDate,
+                                  onDateSelected: (date) {
+                                    setState(() {
+                                      selectedPaidDate = date;
+                                    });
+                                  },
+                                )
                               ],
                             ),
                           ],
@@ -329,6 +350,25 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                               borderRadius: Dimensions.radius10,
                               errorText: errorAmountPaid.toString() != 'null' ? errorAmountPaid.toString() : '',
                             ),
+                          ],
+                        ),
+                      if (isPaid)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Gap(Dimensions.height20),
+                            BigText(text: 'Remark', size: Dimensions.font12,),
+                            Gap(Dimensions.height10/2),
+                            CustomTextField(
+                              hintText: "Enter Payment Remark",
+                              controller: paymentRemarkController,
+                              keyboardType: TextInputType.text,
+                              borderRadius: Dimensions.radius10,
+                              maxLines: 3,
+                              width: MediaQuery.of(context).size.width,
+                              errorText: errorPaymentRemark.toString() != 'null' ? errorPaymentRemark.toString() : '',
+                            )
                           ],
                         ),
                       if (isBillReceived)
@@ -357,7 +397,43 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseList);
+                            if (HelperFunctions.checkInternet() == false) {
+                              CustomApiSnackbar.show(
+                                context,
+                                'Warning',
+                                'No internet connection',
+                                mode: SnackbarMode.warning,
+                              );
+                            } else {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              Map<String, String> body = {
+                                'purchase_id': '${widget.purchaseID}',
+                                'user_id': HelperFunctions.getUserID(),
+                                'delivery_date': DateFormat('yyyy-MM-dd').format(selectedDeliveryDate),
+                                'rate': rateController.text,
+                                'gross_weight': grossReceivedController.text,
+                                'net_weight': netWeightController.text,
+                                'denier': denierController.text,
+                                'cops': copsController.text,
+                                'payment_type': paymentType == 'Current' ? 'current' : 'dhara',
+                                'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
+                                'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
+                                'paid_status': isPaid ? 'yes' : 'no',
+                                'payment_method': isPaid ? paymentMethod : '',
+                                'paid_amount': isPaid ? amountPaidController.text : '',
+                                'payment_notes': isPaid ? paymentRemarkController.text : '',
+                                'next_delivery_date': isPaid ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
+                                'bill_received': isBillReceived ? 'yes' : 'no',
+                                'bill_url': billImageResult != null ? '${billImageResult!.files.single.path}' : '',
+                              };
+                              if (widget.purchaseID != null) {
+                                _addDeliveryDetail(body);
+                              } else {
+                                // _updateDeliveryDetail(body);
+                              }
+                            }
                           }
                         },
                         buttonText: 'Save',
@@ -380,7 +456,12 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
         BigText(text: 'Select Due Date', size: Dimensions.font12,),
         Gap(Dimensions.height10/2),
         CustomDatePicker(
-            selectedDate: selectedDate,
+          selectedDate: selectedDueDate,
+          onDateSelected: (date) {
+            setState(() {
+              selectedDueDate = date;
+            });
+          },
         )
       ],
     );
@@ -415,8 +496,13 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
         BigText(text: 'Select Due Date', size: Dimensions.font12,),
         Gap(Dimensions.height10/2),
         CustomDatePicker(
-            width: MediaQuery.of(context).size.width,
-            selectedDate: selectedDate,
+          selectedDate: selectedDueDate,
+          width: MediaQuery.of(context).size.width,
+          onDateSelected: (date) {
+            setState(() {
+              selectedDueDate = date;
+            });
+          },
         )
       ],
     );
@@ -429,16 +515,16 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     return null;
   }
 
-  String? _validateBoxOrdered(String? value) {
+  String? _validateGrossReceived(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Box Ordered is required';
+      return 'Gross Weight Received is required';
     }
     return null;
   }
 
-  String? _validateDenyar(String? value) {
+  String? _validateDenier(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Denyar is required';
+      return 'Denier is required';
     }
     return null;
   }
@@ -464,14 +550,61 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     return null;
   }
 
+  String? _validatePaymentRemark(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Payment Remark is required';
+    }
+    return null;
+  }
+
   bool _isFormValid() {
     String netWeightError = _validateNetWeight(netWeightController.text) ?? '';
-    String boxOrderedError = _validateBoxOrdered(boxReceivedController.text) ?? '';
-    String denyarError = _validateDenyar(denyarController.text) ?? '';
+    String grossReceivedError = _validateGrossReceived(grossReceivedController.text) ?? '';
+    String denierError = _validateDenier(denierController.text) ?? '';
     String rateError = _validateRate(rateController.text) ?? '';
     String copsError = _validateCops(copsController.text) ?? '';
-    String amountPaidError = _validateAmountPaid(amountPaidController.text) ?? '';
+    String amountPaidError = isPaid ? (_validateAmountPaid(amountPaidController.text) ?? '') : '';
+    String paymentRemarkError = isPaid ? (_validatePaymentRemark(paymentRemarkController.text) ?? '') : '';
 
-    return netWeightError.isEmpty && boxOrderedError.isEmpty && denyarError.isEmpty && rateError.isEmpty && copsError.isEmpty && amountPaidError.isEmpty == 'Current' ? true : false;
+    return netWeightError.isEmpty && grossReceivedError.isEmpty && denierError.isEmpty && rateError.isEmpty && copsError.isEmpty && amountPaidError.isEmpty ? true : false;
+  }
+
+  Future<void> _addDeliveryDetail(Map<String, String> body) async {
+    print("Purchase Id: ${widget.purchaseID}");
+    print("Body: $body");
+    AddDeliveryModel? addDeliveryModel = await deliveryServices.addDelivery(body);
+    print("Add Delivery Model: ${addDeliveryModel?.toJson()}");
+    if (addDeliveryModel?.message != null) {
+      if (addDeliveryModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          addDeliveryModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseID});
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          addDeliveryModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
