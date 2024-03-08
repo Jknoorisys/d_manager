@@ -42,8 +42,9 @@ class _SellHistoryState extends State<SellHistory> {
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
   DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 30));
+  DateTime firstDate = DateTime(2000);
+  DateTime lastDate = DateTime(2050);
+
   bool isLoading = false;
   ManageHistoryServices manageHistoryServices = ManageHistoryServices();
   int currentPage = 1;
@@ -98,17 +99,19 @@ class _SellHistoryState extends State<SellHistory> {
                 GestureDetector(
                   onTap: () {
                     if (isFilterApplied) {
-                      // If filters are applied, clear the filters
                       clearFilters();
                       setState(() {
-                        isFilterApplied = false; // Reset the filter applied flag
+                        isFilterApplied = false;
                       });
                     } else {
                       // Otherwise, show the filter bottom sheet
                       _showBottomSheet(context);
                     }
                   },
-                  child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+                  child: isFilterApplied ? Text(
+                    'Clear',
+                    style: TextStyle(color: AppTheme.black,fontWeight: FontWeight.bold),
+                  ) : const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
                 ),
               ],
             ),
@@ -487,20 +490,26 @@ class _SellHistoryState extends State<SellHistory> {
                               Gap(Dimensions.height10/2),
                               GestureDetector(
                                 onTap: () async {
-                                  DateTime? pickedDate = (
-                                      await showDateRangePicker(
-                                        initialEntryMode: DatePickerEntryMode.input,
-                                        helpText: S.of(context).selectDate,
-                                        context: context,
-                                        firstDate: firstDate,
-                                        lastDate: lastDate,
-                                      )
-                                  ) as DateTime?;
+                                  DateTimeRange? pickedDateRange = await showDateRangePicker(
+                                    initialEntryMode: DatePickerEntryMode.input,
+                                    helpText: S.of(context).selectDate,
+                                    context: context,
+                                    initialDateRange: DateTimeRange(
+                                      start: DateTime.now(),
+                                      end: DateTime.now().add(const Duration(days: 7)),
+                                    ),
+                                    firstDate: firstDate,
+                                    lastDate: lastDate,
+                                  );
 
-                                  if (pickedDate != null && pickedDate != firstDate) {
-                                    setState(() {
-                                      firstDate = pickedDate;
-                                    });
+                                  if (pickedDateRange != null) {
+                                    DateTime startDate = pickedDateRange.start;
+                                    DateTime endDate = pickedDateRange.end;
+                                    String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
+                                    String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
+
+                                    print("selectedStartDate## $formattedStartDate");
+                                    print("selectedEndDate##  $formattedEndDate");
                                   }
                                 },
                                 child: Container(
@@ -516,7 +525,8 @@ class _SellHistoryState extends State<SellHistory> {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(child: BigText(text: '${DateFormat('dd/MM/yyyy').format(firstDate)} to ${DateFormat('dd/MM/yyyy').format(lastDate)}', size: Dimensions.font12,)),
+                                        Expanded(child: BigText(
+                                        text: '${DateFormat('dd/MM/yyyy').format(firstDate)} to ${DateFormat('dd/MM/yyyy').format(lastDate)}', size: Dimensions.font12,)),
                                         Padding(
                                           padding: EdgeInsets.zero,
                                           child: Icon(
@@ -723,13 +733,12 @@ class _SellHistoryState extends State<SellHistory> {
     await HelperFunctions.setFirmID('');
     await HelperFunctions.setPartyID('');
     await HelperFunctions.setClothID('');
-    await HelperFunctions.setDealStatus('');
     setState(() {
       selectedFirm = null;
       selectedParty = null;
       selectedClothQuality = null;
     });
 
-    // getSellDealList(1, ''); // Assuming you're resetting to the first page and empty search query
+    getSellHistory(1, ''); // Assuming you're resetting to the first page and empty search query
   }
 }
