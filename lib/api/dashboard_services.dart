@@ -7,14 +7,12 @@ import 'manage_invoice_services.dart';
 import 'package:dio/dio.dart';
 
 class DashboardServices{
-  Future<DashboardModel?> showDashboardData(
-      String startDate,
-      String endDate)async{
+  Future<DashboardModel?> showDashboardData()async{
     try{
       Map<String, dynamic> body = {
         "user_id": HelperFunctions.getUserID(),
-        "start_date":startDate,
-        "end_date":endDate
+        "start_date":HelperFunctions.getStartDate(),
+        "end_date":HelperFunctions.getEndDate(),
       };
       Response response = await dio.post(dashBoardApi, data: body,
         options: Options(

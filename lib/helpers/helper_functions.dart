@@ -126,6 +126,24 @@ class HelperFunctions {
     return {'email': userEmail ?? '', 'password': password ?? ''};
   }
 
+
+  // Dates
+
+  static Future<bool> setStartDate(String startDate) async {
+    return pref.setString("start", startDate);
+  }
+  static String getStartDate() {
+    String? startDate = pref.getString('start');
+    return startDate ?? '';
+  }
+  static Future<bool> setEndDate(String endDate) async {
+    return pref.setString("end", endDate);
+  }
+  static String getEndDate() {
+    String? endDate = pref.getString('end');
+    return endDate ?? '';
+  }
+
   static Future<bool> checkInternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');

@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import '../../api/dashboard_services.dart';
-import '../../constants/routes.dart';
 import '../../models/dashboard_models/dashboard_models.dart';
 import '../widgets/snackbar.dart';
 import 'dashboard_card.dart';
@@ -26,13 +25,16 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
-  late List<Widget> _pages;
-  late List<PurchaseDeal> purchaseDeals;
-  late List<SellDeal> sellDeal;
+  late List<Widget> _pages = [];
+  late List<PurchaseDeal> purchaseDeals = [];
+  late List<SellDeal> sellDeal = [];
   bool isLoading = false;
   DashboardServices dashboardServices = DashboardServices();
-  late Widget dynamicDashboardCard;
+  late Widget dynamicDashboardCard = Container();
   DashboardModel? dashboardModel;
+
+  String purchaseAmount = "";
+  String saleAmount = "";
 
   @override
   void initState() {
@@ -45,68 +47,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
       isLoading = true;
     });
     try {
-      DateTime startDate = DateTime.now();
-      DateTime endDate = DateTime.now();
-      purchaseDeals = await fetchPurchaseDeals(startDate,endDate);
-      sellDeal = await fetchSellDeals(startDate,endDate);
-
-      // Wait for purchaseDeals and sellDeal to be fetched before initializing _pages
-      _pages = [
-        Purchases(purchaseDeals: purchaseDeals),
-        ClothSells(sellDeal: sellDeal),
-      ];
-      updateDashboardCard(purchaseDeals, sellDeal);
+      dashboardModel = await GetDashboardData();
       setState(() {
         isLoading = false;
       });
     } catch (e) {
       print("Error occurred: $e");
+    }
+    finally{
       setState(() {
         isLoading = false;
       });
     }
   }
 
-
-  Future<List<PurchaseDeal>> fetchPurchaseDeals(DateTime startDate, DateTime endDate) async {
-    try {
-      DashboardModel? model = await GetDashboardData(startDate, endDate);
-      if (model != null && model.success == true) {
-        return model.data!.purchaseDeals ?? [];
-      } else {
-        // Handle error
-        return [];
-      }
-    } catch (e) {
-      print("Error occurred: $e");
-      return [];
-    }
+  void updatePages() {
+    // Update pages with the fetched data
+    _pages = [
+      Purchases(purchaseDeals: dashboardModel!.data!.purchaseDeals ?? []),
+      ClothSells(sellDeal: dashboardModel!.data!.sellDeal ?? []),
+    ];
   }
-
-  Future<List<SellDeal>> fetchSellDeals(DateTime startDate, DateTime endDate) async {
-    try {
-      DashboardModel? model = await GetDashboardData(startDate, endDate);
-      if (model != null && model.success == true) {
-        return model.data!.sellDeal ?? [];
-      } else {
-        // Handle error
-        return [];
-      }
-    } catch (e) {
-      print("Error occurred: $e");
-      return [];
-    }
-  }
-
-  void updateDashboardCard(List<PurchaseDeal> purchaseDeals, List<SellDeal> sellDeal) {
+  void updateDashboardCard() {
     if (_currentIndex == 0) {
-      // Update DashboardCard for purchases
       setState(() {
         dynamicDashboardCard = DashboardCard(
           title: 'Total Yarn Purchases',
-          value: purchaseDeals.length.toString(), // You can update this with the actual data
+          value:purchaseAmount, // You can update this with the actual data
           date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
           image: AppImages.purchaseIcon,
+          fetchDataCallback: () {
+            fetchData();
+          },
+
         );
       });
     } else if (_currentIndex == 1) {
@@ -114,9 +87,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         dynamicDashboardCard = DashboardCard(
           title: 'Total Cloth Sells Deals',
-          value: sellDeal.length.toString(), // You can update this with the actual data
+          value: saleAmount, // You can update this with the actual data
           date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
           image: AppImages.salesIcon,
+          fetchDataCallback: () {
+            fetchData();
+          },
+
         );
       });
     }
@@ -129,7 +106,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return CustomDrawer(
       content: CustomBody(
         dashboardCard: dynamicDashboardCard,
-        content: _pages[_currentIndex],
+        content: _pages.isNotEmpty ? _pages[_currentIndex] : SizedBox(),
         isLoading: isLoading,
         bottomNavigationBar: Container(
           padding: EdgeInsets.all(Dimensions.width20),
@@ -156,6 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 onPressed: () {
                   setState(() {
                     _currentIndex = 0;
+                    updateDashboardCard();
                   });
                 },
                 buttonText: S.of(context).purchases,
@@ -176,6 +154,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 onPressed: () {
                   setState(() {
                     _currentIndex = 1;
+                    updateDashboardCard();
                   });
                 },
                 buttonText: S.of(context).clothSells,
@@ -198,28 +177,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-  Future<DashboardModel?> GetDashboardData(
-      DateTime startDate,
-      DateTime endDate
-      ) async {
+  Future<DashboardModel?> GetDashboardData() async {
     setState(() {
       isLoading = true;
     });
     try {
-      String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
-      String formattedEndDueDate = DateFormat('yyyy-MM-dd').format(endDate);
-
-      DashboardModel? model = await dashboardServices.showDashboardData(
-          formattedStartDate,
-          formattedEndDueDate
-      );
+      DashboardModel? model = await dashboardServices.showDashboardData();
       if (model?.success == true) {
         // purchaseDeals?.addAll(model!.data!.purchaseDeals!);
         setState(() {
           dashboardModel = model;
+          purchaseAmount = "${dashboardModel?.purchaseAmount}";
+          saleAmount = "${dashboardModel?.sellAmount}";
           purchaseDeals.addAll(model!.data!.purchaseDeals!);
           sellDeal.addAll(model.data!.sellDeal!);
         });
+        updateDashboardCard();
+        updatePages();
       } else {
         Navigator.of(context).pop(); // Close the loading dialog
         CustomApiSnackbar.show(
