@@ -1,3 +1,7 @@
+// To parse this JSON data, do
+//
+//     final getInvoiceModel = getInvoiceModelFromJson(jsonString);
+
 import 'dart:convert';
 
 GetInvoiceModel getInvoiceModelFromJson(String str) => GetInvoiceModel.fromJson(json.decode(str));
@@ -102,6 +106,7 @@ class Data {
     transportDate: json["transport_date"],
     transportName: json["transport_name"],
     hammalName: json["hammal_name"],
+    baleDetails: json["bale_details"] == null ? [] : List<BaleDetail>.from(json["bale_details"]!.map((x) => BaleDetail.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -127,7 +132,7 @@ class Data {
     "transport_date": transportDate,
     "transport_name": transportName,
     "hammal_name": hammalName,
-    "bale_details": List<dynamic>.from(baleDetails!.map((x) => x.toJson())),
+    "bale_details": baleDetails == null ? [] : List<dynamic>.from(baleDetails!.map((x) => x.toJson())),
   };
 }
 
@@ -154,4 +159,3 @@ class BaleDetail {
     "meter": meter,
   };
 }
-

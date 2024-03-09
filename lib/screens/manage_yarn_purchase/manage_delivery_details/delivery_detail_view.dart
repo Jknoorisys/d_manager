@@ -1,26 +1,44 @@
+import 'package:d_manager/api/manage_delivery_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/models/delivery_models/DeliveryDetailModel.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 
 class DeliveryDetailView extends StatefulWidget {
-  final Map<String, dynamic>? deliveryDetailData;
-  const DeliveryDetailView({Key? key, this.deliveryDetailData}) : super(key: key);
+  final String? purchaseID;
+  final String? deliveryID;
+  const DeliveryDetailView({Key? key, this.purchaseID, this.deliveryID}) : super(key: key);
 
   @override
   _DeliveryDetailViewState createState() => _DeliveryDetailViewState();
 }
 
 class _DeliveryDetailViewState extends State<DeliveryDetailView> {
+  bool isLoading = false;
+  ManageDeliveryServices deliveryServices = ManageDeliveryServices();
+  Data? deliveryDetailData;
+
+  @override
+  void initState() {
+    super.initState();
+    isLoading = true;
+    if (widget.purchaseID != null) {
+      // Fetch data from API
+      _getDeliveryDetails();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
             title: S.of(context).deliveryDetail,
-            content: SingleChildScrollView(
+            content: deliveryDetailData == null ? NoRecordFound() : SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
                 child: Card(
@@ -66,7 +84,7 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Deal Date', widget.deliveryDetailData!['dealDate']),
+                            _buildInfoColumn('Deal Date', deliveryDetailData!.deliveryDate.toString()),
                             SizedBox(width: Dimensions.width20),
                             _buildInfoColumn('Yarn Name', 'Bhilosa'),
                             SizedBox(width: Dimensions.width20),
@@ -78,66 +96,66 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
                           children: [
                             _buildInfoColumn('Lot Number', '123'),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Payment Type', widget.deliveryDetailData!['paymentType']),
+                            _buildInfoColumn('Payment Type', deliveryDetailData!.paymentType.toString() == 'current' ? 'Current' : 'Dhara'),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Payment Method', widget.deliveryDetailData!['paymentMethod']),
+                            _buildInfoColumn('Payment Method', deliveryDetailData!.paymentMethod.toString()),
                           ],
                         ),
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Box Ordered', '1000'),
+                            _buildInfoColumn('Box Ordered', deliveryDetailData!.deliveredBoxCount.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Box Received', widget.deliveryDetailData!['boxReceived']),
+                            _buildInfoColumn('Box Received', deliveryDetailData!.deliveredBoxCount.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Box Remaining', '200'),
+                            _buildInfoColumn('Box Remaining', deliveryDetailData!.deliveredBoxCount.toString() ),
                           ],
                         ),
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Net Weight', widget.deliveryDetailData!['netWeight']),
+                            _buildInfoColumn('Net Weight', deliveryDetailData!.netWeight.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Rate', widget.deliveryDetailData!['rate']),
+                            _buildInfoColumn('Rate', deliveryDetailData!.rate.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Bill Amount', widget.deliveryDetailData!['billAmount']),
+                            _buildInfoColumn('Bill Amount', deliveryDetailData!.gstBillAmount.toString()),
                           ],
                         ),
                         Row(
                           children: [
-                            _buildInfoColumn('GST', widget.deliveryDetailData!['GST']),
+                            _buildInfoColumn('GST', deliveryDetailData!.gstBillAmount.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Due Date', widget.deliveryDetailData!['dueDate']),
+                            _buildInfoColumn('Due Date', deliveryDetailData!.paymentDueDate.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Paid', widget.deliveryDetailData!['paid'] == true ? 'Yes' : 'No'),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Paid Date', widget.deliveryDetailData!['paidDate']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Amount Paid', widget.deliveryDetailData!['amountPaid']),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Difference In Amount', widget.deliveryDetailData!['differenceInAmount']),
+                            _buildInfoColumn('Paid', deliveryDetailData!.paidStatus.toString() == '1' ? 'Yes' : 'No'),
                           ],
                         ),
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Cops', widget.deliveryDetailData!['cops']),
+                            _buildInfoColumn('Paid Date', deliveryDetailData!.paymentDate.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Denyar', widget.deliveryDetailData!['denyar']),
+                            _buildInfoColumn('Amount Paid', deliveryDetailData!.paidAmount.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Bill Received', widget.deliveryDetailData!['billReceived'] == true ? 'Yes' : 'No'),
+                            _buildInfoColumn('Difference In Amount', deliveryDetailData!.paidAmount.toString()),
                           ],
                         ),
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('View PDF', widget.deliveryDetailData!['viewPDF']),
+                            _buildInfoColumn('Cops', deliveryDetailData!.cops.toString()),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Status', widget.deliveryDetailData!['status']),
+                            _buildInfoColumn('Denyar', deliveryDetailData!.denier.toString()),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Bill Received', deliveryDetailData!.billReceived.toString() == '1' ? 'Yes' : 'No'),
+                          ],
+                        ),
+                        SizedBox(height: Dimensions.height10),
+                        Row(
+                          children: [
+                            _buildInfoColumn('View PDF', deliveryDetailData!.billUrl.toString() == '' ? 'No' : 'Yes'),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Status', deliveryDetailData!.paidStatus.toString() == '1' ? 'Paid' : 'Unpaid'),
                             SizedBox(width: Dimensions.width20),
                             _buildInfoColumn('', ''),
                           ],
@@ -167,10 +185,10 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
                                         ),
                                         children: [
                                           TextSpan(
-                                            text: widget.deliveryDetailData!['netWeight'],
+                                            text: deliveryDetailData!.netWeight.toString(),
                                           ),
                                           TextSpan(
-                                            text: ' kg',
+                                            text: ' ton',
                                             style: TextStyle(
                                               fontSize: Dimensions.font12,
                                             ),
@@ -196,7 +214,7 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                    BigText(text: '₹ ${widget.deliveryDetailData!['rate']}',color: AppTheme.primary, size: Dimensions.font18)
+                                    BigText(text: '₹ ${deliveryDetailData!.rate}',color: AppTheme.primary, size: Dimensions.font18)
                                   ],
                                 )
                             ),
@@ -222,5 +240,35 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
         ],
       ),
     );
+  }
+
+  Future<void> _getDeliveryDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    DeliveryDetailModel? dealDetailModel = await deliveryServices.viewDeliveryDetail(int.parse(widget.purchaseID!), int.parse(widget.deliveryID!));
+
+    if (dealDetailModel?.message != null) {
+      if (dealDetailModel?.success == true) {
+        deliveryDetailData = dealDetailModel?.data;
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          dealDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    }
   }
 }

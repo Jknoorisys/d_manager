@@ -1,22 +1,22 @@
+import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../api/manage_invoice_services.dart';
 import '../../../models/invoice_models/invoice_detail_model.dart';
 import '../../widgets/buttons.dart';
-import '../../widgets/snackbar.dart';
 import '../../widgets/texts.dart';
 class InvoiceView extends StatefulWidget {
-  final Map<String, dynamic>? invoiceData;
   final int invoiceId;
   final String sellId;
-  const InvoiceView({Key? key, this.invoiceData, required this.invoiceId,required this.sellId}) : super(key: key);
+  const InvoiceView({Key? key, required this.invoiceId,required this.sellId}) : super(key: key);
 
   @override
   _InvoiceViewState createState() => _InvoiceViewState();
@@ -25,28 +25,22 @@ class InvoiceView extends StatefulWidget {
 class _InvoiceViewState extends State<InvoiceView> {
   //
   List<DeliveryDetails> transportDetails = [];
-  DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime.now();
-  DateTime lastDate = DateTime.now().add(const Duration(days: 365));
-
-  String transportName = 'Dharma Transport';
-  String hammalName = 'Prakash';
   GetInvoiceModel? getInvoiceModel;
 
-  bool _isLoading = true;
-  ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
+  bool isLoading = false;
+  ManageInvoiceServices invoiceServices = ManageInvoiceServices();
 
   void _addTransportDetails(
       String deliveryDate, String transportName, String hammalName) {
-    setState(() {
-      transportDetails.add(
-        DeliveryDetails(
-          deliveryDate: deliveryDate,
-          transportName: transportName,
-          hammalName: hammalName,
-        ),
-      );
-    });
+      setState(() {
+        transportDetails.add(
+          DeliveryDetails(
+            deliveryDate: deliveryDate,
+            transportName: transportName,
+            hammalName: hammalName,
+          ),
+        );
+      });
   }
 
   void _deleteDeliveryDetails(int index) {
@@ -58,7 +52,10 @@ class _InvoiceViewState extends State<InvoiceView> {
   @override
   void initState() {
     super.initState();
-    // getInvoiceDetails(widget.sellId,widget.invoiceId);
+    isLoading = true;
+    if (widget.invoiceId != null && widget.sellId != null) {
+      _getInvoiceDetails();
+    }
   }
 
   @override
@@ -66,6 +63,7 @@ class _InvoiceViewState extends State<InvoiceView> {
     return CustomDrawer(
       content: CustomBody(
         title: 'Invoice Details',
+          isLoading: isLoading,
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -74,7 +72,7 @@ class _InvoiceViewState extends State<InvoiceView> {
               const Icon(Icons.print, color: AppTheme.black),
             ],
           ),
-        content: SingleChildScrollView(
+        content: getInvoiceModel?.data! == null ? Container() : SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: Dimensions.width10),
             child: Column(
@@ -98,62 +96,53 @@ class _InvoiceViewState extends State<InvoiceView> {
                       Row(
                         children: [
                           _buildInfoColumn(
-                              'Bale Number', widget.invoiceData?['baleNumber']),
+                              'Bale Number', '${getInvoiceModel!.data!.baleDetails!.first.baleNumber!} - ${getInvoiceModel!.data!.baleDetails!.last.baleNumber!}'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Than', widget.invoiceData?['than']),
+                          _buildInfoColumn('Than', '${getInvoiceModel!.data!.baleDetails!.first.than!} - ${getInvoiceModel!.data!.baleDetails!.last.than!}'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Meter', widget.invoiceData?['meter']),
+                          _buildInfoColumn('Meter', '${getInvoiceModel!.data!.baleDetails!.first.meter!} - ${getInvoiceModel!.data!.baleDetails!.last.meter!}'),
                         ],
                       ),
                       SizedBox(height: Dimensions.height10),
-                      Row(
-                        children: [
-                          _buildInfoColumn('Cloth Quality',
-                              widget.invoiceData?['clothQuality']),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('GST', widget.invoiceData?['gst']),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Invoice Amount',
-                              widget.invoiceData?['invoiceAmount']),
-                        ],
-                      ),
-                      SizedBox(height: Dimensions.height10),
-                      Row(
-                        children: [
-                          _buildInfoColumn(
-                              'Payment Type', widget.invoiceData?['paymentType']),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Additional Discount',
-                              widget.invoiceData?['additionalDiscount']),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Payment Received',
-                              widget.invoiceData?['paymentReceived']),
-                        ],
-                      ),
-                      SizedBox(height: Dimensions.height10),
-                      Row(
-                        children: [
-                          _buildInfoColumn('Payment Amount Received',
-                              widget.invoiceData?['paymentAmountReceived']),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Difference in Amount',
-                              widget.invoiceData?['differenceInAmount']),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Payment Method',
-                              widget.invoiceData?['paymentMethod']),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     _buildInfoColumn('Cloth Quality',getInvoiceModel!.data!.!),
+                      //     SizedBox(width: Dimensions.width20),
+                      //     _buildInfoColumn('GST', widget.invoiceData?['gst']),
+                      //     SizedBox(width: Dimensions.width20),
+                      //     _buildInfoColumn('Invoice Amount',
+                      //         widget.invoiceData?['invoiceAmount']),
+                      //   ],
+                      // ),
                       SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
                           _buildInfoColumn(
-                              'Due Date', widget.invoiceData?['dueDate']),
+                              'Payment Type', (getInvoiceModel!.data!.paymentType! == 'current') ? 'Current' : 'Dhara'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Payment Received Date',
-                              widget.invoiceData?['paymentReceivedDate']),
+                          _buildInfoColumn('Additional Discount',getInvoiceModel!.data!.discount!),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn(
-                              'Reason', widget.invoiceData?['reason']),
+                          _buildInfoColumn('Payment Received', getInvoiceModel!.data!.paidStatus! == 'yes' ? 'Yes' : 'No'),
+                        ],
+                      ),
+                      SizedBox(height: Dimensions.height10),
+                      Row(
+                        children: [
+                          _buildInfoColumn('Payment Amount Received',getInvoiceModel!.data!.invoiceAmount! ?? 'N/A'),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Difference in Amount', getInvoiceModel!.data!.differenceAmount!),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Payment Method', getInvoiceModel!.data!.paymentMethod!),
+                        ],
+                      ),
+                      SizedBox(height: Dimensions.height10),
+                      Row(
+                        children: [
+                          _buildInfoColumn('Due Date', getInvoiceModel!.data!.dueDate!.toString()),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Payment Received Date', getInvoiceModel!.data!.paymentDate!.toString()),
+                          SizedBox(width: Dimensions.width20),
+                          _buildInfoColumn('Reason', getInvoiceModel!.data!.reason!),
                         ],
                       ),
                       SizedBox(height: Dimensions.height10),
@@ -200,13 +189,7 @@ class _InvoiceViewState extends State<InvoiceView> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 1.5,
                   child:transportDetails.isEmpty?
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset("assets/images/icons/nodata.png",height: 200,width: 200,),
-                    ],
-                  )
-                      : ListView.builder(
+                  const NoRecordFound() : ListView.builder(
                       itemCount: transportDetails.length,
                       itemBuilder: (context, index) {
                         final delivery = transportDetails[index];
@@ -298,43 +281,35 @@ class _InvoiceViewState extends State<InvoiceView> {
     );
   }
 
-Future<GetInvoiceModel?> getInvoiceDetails(String sellID, int invoiceID) async {
+  Future<void> _getInvoiceDetails() async {
     setState(() {
-      _isLoading = true;
+      isLoading = true;
     });
-    try {
-      // GetInvoiceModel? model = await manageInvoiceServices.getInvoice(
-      //   widget.sellId,
-      //   widget.invoiceId.toString()
-      // );
-      // if (model != null) {
-      //   if (model.success == true) {
-      //     getInvoiceModel = model;
-      //   } else {
-      //     CustomApiSnackbar.show(
-      //       context,
-      //       'Error',
-      //       model.message.toString(),
-      //       mode: SnackbarMode.error,
-      //     );
-      //   }
-      // } else {
-      //   CustomApiSnackbar.show(
-      //     context,
-      //     'Error',
-      //     'Something went wrong, please try again later.',
-      //     mode: SnackbarMode.error,
-      //   );
-      // }
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(widget.invoiceId, int.parse(widget.sellId));
+    if (invoiceDetailModel?.message != null) {
+      if (invoiceDetailModel?.success == true) {
+        setState(() {
+          getInvoiceModel = invoiceDetailModel;
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          invoiceDetailModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
     }
   }
 }
-
-
 
 class DeliveryDetails {
   String deliveryDate;

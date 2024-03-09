@@ -4,6 +4,7 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/delivery_models/AddDeliveryModel.dart';
+import 'package:d_manager/models/delivery_models/UpdateDeliveryModel.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
@@ -431,7 +432,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                               if (widget.purchaseID != null) {
                                 _addDeliveryDetail(body);
                               } else {
-                                // _updateDeliveryDetail(body);
+                                _updateDeliveryDetail(body);
                               }
                             }
                           }
@@ -588,6 +589,44 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
           context,
           'Error',
           addDeliveryModel!.message.toString(),
+          mode: SnackbarMode.error,
+        );
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateDeliveryDetail(Map<String, String> body) async {
+
+    UpdateDeliveryModel? updateDeliveryModel = await deliveryServices.updateDelivery(body);
+    print("Update Delivery Model: ${updateDeliveryModel?.toJson()}");
+    if (updateDeliveryModel?.message != null) {
+      if (updateDeliveryModel?.success == true) {
+        CustomApiSnackbar.show(
+          context,
+          'Success',
+          updateDeliveryModel!.message.toString(),
+          mode: SnackbarMode.success,
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseID});
+      }  else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          updateDeliveryModel!.message.toString(),
           mode: SnackbarMode.error,
         );
       }

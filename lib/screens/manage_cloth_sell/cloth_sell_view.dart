@@ -2,6 +2,7 @@ import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
@@ -29,56 +30,6 @@ class ClothSellView extends StatefulWidget {
 }
 
 class _ClothSellViewState extends State<ClothSellView> {
-  List<Map<String, dynamic>> unFilteredClothSellList = [
-    {'no': 1, 'dealDate': '2024-01-25','myFirm': 'Danish Textiles','partyName': 'Mahesh Textiles','clothQuality':'5 - Kilo','totalThan':'500','thanDelivered':'100','thanRemaining':'400','rate':'20.10', 'status': 'Ongoing'},
-  ];
-
-  List<Map<String, dynamic>> invoiceDataList = [
-    {'no': 1,
-      'invoiceDate': '2024-01-25',
-      'invoiceNumber': '24-25_10',
-      'rate': '20.10',
-      'baleNumber': '1-10',
-      'than': '80',
-      'meter': '191.90',
-      'clothQuality': '5-kilo',
-      'gst': '12%',
-      'invoiceAmount': '10,80,000',
-      'paymentType': 'Current',
-      'additionalDiscount': '1000',
-      'paymentReceived': 'Yes',
-      'paymentAmountReceived': '10,00,000',
-      'differenceInAmount': '3000',
-      'paymentMethod': 'Chque',
-      'dueDate': '2024-01-29',
-      'paymentReceivedDate': '2024-01-27',
-      'reason': 'XYZ',
-      'viewPDF': 'sample.pdf',
-      'status': 'On Going'
-    },
-    {'no': 2,
-      'invoiceDate': '2024-01-25',
-      'invoiceNumber': '24-25_11',
-      'rate': '20.10',
-      'baleNumber': '1-10',
-      'than': '80',
-      'meter': '191.90',
-      'clothQuality': '5-kilo',
-      'gst': '12%',
-      'invoiceAmount': '10,80,000',
-      'paymentType': 'Current',
-      'additionalDiscount': '1000',
-      'paymentReceived': 'Yes',
-      'paymentAmountReceived': '10,00,000',
-      'differenceInAmount': '3000',
-      'paymentMethod': 'Chque',
-      'dueDate': '2024-01-29',
-      'paymentReceivedDate': '2024-01-27',
-      'reason': 'XYZ',
-      'viewPDF': 'sample.pdf',
-      'status': 'On Going'
-    },
-  ];
   final RefreshController _refreshController = RefreshController();
   final searchController = TextEditingController();
   int currentPage = 1;
@@ -93,32 +44,20 @@ class _ClothSellViewState extends State<ClothSellView> {
   @override
   void initState() {
     super.initState();
-    getSellDealData();
-    getInvoiceList(currentPage, searchController.text.trim());
-  }
-
-  Future<void> handleViewDeal()async{
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else{
-      await getSellDealData();
+    if (widget.sellID != 0) {
+      getSellDealData();
+      getInvoiceList(currentPage, searchController.text.trim());
     }
   }
 
   //await getSellDealData();
   @override
   Widget build(BuildContext context) {
-    // Map<String, dynamic> clothSellData = unFilteredClothSellList.first;
     return CustomDrawer(
         content: CustomBody(
           isLoading:_isLoading,
           title: S.of(context).clothSellDealDetails,
-          content: _isLoading ? Container() : Padding(
+          content: getSellDealModel?.data! == null ? Container() :  Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Column(
                children: [
@@ -185,7 +124,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                       SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
-                          _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus!),
+                          _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus! == 'ongoing' ? 'Ongoing' : 'Completed'),
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
                         ],
@@ -253,10 +192,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                 ),
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: manageInvoiceList.isEmpty
-                      ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
-                  )
-                      :SmartRefresher(
+                  child: manageInvoiceList.isEmpty ? NoRecordFound() :SmartRefresher(
                     enablePullUp: true,
                     controller: _refreshController,
                     onRefresh: () async {
@@ -292,11 +228,11 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Bale Number', manageInvoiceList[index].baleDetails![index].baleNumber!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Bale Number', '${manageInvoiceList[index].baleDetails!.first.baleNumber!} - ${manageInvoiceList[index].baleDetails!.last.baleNumber!}')),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Than', manageInvoiceList[index].baleDetails![index].than!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Than', '${manageInvoiceList[index].baleDetails!.first.than!} - ${manageInvoiceList[index].baleDetails!.last.than!}')),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Meter', manageInvoiceList[index].baleDetails![index].meter!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Meter', '${manageInvoiceList[index].baleDetails!.first.meter!} - ${manageInvoiceList[index].baleDetails!.last.meter!}')),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
@@ -355,16 +291,13 @@ class _ClothSellViewState extends State<ClothSellView> {
                                   children: [
                                     IconButton(
                                       onPressed: () {
-                                        // Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'invoiceData': invoiceDataList[index]});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                                            InvoiceView( invoiceId: manageInvoiceList[index].invoiceId!,
-                                            sellId:manageInvoiceList[index].sellId.toString())));
+                                        Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'sellId': widget.sellID, 'invoiceId': manageInvoiceList[index].invoiceId});
                                       },
                                       icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
                                     ),
                                     IconButton(
                                       onPressed: () {
-                                        Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
+                                        Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID, 'invoiceID': manageInvoiceList[index].invoiceId});
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                                     ),
@@ -385,10 +318,10 @@ class _ClothSellViewState extends State<ClothSellView> {
                                       activeBorderColor: AppTheme.primary,
                                       onChanged: (value) {
                                         setState(() {
-                                          invoiceDataList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                          manageInvoiceList[index].status = value == true ? 'Completed' : 'On Going';
                                         });
                                       },
-                                      value: invoiceDataList[index]['status'] == 'Completed' ? true : false,
+                                      value: manageInvoiceList[index].status == 'completed' ? true : false,
                                       inactiveIcon: null,
                                     ),
                                   ],
@@ -435,7 +368,7 @@ class _ClothSellViewState extends State<ClothSellView> {
   }
   Future<GetSellDealModel?> getSellDealData() async {
     setState(() {
-      _isLoading = true; // Show loader before making API call
+      _isLoading = true;
     });
     try {
       GetSellDealModel? model = await sellDealDetails.getSellDealApi(

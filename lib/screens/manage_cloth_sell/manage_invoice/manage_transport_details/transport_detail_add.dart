@@ -1,9 +1,16 @@
+import 'package:d_manager/api/dropdown_services.dart';
+import 'package:d_manager/api/manage_invoice_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_hammal_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_transport_list_model.dart';
+import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_datepicker.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -11,27 +18,43 @@ import 'package:intl/intl.dart';
 
 class TransportDetailAdd extends StatefulWidget {
   final Map<String, dynamic>? transportDetailData;
+  final String? sellId;
+  final String? invoiceId;
   final void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails;
   //const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
-  const TransportDetailAdd({Key? key, required this.addDeliveryDetails, this.transportDetailData}) : super(key: key);
+  const TransportDetailAdd({Key? key, required this.addDeliveryDetails, this.transportDetailData, this.sellId, this.invoiceId}) : super(key: key);
   @override
   _TransportDetailAddState createState() => _TransportDetailAddState();
 }
 
 class _TransportDetailAddState extends State<TransportDetailAdd> {
   DateTime selectedDate = DateTime.now();
-  String transportName = 'Dharma Transport';
-  String hammalName = 'Prakash';
+  var selectedTransport;
+  var selectedHammal;
+  String selectedTransportName = '';
+  String selectedHammalName = '';
+  bool isLoading = false;
+  List<Transport> transports = [];
+  List<Hammal> hammals = [];
+
+  ManageInvoiceServices invoiceServices = ManageInvoiceServices();
+  DropdownServices dropdownServices = DropdownServices();
+  bool submitted = false;
 
   @override
   void initState() {
     super.initState();
+    isLoading = true;
+    _getTransports();
+    _getHammals();
     if (widget.transportDetailData != null) {
       selectedDate = DateFormat('dd-MM-yyyy').parse(widget.transportDetailData!['transportDate']);
     }
   }
   @override
   Widget build(BuildContext context) {
+     var errorTransport = submitted == true ? selectedTransport == null ? 'Transport is required' : null : null,
+         errorHammal = submitted == true ? selectedHammal == null ? 'Hammal is required' : null : null;
     return
       AlertDialog(
       backgroundColor: AppTheme.white,
@@ -65,6 +88,11 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
               CustomDatePicker(
                 selectedDate: selectedDate,
                 width: Dimensions.screenWidth,
+                onDateSelected: (date) {
+                  setState(() {
+                    selectedDate = date;
+                  });
+                },
               ),
             ],
           ),
@@ -75,16 +103,19 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             children: [
               BigText(text: 'Select Transport', size: Dimensions.font12,),
               Gap(Dimensions.height10/2),
-              CustomDropdown(
-                dropdownItems: const ['Dharma Transport', 'Kamal Carrier', 'Yadav Brothers India', 'Kamdhenu Cargo Carriers'],
-                selectedValue: transportName,
-                width: Dimensions.screenWidth,
-                onChanged: (newValue) {
-                  setState(() {
-                    transportName = newValue!;
-                  });
-                },
-              ),
+              CustomApiDropdown(
+                  hintText: 'Select Transport',
+                  dropdownItems: transports.map((e) => DropdownMenuItem<dynamic>(value: e.transportId!, child: BigText(text: e.transportName!, size: Dimensions.font14,))).toList(),
+                  selectedValue: selectedTransport,
+                  errorText: errorTransport.toString() != 'null' ? errorTransport.toString() : null,
+                  width: Dimensions.screenWidth,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedTransportName = transports.firstWhere((element) => element.transportId == newValue).transportName!;
+                      selectedTransport = newValue!;
+                    });
+                  }
+              )
             ],
           ),
           SizedBox(height: Dimensions.height15),
@@ -94,16 +125,19 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             children: [
               BigText(text: 'Select Hammal', size: Dimensions.font12,),
               Gap(Dimensions.height10/2),
-              CustomDropdown(
-                width: Dimensions.screenWidth,
-                dropdownItems: const ['Kamlesh', 'Sami Khan', 'Prakash', 'Rajesh'],
-                selectedValue: hammalName,
-                onChanged: (newValue) {
-                  setState(() {
-                    hammalName = newValue!;
-                  });
-                },
-              ),
+              CustomApiDropdown(
+                  hintText: 'Select Hammal',
+                  dropdownItems: hammals.map((e) => DropdownMenuItem<dynamic>(value: e.hammalId!, child: BigText(text: e.hammalName!, size: Dimensions.font14,))).toList(),
+                  selectedValue: selectedHammal,
+                  errorText: errorHammal.toString() != 'null' ? errorHammal.toString() : null,
+                  width: Dimensions.screenWidth,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedHammalName = hammals.firstWhere((element) => element.hammalId == newValue).hammalName!;
+                      selectedHammal = newValue!;
+                    });
+                  }
+              )
             ],
           ),
         ],
@@ -111,17 +145,109 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       actions: [
         CustomElevatedButton(
           onPressed: () {
-            widget.addDeliveryDetails(
-              DateFormat('dd-MM-yyyy').format(selectedDate),
-              transportName,
-              hammalName,
-            );
-            Navigator.of(context).pop();
+            setState(() {
+              submitted = true;
+            });
+            if (HelperFunctions.checkInternet() == false) {
+              CustomApiSnackbar.show(
+                context,
+                'Warning',
+                'No internet connection',
+                mode: SnackbarMode.warning,
+              );
+            } else {
+              setState(() {
+                isLoading = !isLoading;
+              });
+              Map<String, dynamic> body = {
+                "user_id": HelperFunctions.getUserID(),
+                "invoice_id": widget.invoiceId,
+                "sell_id": widget.sellId,
+                "transport_date": DateFormat('yyyy-MM-dd').format(selectedDate),
+                "transport_id": selectedTransport.toString(),
+                "hammal_id": selectedHammal.toString(),
+              };
+              print('Body: $body');
+              if (widget.sellId == null && widget.invoiceId == null) {
+                _addTransportDetail(body);
+              }
+            }
           },
           buttonText: "Submit",
         )
       ],
     );
+  }
+
+  Future<void> _getTransports() async {
+    DropdownTransportListModel? response = await dropdownServices.transportList();
+    if (response != null) {
+      setState(() {
+        transports.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getHammals() async {
+    DropdownHammalListModel? response = await dropdownServices.hammalList();
+    if (response != null) {
+      setState(() {
+        hammals.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _addTransportDetail(Map<String, dynamic> body) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      AddTransportDetailModel? addInvoiceModel = await invoiceServices.addTransportDetail((body));
+      if (addInvoiceModel?.message != null) {
+        if (addInvoiceModel?.success == true) {
+          widget.addDeliveryDetails(
+            DateFormat('dd-MM-yyyy').format(selectedDate),
+            selectedTransportName,
+            selectedHammalName,
+          );
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addInvoiceModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.pop(context);
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addInvoiceModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (error) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'An error occurred: $error',
+        mode: SnackbarMode.error,
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:d_manager/models/invoice_models/add_invoice_model.dart';
+import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
 import 'package:d_manager/models/invoice_models/invoice_detail_model.dart';
 import 'package:d_manager/models/invoice_models/invoice_list_model.dart';
 import 'package:d_manager/models/invoice_models/update_invoice_model.dart';
@@ -12,12 +13,14 @@ import 'manage_sell_deals.dart';
 class ManageInvoiceServices{
   Future<InvoiceListModel?> showInvoiceList(String sellId, String pageNo, String search) async{
     try{
+
       Map<String, dynamic> body = {
+        "user_id": HelperFunctions.getUserID(),
         "sell_id":sellId,
-        "sellId": HelperFunctions.getUserID(),
         "page_no":pageNo,
         "search":search,
       };
+
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
@@ -31,6 +34,7 @@ class ManageInvoiceServices{
       }
     }catch(e){
       print(e.toString());
+      return null;
     }
   }
 
@@ -38,10 +42,11 @@ class ManageInvoiceServices{
     try {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json"
       };
 
       Response response = await post(Uri.parse(addInvoiceUrl), body: jsonEncode(body), headers: headers);
-      print(response.body);
+
       if (response.statusCode == 200) {
         return addInvoiceModelFromJson(response.body);
       } else {
@@ -55,7 +60,6 @@ class ManageInvoiceServices{
 
   Future<GetInvoiceModel?> viewInvoice(int invoiceId, int sellId) async {
     try {
-      print("Invoice ID: $invoiceId");
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
         "invoice_id": invoiceId.toString(),
@@ -66,6 +70,7 @@ class ManageInvoiceServices{
         "X-API-Key": HelperFunctions.getApiKey(),
       };
       Response response = await post(Uri.parse(getInvoiceUrl), body: body, headers: headers);
+
       if (response.statusCode == 200) {
         return getInvoiceModelFromJson(response.body);
       } else {
@@ -80,14 +85,36 @@ class ManageInvoiceServices{
     try {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json"
       };
-      Response response = await post(Uri.parse(updateInvoiceUrl), body: body, headers: headers);
+      Response response = await post(Uri.parse(updateInvoiceUrl), body: jsonEncode(body), headers: headers);
       if (response.statusCode == 200) {
         return updateInvoiceModelFromJson(response.body);
       } else {
         return updateInvoiceModelFromJson(response.body);
       }
     } catch (e) {
+      return null;
+    }
+  }
+
+  Future<AddTransportDetailModel?> addTransportDetail(Map<String, dynamic> body) async {
+    try {
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json"
+      };
+
+      Response response = await post(Uri.parse(addTransportDetailUrl), body: jsonEncode(body), headers: headers);
+      print("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return addTransportDetailModelFromJson(response.body);
+      } else {
+        return addTransportDetailModelFromJson(response.body);
+      }
+    } catch (e) {
+      print("Error: $e");
       return null;
     }
   }

@@ -65,6 +65,8 @@ const String updateYarnPurchaseDealStatusUrl = '$baseUrl/api/update-purchase-sta
 // Manage Delivery Details
 const String addDeliveryDetailUrl = '$baseUrl/api/add-delivery';
 const String deliveryDetailListUrl = '$baseUrl/api/purchase-deal-details';
+const String getDeliveryDetailUrl = '$baseUrl/api/get-delivery-details';
+const String updateDeliveryDetailUrl = '$baseUrl/api/update-delivery';
 
 // Manage Sell Deals
 const String createSellDeal = '$baseUrl/api/add-sell-deal';
@@ -81,6 +83,7 @@ const String invoiceListUrl = '$baseUrl/api/invoice';
 const String getInvoiceUrl = '$baseUrl/api/get-invoice';
 const String updateInvoiceUrl = '$baseUrl/api/update-invoice';
 const String updateInvoiceStatusUrl = '$baseUrl/api/update-invoice-status';
+const String addTransportDetailUrl = '$baseUrl/api/add-transport-details';
 
 // Reminders
 const String yarnToBeReceivedForReminder = '$baseUrl/api/reminder-yarn-to-be-received';

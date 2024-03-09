@@ -31,7 +31,6 @@ class InvoiceAdd extends StatefulWidget {
 class _InvoiceAddState extends State<InvoiceAdd> {
   ManageInvoiceServices invoiceServices = ManageInvoiceServices();
   bool submitted = false;
-  DateTime selectedDate = DateTime.now();
   DateTime selectedPaidDate = DateTime.now();
   DateTime selectedDueDate = DateTime.now();
   DateTime invoiceDate = DateTime.now();
@@ -75,7 +74,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     baleNumberControllers = [TextEditingController()];
     thanControllers = [TextEditingController()];
     meterControllers = [TextEditingController()];
-    _getInvoiceDetails();
+
     if (widget.invoiceID != null && widget.sellID != null) {
       _getInvoiceDetails();
     }
@@ -698,27 +697,31 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     setState(() {
       isLoading = true;
     });
-    GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(3, 1);
+    GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(widget.invoiceID!, widget.sellID!);
     if (invoiceDetailModel?.message != null) {
       if (invoiceDetailModel?.success == true) {
-        invoiceDate = DateFormat('yyyy-MM-dd').parse(invoiceDetailModel!.data!.invoiceDate.toString());
-        rateController.text = invoiceDetailModel.data!.rate.toString();
-        invoiceNumberController.text = invoiceDetailModel.data!.invoiceNumber.toString();
-        discountController.text = invoiceDetailModel.data!.discount.toString();
-        amountReceivedController.text = invoiceDetailModel.data!.receivedAmount.toString();
-        paymentRemarkController.text = invoiceDetailModel.data!.reason.toString();
-        selectedPaidDate = invoiceDetailModel.data!.paymentDate == null ? DateTime.now() : DateFormat('yyyy-MM-dd').parse(invoiceDetailModel.data!.paymentDate.toString());
-        selectedDueDate = DateFormat('yyyy-MM-dd').parse(invoiceDetailModel.data!.dueDate.toString());
-        isPaymentReceived = invoiceDetailModel.data!.paidStatus == 'yes' ? true : false;
-        paymentMethod = invoiceDetailModel.data!.paymentMethod.toString();
-        paymentType = invoiceDetailModel.data!.paymentType.toString();
-        dharaOption = invoiceDetailModel.data!.dharaDays.toString();
-       for (int i = 0; i < invoiceDetailModel.data!.baleDetails!.length; i++) {
-          rowsData.add(RowData(
-            baleNumber: invoiceDetailModel.data!.baleDetails![i].baleNumber.toString(),
-            than: invoiceDetailModel.data!.baleDetails![i].than.toString(),
-            meter: invoiceDetailModel.data!.baleDetails![i].meter.toString(),
-          ));
+        baleNumberControllers.clear();
+        thanControllers.clear();
+        meterControllers.clear();
+        rowsData.clear();
+        var invoiceModel = invoiceDetailModel?.data!;
+        invoiceDate = invoiceModel?.invoiceDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel!.invoiceDate.toString()) : DateTime.now();
+        rateController.text = invoiceModel!.rate.toString();
+        invoiceNumberController.text = invoiceModel.invoiceNumber.toString();
+        discountController.text = invoiceModel.discount.toString();
+        amountReceivedController.text = invoiceModel.receivedAmount.toString();
+        paymentRemarkController.text = invoiceModel.reason.toString();
+        selectedPaidDate = invoiceModel.paymentDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel.paymentDate.toString()) : DateTime.now();
+        selectedDueDate = invoiceModel.paymentDueDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel.paymentDueDate.toString()) : DateTime.now();
+        isPaymentReceived = invoiceModel.paidStatus == 'yes' ? true : false;
+        paymentMethod = invoiceModel.paymentMethod.toString() == 'cheque' ? 'Cheque' : 'RTGS';
+        paymentType = invoiceModel.paymentType.toString() == 'current' ? 'Current' : 'Dhara';
+        dharaOption = invoiceModel.dharaDays.toString();
+        for (var baleDetail in invoiceModel.baleDetails!) {
+          baleNumberControllers.add(TextEditingController(text: baleDetail.baleNumber.toString()));
+          thanControllers.add(TextEditingController(text: baleDetail.than.toString()));
+          meterControllers.add(TextEditingController(text: baleDetail.meter.toString()));
+          rowsData.add(RowData(baleNumber: baleDetail.baleNumber.toString(), than: baleDetail.than.toString(), meter: baleDetail.meter.toString()));
         }
 
         setState(() {
@@ -749,7 +752,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
       });
 
       UpdateInvoiceModel? updateInvoiceModel = await invoiceServices.updateInvoice(body);
-      print(updateInvoiceModel?.toJson());
 
       if (updateInvoiceModel?.message != null) {
         if (updateInvoiceModel?.success == true) {

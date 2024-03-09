@@ -166,8 +166,8 @@ class AppRoutes {
     },
     deliveryDetailView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final Map<String, dynamic>? deliveryDetailData = args?['deliveryDetailData'];
-      return DeliveryDetailView(deliveryDetailData: deliveryDetailData);
+      final String? purchaseID = args?['deliveryDetailData'];
+      return DeliveryDetailView(purchaseID: purchaseID);
     },
 
     // Manage Cloth Sell
@@ -192,11 +192,12 @@ class AppRoutes {
       final int? invoiceID = args?['invoiceID'];
       return InvoiceAdd(sellID: sellID, invoiceID: invoiceID);
     },
-    // invoiceView: (context) {
-    //   final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    //   final Map<String, dynamic>? invoiceData = args?['invoiceData'];
-    //   return InvoiceView(invoiceData: invoiceData);
-    // },
+    invoiceView: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final int? invoiceId = args?['invoiceId'];
+      final int? sellId = args?['sellId'];
+      return InvoiceView(invoiceId: invoiceId!.toInt(), sellId: sellId!.toString());
+    },
 
     //Manage Purchase Reminders
     boxToBeReceived: (context) => const BoxToBeReceived(),

@@ -182,10 +182,10 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                               CircleAvatar(
                                                 backgroundColor: AppTheme.black,
                                                 radius: Dimensions.height10,
-                                                child: BigText(text: purchase.partyFirm![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                child: BigText(text: purchase.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                               ),
                                               SizedBox(width: Dimensions.width10),
-                                              SmallText(text: purchase.partyFirm!, color: AppTheme.black, size: Dimensions.font12),
+                                              SmallText(text: purchase.firmName!, color: AppTheme.black, size: Dimensions.font12),
                                             ],
                                           ),
                                         ],
