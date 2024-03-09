@@ -42,8 +42,8 @@ class _SellHistoryState extends State<SellHistory> {
   String partyName = 'Mahesh Textiles';
   String clothQuality = '5 - Kilo';
   DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime(2000);
-  DateTime lastDate = DateTime(2050);
+  DateTime firstDateForSell = DateTime(2000);
+  DateTime lastDateForSell = DateTime(2050);
 
   bool isLoading = false;
   ManageHistoryServices manageHistoryServices = ManageHistoryServices();
@@ -104,7 +104,6 @@ class _SellHistoryState extends State<SellHistory> {
                         isFilterApplied = false;
                       });
                     } else {
-                      // Otherwise, show the filter bottom sheet
                       _showBottomSheet(context);
                     }
                   },
@@ -189,14 +188,14 @@ class _SellHistoryState extends State<SellHistory> {
                                             CircleAvatar(
                                               backgroundColor: AppTheme.secondary,
                                               radius: Dimensions.height20,
-                                              child: BigText(text: sellHistoryData[index].partyFirm![0], color: AppTheme.primary, size: Dimensions.font18),
+                                              child: BigText(text: sellHistoryData[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
                                             ),
                                             SizedBox(width: Dimensions.height10),
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               mainAxisAlignment: MainAxisAlignment.start,
                                               children: [
-                                                BigText(text: sellHistoryData[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                                                BigText(text: sellHistoryData[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
                                                 Row(
                                                   children: [
                                                     CircleAvatar(
@@ -498,18 +497,24 @@ class _SellHistoryState extends State<SellHistory> {
                                       start: DateTime.now(),
                                       end: DateTime.now().add(const Duration(days: 7)),
                                     ),
-                                    firstDate: firstDate,
-                                    lastDate: lastDate,
+                                    firstDate: firstDateForSell,
+                                    lastDate: lastDateForSell,
                                   );
 
                                   if (pickedDateRange != null) {
-                                    DateTime startDate = pickedDateRange.start;
-                                    DateTime endDate = pickedDateRange.end;
-                                    String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
-                                    String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
+                                    DateTime startDateForSellHistory = pickedDateRange.start;
+                                    DateTime endDateForSellHistory = pickedDateRange.end;
+                                    String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDateForSellHistory);
+                                    String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDateForSellHistory);
+                                    await HelperFunctions.setStartDateForSellHistory(formattedStartDate);
+                                    await HelperFunctions.setEndDateForSellHistory(formattedEndDate);
+                                    setState(() {
+                                      firstDateForSell = startDateForSellHistory;
+                                      lastDateForSell = endDateForSellHistory;
+                                    });
 
-                                    print("selectedStartDate## $formattedStartDate");
-                                    print("selectedEndDate##  $formattedEndDate");
+                                    print("StartDate## $formattedStartDate");
+                                    print("EndDate##  $formattedEndDate");
                                   }
                                 },
                                 child: Container(
@@ -526,7 +531,7 @@ class _SellHistoryState extends State<SellHistory> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(child: BigText(
-                                        text: '${DateFormat('dd/MM/yyyy').format(firstDate)} to ${DateFormat('dd/MM/yyyy').format(lastDate)}', size: Dimensions.font12,)),
+                                        text: '${DateFormat('dd/MM/yyyy').format(firstDateForSell)} to ${DateFormat('dd/MM/yyyy').format(lastDateForSell)}', size: Dimensions.font12,)),
                                         Padding(
                                           padding: EdgeInsets.zero,
                                           child: Icon(
@@ -566,7 +571,10 @@ class _SellHistoryState extends State<SellHistory> {
        )
     );
   }
-  Future<SellHistoryModel?> getSellHistory(int pageNo, String search,) async {
+  Future<SellHistoryModel?> getSellHistory(
+      int pageNo,
+      String search,
+      ) async {
     setState(() {
       isLoading = true;
     });
@@ -738,7 +746,12 @@ class _SellHistoryState extends State<SellHistory> {
       selectedParty = null;
       selectedClothQuality = null;
     });
-
+    if (firstDateForSell != DateTime(2000) || lastDateForSell != DateTime(2050)) {
+      setState(() {
+        firstDateForSell = DateTime(2000);
+        lastDateForSell = DateTime(2050);
+      });
+    }
     getSellHistory(1, ''); // Assuming you're resetting to the first page and empty search query
   }
 }

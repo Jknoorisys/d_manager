@@ -143,6 +143,23 @@ class HelperFunctions {
     String? endDate = pref.getString('end');
     return endDate ?? '';
   }
+  // Sell history filter date
+
+
+  static Future<bool> setStartDateForSellHistory(String startDate) async {
+    return pref.setString("start", startDate);
+  }
+  static String getStartDateForSellHistory() {
+    String? startDate = pref.getString('start');
+    return startDate ?? '';
+  }
+  static Future<bool> setEndDateForSellHistory(String endDate) async {
+    return pref.setString("end", endDate);
+  }
+  static String getEndDateForSellHistory() {
+    String? endDate = pref.getString('end');
+    return endDate ?? '';
+  }
 
   static Future<bool> checkInternet() async {
     try {
