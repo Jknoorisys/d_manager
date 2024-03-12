@@ -585,10 +585,11 @@ class _SellHistoryState extends State<SellHistory> {
       if (model != null) {
         if (model.success == true) {
           if (model.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              sellHistoryData.clear();
-            }
+
             setState(() {
+              if (pageNo == 1) {
+                sellHistoryData.clear();
+              }
               sellHistoryData.addAll(model.data!);
               currentPage++;
             });
@@ -740,6 +741,8 @@ class _SellHistoryState extends State<SellHistory> {
     await HelperFunctions.setFirmID('');
     await HelperFunctions.setPartyID('');
     await HelperFunctions.setClothID('');
+    await HelperFunctions.setStartDateForSellHistory('');
+    await HelperFunctions.setEndDateForSellHistory('');
     setState(() {
       selectedFirm = null;
       selectedParty = null;

@@ -101,8 +101,11 @@ const String invoiceListApi = '$baseUrl/api/sell-deal-details';
 const String getInvoiceApi = '$baseUrl/api/get-invoice';
 
 // Dashboard
-
 const String dashBoardApi = '$baseUrl/api/dashboard';
+
+// GST Return
+
+const String gstReturnApi = '$baseUrl/api/gst-difference';
 
 
 
