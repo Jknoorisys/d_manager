@@ -37,6 +37,7 @@ class FirmDetails {
   String? panNumber;
   String? groupCode;
   String? phoneNumber;
+  String? signature;
   String? status;
   BankDetails? bankDetails;
 
@@ -49,6 +50,7 @@ class FirmDetails {
     this.panNumber,
     this.groupCode,
     this.phoneNumber,
+    this.signature,
     this.status,
     this.bankDetails,
   });
@@ -62,6 +64,7 @@ class FirmDetails {
     panNumber: json["pan_number"],
     groupCode: json["group_code"],
     phoneNumber: json["phone_number"],
+    signature: json["signature"],
     status: json["status"],
     bankDetails: json["bank_details"] == null ? null : BankDetails.fromJson(json["bank_details"]),
   );
@@ -74,6 +77,7 @@ class FirmDetails {
     "gst_number": gstNumber,
     "group_code": groupCode,
     "phone_number": phoneNumber,
+    "signature": signature,
     "status": status,
     "bank_details": bankDetails?.toJson(),
   };

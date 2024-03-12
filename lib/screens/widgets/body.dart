@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
+import 'package:d_manager/screens/widgets/no_internet_connection.dart';
 import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,8 +23,9 @@ class CustomBody extends StatelessWidget {
 
   final bool? isLoading;
   final bool? noRecordFound;
+  final bool? internetNotAvailable;
 
-  const CustomBody({super.key, required this.content, this.isAppBarTitle = true, this.isBackgroundGradient = false, this.bottomNavigationBar, this.title, this.filterButton, this.dashboardCard, this.isLoading = false, this.noRecordFound = false});
+  const CustomBody({super.key, required this.content, this.isAppBarTitle = true, this.isBackgroundGradient = false, this.bottomNavigationBar, this.title, this.filterButton, this.dashboardCard, this.isLoading = false, this.noRecordFound = false, this.internetNotAvailable = true});
   final int pendingNotifications = 2;
   @override
   Widget build(BuildContext context) {
@@ -54,8 +56,8 @@ class CustomBody extends StatelessWidget {
                   top: Dimensions.height10,
                   right:Dimensions.width15,
                   child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
@@ -134,7 +136,7 @@ class CustomBody extends StatelessWidget {
                 child: AppTheme.divider,
             ) : Container(),
             Expanded(
-              child: noRecordFound == false ? content : const NoRecordFound(),
+              child: internetNotAvailable == true ? (noRecordFound == false ? content : const NoRecordFound()) : const NoInternetConnection(),
             ),
           ],
         ),

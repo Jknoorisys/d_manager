@@ -1,24 +1,35 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/delivery_models/AddDeliveryModel.dart';
 import 'package:d_manager/models/delivery_models/DeliveryDetailModel.dart';
 import 'package:d_manager/models/delivery_models/UpdateDeliveryModel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart';
 
 class ManageDeliveryServices {
-  Future<AddDeliveryModel?> addDelivery(Map<String, String> body) async {
+  Future<AddDeliveryModel?> addDelivery(Map<String, String> body, [File? billUrl]) async {
     try {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "multipart/form-data",
       };
 
-      Response response = await post(Uri.parse(addDeliveryDetailUrl), body: body, headers: headers);
-      print("Add Delivery Response: ${response.body}");
+      var request = MultipartRequest('POST', Uri.parse(addDeliveryDetailUrl));
+      request.headers.addAll(headers);
+      request.fields.addAll(body);
+      if (billUrl != null) {
+        request.files.add(await MultipartFile.fromPath('bill_url', billUrl.path, filename: billUrl.path.split('/').last));
+      }
+      var response = await request.send();
+      var data = json.decode(await response.stream.bytesToString());
 
       if (response.statusCode == 200) {
-        return addDeliveryModelFromJson(response.body);
+        return AddDeliveryModel.fromJson(data);
       } else {
-        return addDeliveryModelFromJson(response.body);
+        return AddDeliveryModel.fromJson(data);
       }
     } catch (e) {
       print(e);
@@ -26,19 +37,26 @@ class ManageDeliveryServices {
     }
   }
 
-  Future<UpdateDeliveryModel?> updateDelivery(Map<String, String> body) async {
+  Future<UpdateDeliveryModel?> updateDelivery(Map<String, String> body, billUrl) async {
     try {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "multipart/form-data",
       };
 
-      Response response = await post(Uri.parse(updateDeliveryDetailUrl), body: body, headers: headers);
-      print("Update Delivery Response: ${response.body}");
+      var request = MultipartRequest('POST', Uri.parse(updateDeliveryDetailUrl));
+      request.headers.addAll(headers);
+      request.fields.addAll(body);
+      if (billUrl != null) {
+        request.files.add(await MultipartFile.fromPath('bill_url', billUrl.path, filename: billUrl.path.split('/').last));
+      }
+      var response = await request.send();
+      var data = json.decode(await response.stream.bytesToString());
 
       if (response.statusCode == 200) {
-        return updateDeliveryModelFromJson(response.body);
+        return UpdateDeliveryModel.fromJson(data);
       } else {
-        return updateDeliveryModelFromJson(response.body);
+        return UpdateDeliveryModel.fromJson(data);
       }
     } catch (e) {
       print(e);

@@ -54,6 +54,7 @@ const String dropdownClothQualityListUrl = '$baseUrl/api/quality-list';
 const String dropdownYarnListUrl = '$baseUrl/api/yarn-list';
 const String dropdownHammalListUrl = '$baseUrl/api/hammal-list';
 const String dropdownTransportListUrl = '$baseUrl/api/transport-list';
+const String dropdownStateListUrl = '$baseUrl/api/state-list';
 
 // Manage Yarn Purchase Deals
 const String addYarnPurchaseDealUrl = '$baseUrl/api/add-purchase-deal';

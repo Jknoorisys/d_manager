@@ -35,7 +35,9 @@ class PartyDetails {
   String? address;
   String? gstNumber;
   String? panNumber;
+  int? stateId;
   String? state;
+  String? stateName;
   String? phoneNumber;
   String? status;
   BankDetails? bankDetails;
@@ -47,7 +49,9 @@ class PartyDetails {
     this.address,
     this.gstNumber,
     this.panNumber,
+    this.stateId,
     this.state,
+    this.stateName,
     this.phoneNumber,
     this.status,
     this.bankDetails,
@@ -60,7 +64,9 @@ class PartyDetails {
     address: json["address"],
     gstNumber: json["gst_number"],
     panNumber: json["pan_number"],
+    stateId: json["state_id"],
     state: json["state"],
+    stateName: json["state_name"],
     phoneNumber: json["phone_number"],
     status: json["status"],
     bankDetails: json["bank_details"] == null ? null : BankDetails.fromJson(json["bank_details"]),
@@ -72,7 +78,10 @@ class PartyDetails {
     "firm_name": firmName,
     "address": address,
     "gst_number": gstNumber,
+    "pan_number": panNumber,
+    "state_id": stateId,
     "state": state,
+    "state_name": stateName,
     "phone_number": phoneNumber,
     "status": status,
     "bank_details": bankDetails?.toJson(),

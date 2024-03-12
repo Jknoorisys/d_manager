@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:d_manager/api/manage_firm_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
+import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
@@ -12,8 +15,10 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:image_picker/image_picker.dart';
 
 class FirmAdd extends StatefulWidget {
   final int? firmId;
@@ -37,7 +42,43 @@ class _FirmAddState extends State<FirmAdd> {
   bool submitted = false;
 
   bool isLoading = false;
+  dynamic _selectedFile;
   ManageFirmServices manageFirmServices = ManageFirmServices();
+
+  _imgFromGallery() async {
+    try {
+      final File? pickedFile =
+      await HelperFunctions.imagePicker(ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedFile = pickedFile;
+        });
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
+  _imgFromCamera() async {
+    try {
+      final File? pickedFile =
+      await HelperFunctions.imagePicker(ImageSource.camera);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedFile = pickedFile;
+        });
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.firmId != null) {
+      _getFirmDetails();
+    }
+  }
 
   @override
   void dispose() {
@@ -52,16 +93,10 @@ class _FirmAddState extends State<FirmAdd> {
     ifscCodeController.dispose();
     accountNumberController.dispose();
     groupCodeController.dispose();
+    _selectedFile = null;
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.firmId != null) {
-      _getFirmDetails();
-    }
-  }
   @override
   Widget build(BuildContext context) {
     var errorFirmName = submitted == true ? _validateFirmName(firmNameController.text) : null,
@@ -204,6 +239,81 @@ class _FirmAddState extends State<FirmAdd> {
                           borderRadius: Dimensions.radius10,
                           errorText: errorAccountNumber.toString() != 'null' ? errorAccountNumber.toString() : ''
                       ),
+                      Gap(Dimensions.height15),
+
+                      FittedBox(
+                      fit: BoxFit.contain,
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => showPickerDialog(context),
+                          );
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 0),
+                                  child: Container(
+                                    height: Dimensions.height50,
+                                    width: MediaQuery.of(context).size.width / 3.6,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppTheme.black, width: 0.2),
+                                      borderRadius: BorderRadius.all(Radius.circular(Dimensions.radius10/2)),
+                                      color: AppTheme.white,
+                                    ),
+                                    child: _selectedFile == null ? Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_a_photo,
+                                          color: AppTheme.deactivatedText,
+                                          size: Dimensions.height20,
+                                        ),
+                                        Text(
+                                          "Upload Signature",
+                                          style: TextStyle(
+                                            color: AppTheme.grey,
+                                            fontSize: Dimensions.font12/2.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ) : ClipRRect(
+                                      borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        child: _selectedFile != null
+                                            ? _selectedFile is File
+                                            ? Image.file(
+                                          _selectedFile,
+                                          fit: BoxFit.cover,
+                                        )
+                                            : CachedNetworkImage(
+                                          imageUrl: '$baseUrl/$_selectedFile',
+                                          errorWidget: (_, __, ___) =>
+                                              Image.asset(AppImages.appLogoTransparent),
+                                          fit: BoxFit.cover,
+                                        ): const SizedBox(),
+                                    ) ,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                      // Gap(Dimensions.height15),
+                      // CustomElevatedButton(
+                      //   onPressed: () async {
+                      //     await _selectFile();
+                      //   },
+                      //   buttonText: 'Upload Signature Image',
+                      //   isBackgroundGradient: false,
+                      //   backgroundColor: AppTheme.primary,
+                      // ),
                       Gap(Dimensions.height20),
 
                       CustomElevatedButton(
@@ -223,7 +333,7 @@ class _FirmAddState extends State<FirmAdd> {
                               setState(() {
                                 isLoading = !isLoading;
                               });
-                              Map<String, dynamic> body = {
+                              Map<String, String> body = {
                                 "firm_id": widget.firmId != null ? widget.firmId.toString() : "",
                                 "user_id" : HelperFunctions.getUserID(),
                                 "owner_name": partyNameController.text,
@@ -239,9 +349,9 @@ class _FirmAddState extends State<FirmAdd> {
                                 "group_code": groupCodeController.text,
                               };
                               if (widget.firmId == null) {
-                                _addFirm(body);
+                                _addFirm(body, _selectedFile);
                               } else {
-                                _updateFirm(body);
+                                _updateFirm(body, _selectedFile);
                               }
                             }
                           }
@@ -255,6 +365,70 @@ class _FirmAddState extends State<FirmAdd> {
             ),
           )
         )
+    );
+  }
+
+  Widget showPickerDialog(BuildContext context) {
+    var mediaQueryData = MediaQuery.of(context);
+    return MediaQuery(
+      data: mediaQueryData.copyWith(textScaleFactor: 1.0),
+      child: AlertDialog(
+        surfaceTintColor: AppTheme.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimensions.radius10),
+        ),
+        shadowColor: AppTheme.nearlyWhite,
+        // title: Row(
+        //   children: [
+        //     Text('Choose option',
+        //         style: AppTheme.hintText),
+        //     Spacer(),
+        //     IconButton(
+        //       icon: Icon(Icons.close, color: AppTheme.deactivatedText),
+        //       onPressed: () {
+        //         Navigator.of(context).pop();
+        //       },
+        //     ),
+        //   ],
+        // ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Choose from', style: AppTheme.hintText),
+            const SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _imgFromGallery();
+                    },
+                    child: Text('Gallery',
+                      style: AppTheme.hintText,
+                    )),
+                const SizedBox(
+                  width: 10,
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _imgFromCamera();
+                      setState(() {});
+                    },
+                    child: Text(
+                      'Camera',
+                      style: AppTheme.hintText,
+                    )),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -379,8 +553,8 @@ class _FirmAddState extends State<FirmAdd> {
     return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && panNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty && groupCodeError.isEmpty ? true : false;
   }
 
-  Future<void> _addFirm(Map<String, dynamic> body) async {
-    AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body);
+  Future<void> _addFirm(Map<String, String> body, File? signature) async {
+    AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body, signature);
     if (addFirmModel?.message != null) {
       if (addFirmModel?.success == true) {
         CustomApiSnackbar.show(
@@ -415,8 +589,8 @@ class _FirmAddState extends State<FirmAdd> {
     }
   }
 
-  Future<void> _updateFirm(Map<String, dynamic> body) async {
-    UpdateFirmModel? updateFirmModel = await manageFirmServices.updateFirm(body);
+  Future<void> _updateFirm(Map<String, String> body, File? signature) async {
+    UpdateFirmModel? updateFirmModel = await manageFirmServices.updateFirm(body, signature);
     if (updateFirmModel?.message != null) {
       if (updateFirmModel?.success == true) {
         CustomApiSnackbar.show(
@@ -469,6 +643,7 @@ class _FirmAddState extends State<FirmAdd> {
         ifscCodeController.text = firmDetailModel.data!.bankDetails?.ifscCode ?? '';
         accountNumberController.text = firmDetailModel.data!.bankDetails?.accountNumber ?? '';
         groupCodeController.text = firmDetailModel.data!.groupCode ?? '';
+        _selectedFile = firmDetailModel.data!.signature ?? null;
         setState(() {
           isLoading = false;
         });

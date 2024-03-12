@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:d_manager/constants/constants.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -208,5 +209,25 @@ class HelperFunctions {
 
   static Future<bool> isPossiblyNetworkAvailable() async {
     return await isInternetAvailable() && await isNetworkResponsive();
+  }
+
+  static Future<File?> imagePicker(ImageSource source) async {
+    try {
+      XFile? file = await ImagePicker().pickImage(
+          source: source,
+          imageQuality: 50);
+      if (file != null) {
+        final extension = file.name.split('.')[1];
+        if(File(file.path) != null){
+          return Future.value(File(file.path));
+        }else{
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 }

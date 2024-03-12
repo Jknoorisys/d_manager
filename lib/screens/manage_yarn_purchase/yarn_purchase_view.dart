@@ -30,7 +30,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   String paymentPaid = 'Yes';
   bool isLoading = false;
   Data? yarnPurchaseData;
-  bool noRecordFound = true;
+  bool noRecordFound = false;
 
   ManagePurchaseServices purchaseServices = ManagePurchaseServices();
 
@@ -45,7 +45,14 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   @override
   void initState() {
     isLoading = true;
+  if (widget.purchaseId != null) {
     _getPurchaseDetails();
+  } else {
+    setState(() {
+      noRecordFound = true;
+      isLoading = false;
+    });
+  }
     super.initState();
   }
 
@@ -57,7 +64,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
           isLoading: isLoading,
           noRecordFound: noRecordFound,
           content: SingleChildScrollView(
-            child: yarnPurchaseData == null ? const NoRecordFound() : Padding(
+            child: yarnPurchaseData == null ? Container() : Padding(
               padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -108,7 +115,7 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                             children: [
                               _buildInfoColumn('Deal Date', yarnPurchaseData!.purchaseDate!.toString().split(' ')[0]),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Payment Type', yarnPurchaseData!.paymentType!.toUpperCase()),
+                              _buildInfoColumn('Payment Type', yarnPurchaseData!.paymentType! == 'current' ? 'Current' : 'Dhara'),
                               // _buildInfoColumn('Yarn Name', yarnPurchaseData!['yarnName']),
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Yarn Type', yarnPurchaseData!.typeName!),
@@ -302,8 +309,6 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                   _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
-                                  // SizedBox(width: Dimensions.width20),
-                                  // _buildInfoColumn('Rate', deliveryDetailList[index]['rate']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Bill Amount', deliveryDetailList[index]['billAmount']),
                                 ],
@@ -316,32 +321,21 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                   _buildInfoColumn('Due Date', deliveryDetailList[index]['dueDate']),
                                    SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Difference In Amount', deliveryDetailList[index]['differenceInAmount']),
-                                  // _buildInfoColumn('Paid', deliveryDetailList[index]['paid'] == true ? 'Yes' : 'No'),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  // _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
-                                  // SizedBox(width: Dimensions.width20),
-                                  // _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
-                                  // SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Denyar', deliveryDetailList[index]['denyar']),
+                                  _buildInfoColumn('Denier', deliveryDetailList[index]['denyar']),
                                    SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Cops', deliveryDetailList[index]['cops']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Net Weight', '${deliveryDetailList[index]['netWeight']} Kg'),
-                                  // _buildInfoColumn('Bill Received', deliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  // _buildInfoColumn('Cops', deliveryDetailList[index]['cops']),
-                                  // SizedBox(width: Dimensions.width20),
-                                  // _buildInfoColumn('Denyar', deliveryDetailList[index]['denyar']),
-                                  // SizedBox(width: Dimensions.width20),
-                                  // _buildInfoColumn('Bill Received', deliveryDetailList[index]['billReceived'] == true ? 'Yes' : 'No'),
                                   _buildInfoColumn('View PDF', deliveryDetailList[index]['viewPDF']),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Status', deliveryDetailList[index]['status']),
@@ -425,13 +419,13 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailView, arguments: {'deliveryDetailData': deliveryDetailList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailView, arguments: {'purchaseID' : widget.purchaseId, 'deliveryID': deliveryDetailList[index]['id'].toString()});
                                     },
                                     icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd, arguments: {'deliveryDetailData': deliveryDetailList[index]});
+                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd, arguments: {'purchaseID': widget.purchaseId, 'deliveryID': deliveryDetailList[index]['id'].toString()});
                                     },
                                     icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                                   ),
@@ -496,8 +490,11 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
       if (dealDetailModel?.success == true) {
         setState(() {
           isLoading = false;
-          yarnPurchaseData = dealDetailModel!.data;
-          noRecordFound = false;
+          if (dealDetailModel!.data != null) {
+            yarnPurchaseData = dealDetailModel.data;
+          } else {
+            noRecordFound = true;
+          }
         });
       } else {
         CustomApiSnackbar.show(

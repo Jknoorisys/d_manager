@@ -34,7 +34,7 @@ class DeliveryDetailModel {
 
 class Data {
   int? yarnPurchaseId;
-  DateTime? deliveryDate;
+  String? deliveryDate;
   String? deliveredBoxCount;
   String? rate;
   String? grossWeight;
@@ -43,7 +43,7 @@ class Data {
   String? denier;
   dynamic purchaseAmount;
   String? paymentType;
-  DateTime? paymentDueDate;
+  String? paymentDueDate;
   String? dharaDays;
   String? paidStatus;
   dynamic paymentMethod;
@@ -79,7 +79,7 @@ class Data {
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     yarnPurchaseId: json["yarn_purchase_id"],
-    deliveryDate: json["delivery_date"] == null ? null : DateTime.parse(json["delivery_date"]),
+    deliveryDate: json["delivery_date"] == null ? null : json["delivery_date"],
     deliveredBoxCount: json["delivered_box_count"],
     rate: json["rate"],
     grossWeight: json["gross_weight"],
@@ -88,7 +88,7 @@ class Data {
     denier: json["denier"],
     purchaseAmount: json["purchase_amount"],
     paymentType: json["payment_type"],
-    paymentDueDate: json["payment_due_date"] == null ? null : DateTime.parse(json["payment_due_date"]),
+    paymentDueDate: json["payment_due_date"] == null ? null : json["payment_due_date"],
     dharaDays: json["dhara_days"],
     paidStatus: json["paid_status"],
     paymentMethod: json["payment_method"],
@@ -102,7 +102,7 @@ class Data {
 
   Map<String, dynamic> toJson() => {
     "yarn_purchase_id": yarnPurchaseId,
-    "delivery_date": "${deliveryDate!.year.toString().padLeft(4, '0')}-${deliveryDate!.month.toString().padLeft(2, '0')}-${deliveryDate!.day.toString().padLeft(2, '0')}",
+    "delivery_date": deliveryDate == null ? null : deliveryDate,
     "delivered_box_count": deliveredBoxCount,
     "rate": rate,
     "gross_weight": grossWeight,
@@ -111,7 +111,7 @@ class Data {
     "denier": denier,
     "purchase_amount": purchaseAmount,
     "payment_type": paymentType,
-    "payment_due_date": "${paymentDueDate!.year.toString().padLeft(4, '0')}-${paymentDueDate!.month.toString().padLeft(2, '0')}-${paymentDueDate!.day.toString().padLeft(2, '0')}",
+    "payment_due_date": paymentDueDate == null ? null : paymentDueDate,
     "dhara_days": dharaDays,
     "paid_status": paidStatus,
     "payment_method": paymentMethod,

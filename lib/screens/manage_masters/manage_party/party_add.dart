@@ -1,17 +1,21 @@
+import 'package:d_manager/api/dropdown_services.dart';
 import 'package:d_manager/api/manage_party_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_state_list_model.dart';
 import 'package:d_manager/models/master_models/add_party_model.dart';
 import 'package:d_manager/models/master_models/party_detail_model.dart';
 import 'package:d_manager/models/master_models/update_party_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
+import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -37,14 +41,25 @@ class _PartyAddState extends State<PartyAdd> {
   bool isInMaharashtra = true;
   bool submitted = false;
   bool isLoading = false;
+  bool noRecordFound = false;
+  bool isNetworkAvailable = true;
+  var selectedState;
+  List<StateDetail> states = [];
+  DropdownServices dropdownServices = DropdownServices();
   ManagePartyServices partyServices = ManagePartyServices();
 
   @override
   void initState() {
     super.initState();
-    if (widget.partyId != null) {
-      _getPartyDetails();
-    }
+     if (HelperFunctions.checkInternet() == false) {
+       isNetworkAvailable = false;
+       isLoading = false;
+     } else {
+       _getStates();
+       if (widget.partyId != null) {
+         _getPartyDetails();
+       }
+     }
   }
 
   @override
@@ -72,12 +87,15 @@ class _PartyAddState extends State<PartyAdd> {
         errorAccountHolderName = submitted == true ? _validateAccountHolderName(accountHolderNameController.text) : null,
         errorBankName = submitted == true ? _validateBankName(bankNameController.text) : null,
         errorIFSCCode = submitted == true ? _validateIFSCCode(ifscCodeController.text) : null,
-        errorAccountNumber = submitted == true ? _validateAccountNumber(accountNumberController.text) : null;
+        errorAccountNumber = submitted == true ? _validateAccountNumber(accountNumberController.text) : null,
+          errorState = submitted == true ? selectedState == null ? 'Party State is required' : null : null;
 
     return CustomDrawer(
         content: CustomBody(
           title: widget.partyId == null ? S.of(context).addParty : 'Edit Party',
           isLoading: isLoading,
+          noRecordFound: noRecordFound,
+          internetNotAvailable: isNetworkAvailable,
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -196,44 +214,58 @@ class _PartyAddState extends State<PartyAdd> {
                       ),
                       Gap(Dimensions.height20),
 
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Select Party State:",
-                            style: AppTheme.heading2,
-                          ),
-                          Row(
-                            children: [
-                              Radio(
-                                value: true,
-                                groupValue: isInMaharashtra,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isInMaharashtra = value as bool;
-                                  });
-                                },
-                              ),
-                              const Text("In Maharashtra"),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Radio(
-                                value: false,
-                                groupValue: isInMaharashtra,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isInMaharashtra = value as bool;
-                                  });
-                                },
-                              ),
-                              const Text("Outside of Maharashtra"),
-                            ],
-                          ),
-                        ],
+                      CustomApiDropdown(
+                          hintText: 'Select Party State',
+                          width: double.infinity,
+                          dropdownItems: states.map((e) => DropdownMenuItem<dynamic>(value: e.stateId!, child: BigText(text: e.stateName!, size: Dimensions.font14,))).toList(),
+                          selectedValue: selectedState,
+                          errorText: errorState.toString() != 'null' ? errorState.toString() : null,
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedState = newValue!;
+                            });
+                          }
                       ),
                       Gap(Dimensions.height20),
+
+                      // Column(
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     Text(
+                      //       "Select Party State:",
+                      //       style: AppTheme.heading2,
+                      //     ),
+                      //     Row(
+                      //       children: [
+                      //         Radio(
+                      //           value: true,
+                      //           groupValue: isInMaharashtra,
+                      //           onChanged: (value) {
+                      //             setState(() {
+                      //               isInMaharashtra = value as bool;
+                      //             });
+                      //           },
+                      //         ),
+                      //         const Text("In Maharashtra"),
+                      //       ],
+                      //     ),
+                      //     Row(
+                      //       children: [
+                      //         Radio(
+                      //           value: false,
+                      //           groupValue: isInMaharashtra,
+                      //           onChanged: (value) {
+                      //             setState(() {
+                      //               isInMaharashtra = value as bool;
+                      //             });
+                      //           },
+                      //         ),
+                      //         const Text("Outside of Maharashtra"),
+                      //       ],
+                      //     ),
+                      //   ],
+                      // ),
+                      // Gap(Dimensions.height20),
 
                       CustomElevatedButton(
                         onPressed: () {
@@ -242,12 +274,7 @@ class _PartyAddState extends State<PartyAdd> {
                           });
                           if (_isFormValid()) {
                             if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
+                              isNetworkAvailable = false;
                             } else {
                               setState(() {
                                 isLoading = !isLoading;
@@ -265,11 +292,9 @@ class _PartyAddState extends State<PartyAdd> {
                                 "bank_name": bankNameController.text,
                                 "ifsc_code": ifscCodeController.text,
                                 "account_number": accountNumberController.text,
-                                "state": isInMaharashtra ? "maharashtra" : "out-side"
+                                "state_id": selectedState.toString(),
                               };
-                              print('Add Party: $body');
                               if (widget.partyId == null) {
-                                print('Add Party: $body');
                                 _addParty(body);
                               } else {
                                 _updateParty(body);
@@ -411,6 +436,16 @@ class _PartyAddState extends State<PartyAdd> {
     return partyNameError.isEmpty && firmNameError.isEmpty && addressError.isEmpty && gstNumberError.isEmpty && panNumberError.isEmpty && phoneNumberError.isEmpty && accountHolderNameError.isEmpty && bankNameError.isEmpty && ifscCodeError.isEmpty && accountNumberError.isEmpty ? true : false;
   }
 
+  Future<void> _getStates() async {
+    DropdownStateListModel? response = await dropdownServices.stateList();
+    if (response != null) {
+      setState(() {
+        states.addAll(response.data!);
+        isLoading = false;
+      });
+    }
+  }
+
   Future<void> _addParty(Map<String, dynamic> body) async {
     AddPartyModel? addPartyModel = await partyServices.addParty(body);
     if (addPartyModel?.message != null) {
@@ -421,7 +456,7 @@ class _PartyAddState extends State<PartyAdd> {
           addPartyModel!.message.toString(),
           mode: SnackbarMode.success,
         );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+        Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
       }  else {
         CustomApiSnackbar.show(
           context,
@@ -490,21 +525,32 @@ class _PartyAddState extends State<PartyAdd> {
     PartyDetailModel? partyDetailModel = await partyServices.viewParty(widget.partyId!);
     if (partyDetailModel?.message != null) {
       if (partyDetailModel?.success == true) {
-        partyNameController.text = partyDetailModel!.data!.partyName ?? '';
-        firmNameController.text = partyDetailModel.data!.firmName ?? '';
-        addressController.text = partyDetailModel.data!.address ?? '';
-        gstNumberController.text = partyDetailModel.data!.gstNumber ?? '';
-        panNumberController.text = partyDetailModel.data!.panNumber ?? '';
-        phoneNumberController.text = partyDetailModel.data!.phoneNumber ?? '';
-        accountHolderNameController.text = partyDetailModel.data!.bankDetails?.accountHolderName ?? '';
-        bankNameController.text = partyDetailModel.data!.bankDetails?.bankName ?? '';
-        ifscCodeController.text = partyDetailModel.data!.bankDetails?.ifscCode ?? '';
-        accountNumberController.text = partyDetailModel.data!.bankDetails?.accountNumber ?? '';
-        isInMaharashtra = partyDetailModel.data!.state == 'maharashtra' ? true : false;
+       if (partyDetailModel?.data != null) {
+         partyNameController.text = partyDetailModel!.data!.partyName ?? '';
+         firmNameController.text = partyDetailModel.data!.firmName ?? '';
+         addressController.text = partyDetailModel.data!.address ?? '';
+         gstNumberController.text = partyDetailModel.data!.gstNumber ?? '';
+         panNumberController.text = partyDetailModel.data!.panNumber ?? '';
+         phoneNumberController.text = partyDetailModel.data!.phoneNumber ?? '';
+         accountHolderNameController.text = partyDetailModel.data!.bankDetails?.accountHolderName ?? '';
+         bankNameController.text = partyDetailModel.data!.bankDetails?.bankName ?? '';
+         ifscCodeController.text = partyDetailModel.data!.bankDetails?.ifscCode ?? '';
+         accountNumberController.text = partyDetailModel.data!.bankDetails?.accountNumber ?? '';
+         // isInMaharashtra = partyDetailModel.data!.state == 'maharashtra' ? true : false;
+          selectedState = partyDetailModel.data!.stateId;
+         setState(() {
+           isLoading = false;
+         });
+       } else {
+         setState(() {
+           noRecordFound = true;
+           isLoading = false;
+         });
+       }
+      } else {
         setState(() {
           isLoading = false;
         });
-      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
@@ -513,6 +559,9 @@ class _PartyAddState extends State<PartyAdd> {
         );
       }
     } else {
+      setState(() {
+        isLoading = false;
+      });
       CustomApiSnackbar.show(
         context,
         'Error',

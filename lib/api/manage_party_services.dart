@@ -24,6 +24,7 @@ class ManagePartyServices {
         return AddPartyModel.fromJson(data);
       }
     } catch (e) {
+      print(e);
       return null;
     }
   }
@@ -46,6 +47,7 @@ class ManagePartyServices {
         return partyListModelFromJson(response.body);
       }
     } catch (e) {
+      print(e);
       return null;
     }
   }

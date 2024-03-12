@@ -4,6 +4,7 @@ import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart
 import 'package:d_manager/models/dropdown_models/dropdown_cloth_quality_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_hammal_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_state_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_transport_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_yarn_list_model.dart';
 import 'package:http/http.dart';
@@ -99,6 +100,22 @@ class DropdownServices {
         return dropdownHammalListModelFromJson(response.body);
       } else {
         return dropdownHammalListModelFromJson(response.body);
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<DropdownStateListModel?> stateList() async {
+    try {
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      Response response = await post(Uri.parse(dropdownStateListUrl), headers: headers);
+      if (response.statusCode == 200) {
+        return dropdownStateListModelFromJson(response.body);
+      } else {
+        return dropdownStateListModelFromJson(response.body);
       }
     } catch (e) {
       return null;

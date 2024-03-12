@@ -30,7 +30,7 @@ class YarnPurchaseDetailModel {
 
 class Data {
   int? purchaseId;
-  DateTime? purchaseDate;
+  String? purchaseDate;
   String? firmId;
   String? firmName;
   String? partyId;
@@ -49,7 +49,7 @@ class Data {
   String? denier;
   String? cops;
   String? paymentType;
-  DateTime? paymentDueDate;
+  String? paymentDueDate;
   String? dharaDays;
   String? status;
   String? dealStatus;
@@ -83,7 +83,7 @@ class Data {
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     purchaseId: json["purchase_id"],
-    purchaseDate: json["purchase_date"] == null ? null : DateTime.parse(json["purchase_date"]),
+    purchaseDate: json["purchase_date"] == null ? null : json["purchase_date"],
     firmId: json["firm_id"],
     firmName: json["firm_name"],
     partyId: json["party_id"],
@@ -102,7 +102,7 @@ class Data {
     denier: json["denier"],
     cops: json["cops"],
     paymentType: json["payment_type"],
-    paymentDueDate: json["payment_due_date"] == null ? null : DateTime.parse(json["payment_due_date"]),
+    paymentDueDate: json["payment_due_date"] == null ? null : json["payment_due_date"],
     dharaDays: json["dhara_days"],
     status: json["status"],
     dealStatus: json["deal_status"],
@@ -110,7 +110,7 @@ class Data {
 
   Map<String, dynamic> toJson() => {
     "purchase_id": purchaseId,
-    "purchase_date": "${purchaseDate!.year.toString().padLeft(4, '0')}-${purchaseDate!.month.toString().padLeft(2, '0')}-${purchaseDate!.day.toString().padLeft(2, '0')}",
+    "purchase_date": purchaseDate == null ? null : purchaseDate,
     "firm_id": firmId,
     "firm_name": firmName,
     "party_id": partyId,
@@ -129,7 +129,7 @@ class Data {
     "denier": denier,
     "cops": cops,
     "payment_type": paymentType,
-    "payment_due_date": "${paymentDueDate!.year.toString().padLeft(4, '0')}-${paymentDueDate!.month.toString().padLeft(2, '0')}-${paymentDueDate!.day.toString().padLeft(2, '0')}",
+    "payment_due_date": paymentDueDate == null ? null : paymentDueDate,
     "dhara_days": dharaDays,
     "status": status,
     "deal_status": dealStatus,

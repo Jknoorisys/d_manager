@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:d_manager/api/manage_delivery_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
+import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/delivery_models/AddDeliveryModel.dart';
+import 'package:d_manager/models/delivery_models/DeliveryDetailModel.dart';
 import 'package:d_manager/models/delivery_models/UpdateDeliveryModel.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
@@ -16,11 +22,13 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class DeliveryDetailAdd extends StatefulWidget {
   final String? purchaseID;
-  const DeliveryDetailAdd({Key? key, this.purchaseID}) : super(key: key);
+  final String? deliveryID;
+  const DeliveryDetailAdd({Key? key, this.purchaseID, this.deliveryID}) : super(key: key);
 
   @override
   _DeliveryDetailAddState createState() => _DeliveryDetailAddState();
@@ -38,11 +46,38 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
   String paymentMethod = 'RTGS';
   double amountPaid = 0.0;
   bool isBillReceived = false;
-  FilePickerResult? billImageResult;
+  dynamic _selectedFile;
   bool isLoading = false;
+  bool noRecordFound = false;
+  Data? deliveryDetailData;
   ManageDeliveryServices deliveryServices = ManageDeliveryServices();
 
-
+  _imgFromGallery() async {
+    try {
+      final File? pickedFile =
+      await HelperFunctions.imagePicker(ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedFile = pickedFile;
+        });
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
+  _imgFromCamera() async {
+    try {
+      final File? pickedFile =
+      await HelperFunctions.imagePicker(ImageSource.camera);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedFile = pickedFile;
+        });
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
   TextEditingController amountPaidController = TextEditingController();
   TextEditingController netWeightController = TextEditingController();
   TextEditingController grossReceivedController = TextEditingController();
@@ -55,8 +90,13 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
   void initState() {
     super.initState();
     isLoading = true;
-    if (widget.purchaseID != null) {
-      // Fetch data from API
+    if (widget.purchaseID != null && widget.deliveryID != null) {
+      _getDeliveryDetails();
+    } else {
+      setState(() {
+        noRecordFound = true;
+        isLoading = false;
+      });
     }
   }
 
@@ -68,6 +108,8 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     denierController.dispose();
     rateController.dispose();
     copsController.dispose();
+    paymentRemarkController.dispose();
+    _selectedFile = null;
     super.dispose();
   }
 
@@ -75,7 +117,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: false, type: FileType.any);
     if (result != null) {
       setState(() {
-        billImageResult = result;
+        _selectedFile = File(result.files.single.path!);
       });
     } else {
       CustomSnackbar.show(title: 'Error', message: 'No file selected');
@@ -373,23 +415,88 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                           ],
                         ),
                       if (isBillReceived)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Gap(Dimensions.height20),
-                            BigText(text: 'Upload Bill', size: Dimensions.font12,),
-                            Gap(Dimensions.height10/2),
-                            CustomElevatedButton(
-                              onPressed: () async {
-                                openFiles();
-                              },
-                              buttonText: 'Upload Bill',
-                              isBackgroundGradient: false,
-                              backgroundColor: AppTheme.primary,
-                            )
-                          ],
+                        Gap(Dimensions.height20),
+                        // Column(
+                        //   mainAxisAlignment: MainAxisAlignment.start,
+                        //   crossAxisAlignment: CrossAxisAlignment.start,
+                        //   children: [
+                        //     Gap(Dimensions.height20),
+                        //     BigText(text: 'Upload Bill', size: Dimensions.font12,),
+                        //     Gap(Dimensions.height10/2),
+                        //     CustomElevatedButton(
+                        //       onPressed: () async {
+                        //         openFiles();
+                        //       },
+                        //       buttonText: 'Upload Bill',
+                        //       isBackgroundGradient: false,
+                        //       backgroundColor: AppTheme.primary,
+                        //     )
+                        //   ],
+                        // ),
+                      if (isBillReceived)
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => showPickerDialog(context),
+                            );
+                          },
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 0),
+                                    child: Container(
+                                      height: Dimensions.height50,
+                                      width: MediaQuery.of(context).size.width / 3.6,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: AppTheme.black, width: 0.2),
+                                        borderRadius: BorderRadius.all(Radius.circular(Dimensions.radius10/2)),
+                                        color: AppTheme.white,
+                                      ),
+                                      child: _selectedFile == null ? Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_a_photo,
+                                            color: AppTheme.deactivatedText,
+                                            size: Dimensions.height20,
+                                          ),
+                                          Text(
+                                            "Upload Bill Image",
+                                            style: TextStyle(
+                                              color: AppTheme.grey,
+                                              fontSize: Dimensions.font12/2.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ) : ClipRRect(
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        child: _selectedFile != null
+                                            ? _selectedFile is File
+                                            ? Image.file(
+                                          _selectedFile,
+                                          fit: BoxFit.cover,
+                                        )
+                                            : CachedNetworkImage(
+                                          imageUrl: '$baseUrl/$_selectedFile',
+                                          errorWidget: (_, __, ___) =>
+                                              Image.asset(AppImages.appLogoTransparent),
+                                          fit: BoxFit.cover,
+                                        ): const SizedBox(),
+                                      ) ,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
+                      ),
 
                       Gap(Dimensions.height20),
                       CustomElevatedButton(
@@ -427,12 +534,11 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                                 'payment_notes': isPaid ? paymentRemarkController.text : '',
                                 'next_delivery_date': isPaid ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
                                 'bill_received': isBillReceived ? 'yes' : 'no',
-                                'bill_url': billImageResult != null ? '${billImageResult!.files.single.path}' : '',
                               };
                               if (widget.purchaseID != null) {
-                                _addDeliveryDetail(body);
+                                _addDeliveryDetail(body, _selectedFile!);
                               } else {
-                                _updateDeliveryDetail(body);
+                                _updateDeliveryDetail(body, _selectedFile!);
                               }
                             }
                           }
@@ -509,6 +615,70 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     );
   }
 
+  Widget showPickerDialog(BuildContext context) {
+    var mediaQueryData = MediaQuery.of(context);
+    return MediaQuery(
+      data: mediaQueryData.copyWith(textScaleFactor: 1.0),
+      child: AlertDialog(
+        surfaceTintColor: AppTheme.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimensions.radius10),
+        ),
+        shadowColor: AppTheme.nearlyWhite,
+        // title: Row(
+        //   children: [
+        //     Text('Choose option',
+        //         style: AppTheme.hintText),
+        //     Spacer(),
+        //     IconButton(
+        //       icon: Icon(Icons.close, color: AppTheme.deactivatedText),
+        //       onPressed: () {
+        //         Navigator.of(context).pop();
+        //       },
+        //     ),
+        //   ],
+        // ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Choose from', style: AppTheme.hintText),
+            const SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _imgFromGallery();
+                    },
+                    child: Text('Gallery',
+                      style: AppTheme.hintText,
+                    )),
+                const SizedBox(
+                  width: 10,
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _imgFromCamera();
+                      setState(() {});
+                    },
+                    child: Text(
+                      'Camera',
+                      style: AppTheme.hintText,
+                    )),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String? _validateNetWeight(String? value) {
     if (value == null || value.isEmpty) {
       return 'Net Weight is required';
@@ -567,13 +737,11 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     String amountPaidError = isPaid ? (_validateAmountPaid(amountPaidController.text) ?? '') : '';
     String paymentRemarkError = isPaid ? (_validatePaymentRemark(paymentRemarkController.text) ?? '') : '';
 
-    return netWeightError.isEmpty && grossReceivedError.isEmpty && denierError.isEmpty && rateError.isEmpty && copsError.isEmpty && amountPaidError.isEmpty ? true : false;
+    return netWeightError.isEmpty && grossReceivedError.isEmpty && denierError.isEmpty && rateError.isEmpty && copsError.isEmpty && amountPaidError.isEmpty && paymentRemarkError.isEmpty ? true : false;
   }
 
-  Future<void> _addDeliveryDetail(Map<String, String> body) async {
-    print("Purchase Id: ${widget.purchaseID}");
-    print("Body: $body");
-    AddDeliveryModel? addDeliveryModel = await deliveryServices.addDelivery(body);
+  Future<void> _addDeliveryDetail(Map<String, String> body, File? billUrl) async {
+    AddDeliveryModel? addDeliveryModel = await deliveryServices.addDelivery(body, billUrl);
     print("Add Delivery Model: ${addDeliveryModel?.toJson()}");
     if (addDeliveryModel?.message != null) {
       if (addDeliveryModel?.success == true) {
@@ -609,9 +777,9 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     }
   }
 
-  Future<void> _updateDeliveryDetail(Map<String, String> body) async {
+  Future<void> _updateDeliveryDetail(Map<String, String> body, File? billUrl) async {
 
-    UpdateDeliveryModel? updateDeliveryModel = await deliveryServices.updateDelivery(body);
+    UpdateDeliveryModel? updateDeliveryModel = await deliveryServices.updateDelivery(body, billUrl);
     print("Update Delivery Model: ${updateDeliveryModel?.toJson()}");
     if (updateDeliveryModel?.message != null) {
       if (updateDeliveryModel?.success == true) {
@@ -641,6 +809,76 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
         'Something went wrong, please try again',
         mode: SnackbarMode.error,
       );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _getDeliveryDetails() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      DeliveryDetailModel? dealDetailModel = await deliveryServices.viewDeliveryDetail(
+        int.parse(widget.purchaseID!),
+        int.parse(widget.deliveryID!),
+      );
+
+      if (dealDetailModel?.message != null) {
+        if (dealDetailModel?.success == true) {
+          if (dealDetailModel!.data != null) {
+            setState(() {
+              deliveryDetailData = dealDetailModel.data;
+              selectedDeliveryDate = deliveryDetailData!.deliveryDate != null ? DateTime.parse(deliveryDetailData!.deliveryDate!) : DateTime.now();
+              selectedDueDate = deliveryDetailData!.paymentDueDate != null ? DateTime.parse(deliveryDetailData!.paymentDueDate!) : DateTime.now();
+              selectedPaidDate = deliveryDetailData!.paymentDate != null ? DateTime.parse(deliveryDetailData!.paymentDate!) : DateTime.now();
+              paymentType = deliveryDetailData!.paymentType != null ? (deliveryDetailData!.paymentType! == 'current' ? 'Current' : 'Dhara') : 'Current';
+              dharaOption = deliveryDetailData!.dharaDays != null ? deliveryDetailData!.dharaDays! : '15 days';
+              isPaid = deliveryDetailData!.paidStatus == 'yes' ? true : false;
+              paymentMethod = deliveryDetailData!.paymentMethod != null ? deliveryDetailData!.paymentMethod! : 'RTGS';
+              amountPaid = deliveryDetailData!.paidAmount != null ? double.parse(deliveryDetailData!.paidAmount!) : 0.0;
+              isBillReceived = deliveryDetailData!.billReceived == 'yes' ? true : false;
+              copsController.text = deliveryDetailData!.cops != null ? deliveryDetailData!.cops! : '';
+              denierController.text = deliveryDetailData!.denier != null ? deliveryDetailData!.denier! : '';
+              grossReceivedController.text = deliveryDetailData!.deliveredBoxCount != null ? deliveryDetailData!.deliveredBoxCount! : '';
+              netWeightController.text = deliveryDetailData!.netWeight != null ? deliveryDetailData!.netWeight! : '';
+              rateController.text = deliveryDetailData!.rate != null ? deliveryDetailData!.rate! : '';
+              amountPaidController.text = deliveryDetailData!.paidAmount != null ? deliveryDetailData!.paidAmount! : '';
+              paymentRemarkController.text = deliveryDetailData!.paymentNotes != null ? deliveryDetailData!.paymentNotes! : '';
+              _selectedFile = deliveryDetailData!.billUrl != null ? deliveryDetailData!.billUrl : null;
+            });
+          } else {
+            setState(() {
+              noRecordFound = true;
+            });
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            dealDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (error) {
+      print('Error: $error');
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
+      );
+    } finally {
       setState(() {
         isLoading = false;
       });

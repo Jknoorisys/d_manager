@@ -39,7 +39,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   var selectedParty;
   var selectedYarn;
   var selectedStatus;
-  String yarnType = 'Roto';
   String status = 'On Going';
   String dharaOption = '15 days';
   bool isLoading = false;
@@ -655,13 +654,12 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
         denyarController.text = dealDetailModel.data!.denier!;
         rateController.text = dealDetailModel.data!.rate!;
         copsController.text = dealDetailModel.data!.cops!;
-        selectedDate = DateTime.parse(dealDetailModel.data!.purchaseDate!.toString());
-        selectedDueDate = DateTime.parse(dealDetailModel.data!.paymentDueDate!.toString());
+        selectedDate = dealDetailModel.data!.purchaseDate != null ? DateTime.parse(dealDetailModel.data!.purchaseDate!) : DateTime.now();
+        selectedDueDate = dealDetailModel.data!.paymentDueDate != null ? DateTime.parse(dealDetailModel.data!.paymentDueDate!) : DateTime.now();
         selectedFirm = int.parse(dealDetailModel.data!.firmId!);
         selectedParty = int.parse(dealDetailModel.data!.partyId!);
         selectedYarn = int.parse(dealDetailModel.data!.yarnTypeId!);
         selectedStatus = dealDetailModel.data!.dealStatus! == 'ongoing' ? 'ongoing' : 'completed';
-
         setState(() {
           isLoading = false;
         });

@@ -162,12 +162,14 @@ class AppRoutes {
     deliveryDetailAdd: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       final String? purchaseID = args?['purchaseID'];
-      return DeliveryDetailAdd(purchaseID: purchaseID);
+      final String? deliveryID = args?['deliveryID'];
+      return DeliveryDetailAdd(purchaseID: purchaseID, deliveryID: deliveryID);
     },
     deliveryDetailView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final String? purchaseID = args?['deliveryDetailData'];
-      return DeliveryDetailView(purchaseID: purchaseID);
+      final String? purchaseID = args?['purchaseID'];
+      final String? deliveryID = args?['deliveryID'];
+      return DeliveryDetailView(purchaseID: purchaseID, deliveryID: deliveryID);
     },
 
     // Manage Cloth Sell

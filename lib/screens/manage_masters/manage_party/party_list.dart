@@ -31,17 +31,15 @@ class _PartyListState extends State<PartyList> {
   List<PartyDetail> parties = [];
   int currentPage = 1;
   bool isLoading = false;
+  bool noRecordFound = false;
+  bool isNetworkAvailable = true;
   ManagePartyServices partyServices = ManagePartyServices();
   @override
   void initState() {
     super.initState();
     if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
+      isNetworkAvailable = false;
+      isLoading = false;
     } else {
       setState(() {
         isLoading = !isLoading;
@@ -61,6 +59,8 @@ class _PartyListState extends State<PartyList> {
       content: CustomBody(
         title: S.of(context).partyList,
         isLoading: isLoading,
+        noRecordFound: noRecordFound,
+        internetNotAvailable: isNetworkAvailable,
         content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -189,7 +189,7 @@ class _PartyListState extends State<PartyList> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Party State', party.state ?? ''),
+                                  _buildInfoColumn('Party State', party.stateName ?? ''),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('GST Number', party.gstNumber ?? ''),
                                   SizedBox(width: Dimensions.width20),
@@ -265,6 +265,11 @@ class _PartyListState extends State<PartyList> {
       PartyListModel? partyListModel = await partyServices.partyList(pageNo, search);
       if (partyListModel != null) {
         if (partyListModel.success == true) {
+          if(partyListModel.total == 0) {
+            setState(() {
+              noRecordFound = true;
+            });
+          }
           if (partyListModel.data!.isNotEmpty) {
             if (pageNo == 1) {
               parties.clear();
@@ -278,6 +283,9 @@ class _PartyListState extends State<PartyList> {
             _refreshController.loadNoData();
           }
         } else {
+          setState(() {
+            noRecordFound = true;
+          });
           CustomApiSnackbar.show(
             context,
             'Error',
@@ -286,6 +294,9 @@ class _PartyListState extends State<PartyList> {
           );
         }
       } else {
+        setState(() {
+          noRecordFound = true;
+        });
         CustomApiSnackbar.show(
           context,
           'Error',

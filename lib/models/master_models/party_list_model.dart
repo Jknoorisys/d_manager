@@ -42,6 +42,8 @@ class PartyDetail {
   String? phoneNumber;
   String? status;
   String? state;
+  int? stateId;
+  String? stateName;
   BankDetails? bankDetails;
 
   PartyDetail({
@@ -53,7 +55,9 @@ class PartyDetail {
     this.panNumber,
     this.phoneNumber,
     this.status,
+    this.stateId,
     this.state,
+    this.stateName,
     this.bankDetails,
   });
 
@@ -66,7 +70,9 @@ class PartyDetail {
     panNumber: json["pan_number"],
     phoneNumber: json["phone_number"],
     status: json["status"],
+    stateId: json["state_id"],
     state: json["state"],
+    stateName: json["state_name"],
     bankDetails: json["bank_details"] == null ? null : BankDetails.fromJson(json["bank_details"]),
   );
 
@@ -79,7 +85,9 @@ class PartyDetail {
     "pan_number": panNumber,
     "phone_number": phoneNumber,
     "status": status,
+    "state_id": stateId,
     "state": state,
+    "state_name": stateName,
     "bank_details": bankDetails?.toJson(),
   };
 }

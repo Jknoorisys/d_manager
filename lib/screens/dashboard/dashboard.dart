@@ -2,6 +2,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/dashboard/cloth_sells.dart';
 import 'package:d_manager/screens/dashboard/purchases.dart';
 import 'package:d_manager/screens/widgets/body.dart';
@@ -29,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late List<PurchaseDeal> purchaseDeals = [];
   late List<SellDeal> sellDeal = [];
   bool isLoading = false;
+  bool isNetworkAvailable = true;
   DashboardServices dashboardServices = DashboardServices();
   late Widget dynamicDashboardCard = Container();
   DashboardModel? dashboardModel;
@@ -43,6 +45,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void fetchData() async {
+    HelperFunctions.isInternetAvailable().then((value) {
+      setState(() {
+        isNetworkAvailable = value;
+      });
+    });
     setState(() {
       isLoading = true;
     });
@@ -108,6 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         dashboardCard: dynamicDashboardCard,
         content: _pages.isNotEmpty ? _pages[_currentIndex] : SizedBox(),
         isLoading: isLoading,
+        internetNotAvailable: isNetworkAvailable,
         bottomNavigationBar: Container(
           padding: EdgeInsets.all(Dimensions.width20),
           height: Dimensions.height60 + Dimensions.height10,

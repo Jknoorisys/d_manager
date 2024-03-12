@@ -41,12 +41,18 @@ class _ClothSellViewState extends State<ClothSellView> {
   SellDealDetails sellDealDetails = SellDealDetails();
   ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
   GetSellDealModel? getSellDealModel;
+  bool noRecordFound = false;
   @override
   void initState() {
     super.initState();
     if (widget.sellID != 0) {
       getSellDealData();
       getInvoiceList(currentPage, searchController.text.trim());
+    } else {
+      setState(() {
+        _isLoading = false;
+        noRecordFound = true;
+      });
     }
   }
 
@@ -375,7 +381,11 @@ class _ClothSellViewState extends State<ClothSellView> {
           widget.sellID.toString());
       if (model!.success == true) {
         setState(() {
-        getSellDealModel = model;
+        if (model.data != null) {
+          getSellDealModel = model;
+        } else {
+          noRecordFound = true;
+        }
       });
       } else {
         CustomApiSnackbar.show(
