@@ -47,7 +47,12 @@ class ManageHistoryServices{
       Map<String, dynamic> body = {
         "user_id":HelperFunctions.getUserID(),
         "page_no": pageNo,
-        "search":search
+        "search":search,
+        "firm_id":HelperFunctions.getFirmID() ?? "",
+        "party_id":HelperFunctions.getPartyID() ?? "",
+        "quality_id":HelperFunctions.getClothID() ?? "",
+        "start_date":HelperFunctions.getStartDateForSellHistory() ?? "",
+        "end_date":HelperFunctions.getEndDateForSellHistory() ?? ""
       };
       Response response = await dio.post(purchaseHistoryApi, data: body,
         options: Options(

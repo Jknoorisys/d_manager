@@ -146,7 +146,6 @@ class HelperFunctions {
   }
   // Sell history filter date
 
-
   static Future<bool> setStartDateForSellHistory(String startDate) async {
     return pref.setString("start", startDate);
   }
@@ -160,6 +159,24 @@ class HelperFunctions {
   static String getEndDateForSellHistory() {
     String? endDate = pref.getString('end');
     return endDate ?? '';
+  }
+
+  // GST return amount date
+
+  static Future<bool> setSelectedMonth(String selectedMonth) async {
+    return pref.setString("selectedMonth", selectedMonth);
+  }
+  static String getSelectedMonth() {
+    String? selectedMonth = pref.getString('selectedMonth');
+    return selectedMonth ?? '';
+  }
+
+  static Future<bool> setSelectedYear(String selectedYear) async {
+    return pref.setString("selectedYear", selectedYear);
+  }
+  static String getSelectedYear() {
+    String? selectedYear = pref.getString('selectedYear');
+    return selectedYear ?? '';
   }
 
   static Future<bool> checkInternet() async {
