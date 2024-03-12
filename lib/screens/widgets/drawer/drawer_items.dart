@@ -59,7 +59,7 @@ class DrawerItems extends StatelessWidget {
               
               // Manage GST return amount screen
               buildTitle(S.of(context).returnGstAmount, Icons.bar_chart, () {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GSTReturnAmount(),));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => GSTReturnAmount(),));
               }),
               
               // Manage Yarn Purchase Deal

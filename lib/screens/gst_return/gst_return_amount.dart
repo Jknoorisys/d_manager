@@ -1,11 +1,16 @@
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:intl/intl.dart';
+import '../../api/manage_gst_return_services.dart';
 import '../../constants/images.dart';
 import '../../generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+
+import '../../helpers/helper_functions.dart';
+import '../../models/gst_return_models/gst_return_models.dart';
+import '../widgets/snackbar.dart';
 
 class GSTReturnAmount extends StatefulWidget {
   const GSTReturnAmount({super.key});
@@ -16,11 +21,38 @@ class GSTReturnAmount extends StatefulWidget {
 
 class _GSTReturnAmountState extends State<GSTReturnAmount> {
   DateTime selectedDate = DateTime.now();
+  GstReturnServices gstReturnServices = GstReturnServices();
+  bool _isLoading = true;
+  GstReturnAmountModel? gstReturnAmountModel;
+
+  @override
+  void initState() {
+    super.initState();
+    print("Get Return Amount Called");
+    setState(() {
+      _isLoading = !_isLoading;
+    });
+    gstReturnAmount();
+    // if (HelperFunctions.checkInternet() == false) {
+    //   CustomApiSnackbar.show(
+    //     context,
+    //     'Warning',
+    //     'No internet connection',
+    //     mode: SnackbarMode.warning,
+    //   );
+    // } else {
+    //   setState(() {
+    //     _isLoading = !_isLoading;
+    //   });
+    //   gstReturnAmount();
+    // }
+  }
 
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
+          isLoading: _isLoading,
           title: S.of(context).returnGstAmount,
           filterButton: IconButton(
             onPressed: () async {
@@ -30,10 +62,12 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                 initialDate: selectedDate,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2050),
-                initialDatePickerMode: DatePickerMode.year,
+                initialDatePickerMode: DatePickerMode.day,
               );
-
               if (pickedDate != null && pickedDate != selectedDate) {
+                await HelperFunctions.setSelectedMonth(selectedDate.month.toString());
+                await HelperFunctions.setSelectedYear(selectedDate.year.toString());
+                await gstReturnAmount();
                 setState(() {
                   selectedDate = pickedDate;
                 });
@@ -80,7 +114,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                     children: [
                                       const Icon(Icons.currency_rupee,
                                         color: AppTheme.secondary,),
-                                      Text("1,50,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                      Text((gstReturnAmountModel?.data?.currentMonthReturn ?? "0").toString(),style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                     ],
                                   )
                                 ],
@@ -95,7 +129,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                                  Text("31-01-2024", style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                                  Text('${gstReturnAmountModel!.filter!.month}', style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                                 ],
                               )
                             ],
@@ -139,7 +173,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                     children: [
                                       const Icon(Icons.currency_rupee,
                                         color: AppTheme.secondary,),
-                                      Text("1,00,000" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                      Text('${gstReturnAmountModel!.data!.lastMonthReturn!}' ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                     ],
                                   )
                                 ],
@@ -154,7 +188,8 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                                  Text(DateFormat('dd-MM-yyyy').format(DateTime.now()), style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                                  Text(gstReturnAmountModel!.filter!.lastMonth!.toString(),
+                                      style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                                 ],
                               )
                             ],
@@ -170,5 +205,34 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
           
         )
     );
+  }
+
+  Future<GstReturnAmountModel?> gstReturnAmount() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      GstReturnAmountModel? model = await gstReturnServices.showGstReturnAmount();
+      if (model!.success == true) {
+        setState(() {
+          if (model.data != null) {
+            gstReturnAmountModel = model;
+          }
+          print("modelOfGSTReturnAmount=== $gstReturnAmountModel");
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again later.',
+          mode: SnackbarMode.error,
+        );
+      }
+    }
+    finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }
