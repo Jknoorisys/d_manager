@@ -1,15 +1,12 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import '../../api/dashboard_services.dart';
 import '../../models/dashboard_models/dashboard_models.dart';
-import '../widgets/snackbar.dart';
 
 class ClothSells extends StatefulWidget {
   final List<SellDeal> sellDeal;
@@ -22,7 +19,7 @@ class ClothSells extends StatefulWidget {
 class _ClothSellsState extends State<ClothSells> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return widget.sellDeal != null ? Padding(
       padding: EdgeInsets.all(Dimensions.height15),
       child: ListView.builder(
         itemCount: widget.sellDeal.length,
@@ -121,7 +118,7 @@ class _ClothSellsState extends State<ClothSells> {
           );
         },
       ),
-    );
+    ) : const NoRecordFound();
   }
 
   Widget _buildInfoColumn(String title, String value) {

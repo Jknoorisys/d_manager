@@ -212,19 +212,10 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
-                            } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-                              _resendOtp(widget.emailAddress.toString());
-                            }
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            _resendOtp(widget.emailAddress.toString());
                           },
                           child: Text(
                             S.of(context).resend,
@@ -359,32 +350,44 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
   }
 
   Future<void> _resendOtp(String email) async {
-    ForgetPasswordModel forgetPasswordModel = await authServices.forgotPassword(email);
-    if (forgetPasswordModel.message != null) {
-      if (forgetPasswordModel.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          forgetPasswordModel.message.toString(),
-          mode: SnackbarMode.success,
-        );
+    if(await HelperFunctions.isPossiblyNetworkAvailable()) {
+      ForgetPasswordModel forgetPasswordModel = await authServices.forgotPassword(email);
+      if (forgetPasswordModel.message != null) {
+        if (forgetPasswordModel.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            forgetPasswordModel.message.toString(),
+            mode: SnackbarMode.success,
+          );
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            forgetPasswordModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+        setState(() {
+          isLoading = false;
+        });
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          forgetPasswordModel.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;

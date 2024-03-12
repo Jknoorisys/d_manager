@@ -1,3 +1,4 @@
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
@@ -28,6 +29,8 @@ class _InvoiceViewState extends State<InvoiceView> {
   GetInvoiceModel? getInvoiceModel;
 
   bool isLoading = false;
+  bool noRecordFound = false;
+  bool isNetworkAvailable = true;
   ManageInvoiceServices invoiceServices = ManageInvoiceServices();
 
   void _addTransportDetails(
@@ -64,6 +67,8 @@ class _InvoiceViewState extends State<InvoiceView> {
       content: CustomBody(
         title: 'Invoice Details',
           isLoading: isLoading,
+          noRecordFound: noRecordFound,
+          internetNotAvailable: isNetworkAvailable,
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -285,28 +290,42 @@ class _InvoiceViewState extends State<InvoiceView> {
     setState(() {
       isLoading = true;
     });
-    GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(widget.invoiceId, int.parse(widget.sellId));
-    if (invoiceDetailModel?.message != null) {
-      if (invoiceDetailModel?.success == true) {
-        setState(() {
-          getInvoiceModel = invoiceDetailModel;
-          isLoading = false;
-        });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(widget.invoiceId, int.parse(widget.sellId));
+      if (invoiceDetailModel?.message != null) {
+        if (invoiceDetailModel?.success == true) {
+          if (invoiceDetailModel?.data != null) {
+            setState(() {
+              getInvoiceModel = invoiceDetailModel;
+              isLoading = false;
+            });
+          } else {
+            setState(() {
+              noRecordFound = true;
+              isLoading = false;
+            });
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            invoiceDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          invoiceDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
-      CustomApiSnackbar.show(
-        context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
-      );
+      setState(() {
+        isNetworkAvailable = false;
+        isLoading = false;
+      });
     }
   }
 }

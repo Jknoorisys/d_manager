@@ -45,9 +45,6 @@ class _ClothSellListState extends State<ClothSellList> {
   SellDealListModel? sellDealListModel;
   List<SellDeal> clothSellList = [];
 
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mahesh Textiles';
-  String clothQuality = '5 - Kilo';
   String status = 'On Going';
   int currentPage = 1;
 
@@ -64,24 +61,17 @@ class _ClothSellListState extends State<ClothSellList> {
   String? partyID;
   String? clothID;
   bool isLoading = false;
+  bool isNetworkAvailable = true;
+  bool noRecordFound = false;
   HelperFunctions helperFunctions = HelperFunctions();
   bool isFilterApplied = false;
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      getSellDealList(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    getSellDealList(currentPage, searchController.text.trim());
     _loadData();
     _loadPartyData();
     _loadClothData();
@@ -97,6 +87,8 @@ class _ClothSellListState extends State<ClothSellList> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
+          noRecordFound: noRecordFound,
+          internetNotAvailable: isNetworkAvailable,
           title: S.of(context).clothSellList,
           filterButton: GestureDetector(
             onTap: () {
@@ -201,7 +193,10 @@ class _ClothSellListState extends State<ClothSellList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          BigText(text: clothSellList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                          SizedBox(
+                                              width: Dimensions.screenWidth * 0.5,
+                                              child: BigText(text: clothSellList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16)
+                                          ),
                                           Row(
                                             children: [
                                               CircleAvatar(
@@ -210,7 +205,10 @@ class _ClothSellListState extends State<ClothSellList> {
                                                 child: BigText(text: clothSellList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                               ),
                                               SizedBox(width: Dimensions.width10),
-                                              SmallText(text: clothSellList[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                              SizedBox(
+                                                  width: Dimensions.screenWidth * 0.5,
+                                                  child: SmallText(text: clothSellList[index].firmName!, color: AppTheme.black, size: Dimensions.font12)
+                                              ),
                                             ],
                                           ),
                                         ],
@@ -248,7 +246,7 @@ class _ClothSellListState extends State<ClothSellList> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Status', clothSellList[index].dealStatus!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Status', clothSellList[index].dealStatus! == 'ongoing' ? 'On Going' : 'Completed')),
                                   SizedBox(width: Dimensions.width20),
                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', clothSellList[index].sellDueDate!.toString())),
                                   SizedBox(width: Dimensions.width20),
@@ -284,14 +282,6 @@ class _ClothSellListState extends State<ClothSellList> {
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                   ),
-                                  IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          sellDealListModel!.data!.removeAt(index);
-                                        });
-                                      },
-                                      icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                                  ),
                                   GFCheckbox(
                                     size: Dimensions.height20,
                                     type: GFCheckboxType.custom,
@@ -304,10 +294,6 @@ class _ClothSellListState extends State<ClothSellList> {
                                         updateStatusOfSellDeal(
                                             clothSellList[index].sellId.toString(), 'completed', index);
                                       }
-                                      // setState(() {
-                                      //   clothSellList[index].dealStatus = value == true ? 'Completed' : 'On Going';
-                                      // });
-
                                     },
                                     value: clothSellList[index].dealStatus == 'completed' ? true : false,
                                     inactiveIcon: null,
@@ -514,39 +500,51 @@ class _ClothSellListState extends State<ClothSellList> {
         isLoading = true;
       });
       try {
-        SellDealListModel? model = await sellDealDetails.sellDealListApi(
-          pageNo.toString(),
-          search,
-        );
-        if (model != null) {
-          if (model.success == true) {
-            if (model.data!.isNotEmpty) {
-              if (pageNo == 1) {
-                clothSellList.clear();
+        if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+          SellDealListModel? model = await sellDealDetails.sellDealListApi(
+            pageNo.toString(),
+            search,
+          );
+          if (model != null) {
+            if (model.success == true) {
+              if (model.data != null) {
+                if (model.data!.isNotEmpty) {
+                  if (pageNo == 1) {
+                    clothSellList.clear();
+                  }
+                  print("sellDealList===");
+                  setState(() {
+                    clothSellList.addAll(model.data!);
+                    currentPage++;
+                  });
+                } else {
+                  _refreshController.loadNoData();
+                }
+              } else{
+                setState(() {
+                  noRecordFound = true;
+                });
               }
-              print("sellDealList===");
-              setState(() {
-                clothSellList.addAll(model.data!);
-                currentPage++;
-              });
             } else {
-              _refreshController.loadNoData();
+              CustomApiSnackbar.show(
+                context,
+                'Error',
+                model.message.toString(),
+                mode: SnackbarMode.error,
+              );
             }
           } else {
             CustomApiSnackbar.show(
               context,
               'Error',
-              model.message.toString(),
+              'Something went wrong, please try again later.',
               mode: SnackbarMode.error,
             );
           }
         } else {
-          CustomApiSnackbar.show(
-            context,
-            'Error',
-            'Something went wrong, please try again later.',
-            mode: SnackbarMode.error,
-          );
+          setState(() {
+            isNetworkAvailable = false;
+          });
         }
       } finally {
         setState(() {
@@ -564,33 +562,42 @@ class _ClothSellListState extends State<ClothSellList> {
       isLoading = true;
     });
     try {
-      UpdateSellDealStatusModel? model = await sellDealDetails.updateSellDealStatus(
-        sellID,
-        dealStatus,
-      );
-      if (model != null) {
-        if (model.success == true) {
-          clothSellList[index].dealStatus = 'completed';
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            model.message!.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateSellDealStatusModel? model = await sellDealDetails.updateSellDealStatus(
+          sellID,
+          dealStatus,
+        );
+        if (model != null) {
+          if (model.success == true) {
+            clothSellList[index].dealStatus = 'completed';
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              model.message!.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              model.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            model.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } finally {

@@ -8,18 +8,18 @@ import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/firebase_services.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/auth_models/login_model.dart';
+import 'package:d_manager/models/auth_models/login_with_google_model.dart';
 import 'package:d_manager/screens/widgets/animated_logo.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get_utils/src/get_utils/get_utils.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../helpers/auth_interface.dart';
-import '../../helpers/fcm_services.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -30,13 +30,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool submitted = false;
-  bool isLoggedIn = false;
   bool isChecked = false;
   bool _obscureText = true;
 
   bool isLoading = false;
-  bool _googleLoading = false;
   AuthServices authServices = AuthServices();
+  final _auth = FirebaseAuth.instance;
+  final _googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
@@ -58,20 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
       passwordController.text = storedCredentials['password'] ?? '';
     });
   }
-
-  // _loadGoogleStoredCredential() async {
-  //   Map<String, String> storedCredentials = await HelperFunctions.getGoogleCredentials();
-  //   if (storedCredentials.containsKey('gmail')) {
-  //     setState(() {
-  //       isLoggedIn = true;
-  //     });
-  //     Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
-  //     } else {
-  //       print("Something went wrong");
-  //     }
-  // }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -173,19 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           submitted = true;
                         });
                         if (_isFormValid()) {
-                          if (HelperFunctions.checkInternet() == false) {
-                            CustomApiSnackbar.show(
-                              context,
-                              'Warning',
-                              'No internet connection',
-                              mode: SnackbarMode.warning,
-                            );
-                          } else {
-                            setState(() {
-                              isLoading = !isLoading;
-                            });
-                            _login(emailController.text, passwordController.text);
-                          }
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+                          _login(emailController.text, passwordController.text);
                         }
                       },
                       buttonText: S.of(context).login,
@@ -195,11 +172,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Login with Google Button
                     OutlinedButton(
                       onPressed: () {
-                        // Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
                         setState(() {
-                          _googleLoading = !_googleLoading;
+                          isLoading = !isLoading;
                         });
-                        callGoogleLoginAPI();
+                        _loginWithGoogle();
                       },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppTheme.primary),
@@ -245,18 +221,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          if (_googleLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: GFLoader(
-                  type: GFLoaderType.circle,
-                  loaderColorOne: AppTheme.primary,
-                  loaderColorTwo: AppTheme.secondary,
-                  loaderColorThree: AppTheme.secondaryLight,
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -291,38 +255,50 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login(String email, String password) async {
-    LoginModel? loginModel = await authServices.login(email, password);
-    if (loginModel != null) {
-      if (loginModel.success == true) {
-        await HelperFunctions.setApiKey(loginModel.data!.apiKey != null ? loginModel.data!.apiKey.toString() : 'NYS03223');
-        await HelperFunctions.setUserID(loginModel.data!.userId.toString());
-        await HelperFunctions.setUserEmail(loginModel.data!.userEmail.toString());
-        await HelperFunctions.setUserName(loginModel.data!.userName.toString());
-        await HelperFunctions.setUserImage(loginModel.data!.profilePic.toString());
-        await HelperFunctions.setLoginStatus(true);
-        if (isChecked == true) {
-          HelperFunctions.saveCredentials(emailController.text, passwordController.text);
-        } else{
-          HelperFunctions.saveCredentials('', '');
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      LoginModel? loginModel = await authServices.login(email, password);
+      if (loginModel != null) {
+        if (loginModel.success == true) {
+          await HelperFunctions.setApiKey(loginModel.data!.apiKey != null ? loginModel.data!.apiKey.toString() : 'NYS03223');
+          await HelperFunctions.setUserID(loginModel.data!.userId.toString());
+          await HelperFunctions.setUserEmail(loginModel.data!.email.toString());
+          await HelperFunctions.setUserName(loginModel.data!.userName.toString());
+          await HelperFunctions.setUserImage(loginModel.data!.profilePic.toString());
+          await HelperFunctions.setLoginStatus(true);
+          if (isChecked == true) {
+            HelperFunctions.saveCredentials(emailController.text, passwordController.text);
+          } else{
+            HelperFunctions.saveCredentials('', '');
+          }
+          Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            loginModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
         }
-        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
-      }  else {
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          loginModel.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        loginModel!.message.toString(),
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -330,42 +306,95 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  callGoogleLoginAPI() async {
-    setState(() {
-      _googleLoading = true; // Show loader when the button is tapped
-    });
+  Future<void> _loginWithGoogle() async {
+    firebaseService.signOut();
+    final SocialProcess isLoginSuccess = await firebaseService.signInWithGoogle();
+    if (isLoginSuccess == SocialProcess.loggedIn) {
+      User? user = firebaseService.auth.currentUser;
+      print('User: $user');
+      if (user != null && user.email != null && user.displayName != null) {
+        _callGoogleLoginApi(user.email!, user.uid);
+      } else {
+        if (mounted) {
+          CustomApiSnackbar.show(
+            context,
+            'Warning',
+            'Google Sign-In Failed',
+            mode: SnackbarMode.warning,
+          );
+        }
+      }
+    } else if(isLoginSuccess == SocialProcess.error){
+      if (mounted) {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Google Sign-In Error',
+          mode: SnackbarMode.error,
+        );
+      }
+    }
+  }
+
+  void _callGoogleLoginApi(String email, String socialID) async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser != null) {
-        final String uid = googleUser.id;
-        final String email = googleUser.email ?? '';
-        // if (isLoggedIn) {
-        //   HelperFunctions.saveGoogleCredentials(email, uid);
-        // }
-        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
-        print('Google Sign-In Successful:');
-        print('UID: $uid');
-        print('Email: $email');
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        LoginWithGoogleModel? loginModel = await authServices.loginWithGoogle(email, socialID);
+        if (loginModel != null) {
+          if (loginModel.success == true) {
+            await HelperFunctions.setApiKey(loginModel.data!.apiKey != null ? loginModel.data!.apiKey.toString() : 'NYS03223');
+            await HelperFunctions.setUserID(loginModel.data!.userId.toString());
+            await HelperFunctions.setUserEmail(loginModel.data!.email.toString());
+            await HelperFunctions.setUserName(loginModel.data!.userName.toString());
+            await HelperFunctions.setUserImage(loginModel.data!.profilePic.toString() ?? '');
+            await HelperFunctions.setLoginStatus(true);
+            if (isChecked == true) {
+              HelperFunctions.saveCredentials(emailController.text, passwordController.text);
+            } else{
+              HelperFunctions.saveCredentials('', '');
+            }
+            Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+          }  else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              loginModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            loginModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+          setState(() {
+            isLoading = false;
+          });
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Warning',
-          'Google Sign-In Canceled',
+          'No Internet Connection',
           mode: SnackbarMode.warning,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       CustomApiSnackbar.show(
         context,
         'Error',
-        'Google Sign-In Error',
+        'Something went wrong, please try again',
         mode: SnackbarMode.error,
       );
-    }
-    finally {
-      setState(() {
-        _googleLoading = false; // Hide loader after the process is completed
-      });
+      print(e);
     }
   }
 }

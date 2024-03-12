@@ -49,19 +49,12 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   List<ActivePartiesList> parties = [];
   List<ClothQuality> activeClothQuality = [];
   final RefreshController _refreshController = RefreshController();
-  int currentPage = 1;
   ActiveFirmsList? selectedFirm;
   ActivePartiesList? selectedParty;
   ClothQuality? selectedClothQuality;
   String? firmID;
   String? partyID;
   String? clothID;
-
-  void handleDateChanged(DateTime newDate) {
-    setState(() {
-      selectedDate = newDate;
-    });
-  }
 
   @override
   void initState() {
@@ -116,6 +109,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 hintText: 'Select Firm',
                                 dropdownItems:firms ?? [],
                                 selectedValue:selectedFirm,
+                                errorText: selectedFirm == null ? 'Firm is required' : null,
                                 onChanged:(newValue){
                                   setState(() {
                                     selectedFirm = newValue;
@@ -148,6 +142,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 hintText: 'Select Party',
                                 dropdownItems:parties ?? [],
                                 selectedValue:selectedParty,
+                                errorText: selectedParty == null ? 'Party is required' : null,
                                 onChanged:(newValue){
                                   setState(() {
                                     selectedParty = newValue;
@@ -175,6 +170,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 hintText: 'Cloth Quality',
                                 dropdownItems:activeClothQuality ?? [],
                                 selectedValue:selectedClothQuality,
+                                errorText: selectedClothQuality == null ? 'Cloth Quality is required' : null,
                                 onChanged:(newValue){
                                   setState(() {
                                     selectedClothQuality = newValue;
@@ -272,18 +268,10 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
-                            } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-                              NewSellDeal(
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            NewSellDeal(
                                 context,
                                 selectedDate,
                                 firmID!,
@@ -291,9 +279,8 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                                 clothID!, // Assuming qualityID is fixed
                                 totalThanController.text,
                                 rateController.text,
-                                  selectedDueDate
-                              );
-                            }
+                                selectedDueDate
+                            );
                           }
                         },
                         buttonText: 'Save',
@@ -339,39 +326,58 @@ class _ClothSellAddState extends State<ClothSellAdd> {
       DateTime sellDueDate
       ) async {
     try {
-      String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
-      String formattedSellDueDate = DateFormat('yyyy-MM-dd').format(sellDueDate);
-      CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
-        formattedSellDate,
-        firmID,
-        partyID,
-        qualityID,
-        totalThan,
-        rate,
-        formattedSellDueDate,
-      );
-      if (model?.success == true) {
-        Navigator.of(context).pop(); // Close the loading dialog
-        Navigator.of(context).pushNamed(AppRoutes.clothSellList);
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          'Your deal has been created successfully',
-          mode: SnackbarMode.success,
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
+        String formattedSellDueDate = DateFormat('yyyy-MM-dd').format(sellDueDate);
+        CreateSellDealModel? model = await sellDealDetails.createNewSellDeal(
+          formattedSellDate,
+          firmID,
+          partyID,
+          qualityID,
+          totalThan,
+          rate,
+          formattedSellDueDate,
         );
+        if (model?.success == true) {
+          Navigator.of(context).pop(); // Close the loading dialog
+          Navigator.of(context).pushNamed(AppRoutes.clothSellList);
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            'Your deal has been created successfully',
+            mode: SnackbarMode.success,
+          );
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model!.message!,
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
-        Navigator.of(context).pop(); // Close the loading dialog
+        setState(() {
+          isLoading = false;
+        });
         CustomApiSnackbar.show(
           context,
-          'Error',
-          model!.message!,
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } catch (e) {
       print("Error occurred: $e");
+      Navigator.of(context).pop();
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again later.',
+        mode: SnackbarMode.error,
+      );
     }
   }
+
   // Future<void> _handleCreateSellDeal()async{
   //   print("formValidation==== ${_isFormValid()}");
   //   print("internet==== ${HelperFunctions.checkInternet()}");
@@ -400,6 +406,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
   //     }
   //   }
   // }
+
   Future<void> _loadData() async {
     setState(() {
       isLoading = true;

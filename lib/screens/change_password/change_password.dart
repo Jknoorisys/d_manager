@@ -147,19 +147,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       submitted = true;
                     });
                     if (_isFormValid()) {
-                      if (HelperFunctions.checkInternet() == false) {
-                        CustomApiSnackbar.show(
-                          context,
-                          'Warning',
-                          'No internet connection',
-                          mode: SnackbarMode.warning,
-                        );
-                      } else {
-                        setState(() {
-                          isLoading = !isLoading;
-                        });
-                        _changePassword(oldPasswordController.text.trim(), passwordController.text.trim(), confirmPasswordController.text.trim());
-                      }
+                      setState(() {
+                        isLoading = !isLoading;
+                      });
+                      _changePassword(oldPasswordController.text.trim(), passwordController.text.trim(), confirmPasswordController.text.trim());
                     }
                   },
                   buttonText: S.of(context).changePassword,
@@ -218,34 +209,46 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   Future<void> _changePassword(String oldPassword, String password, String confirmPassword) async {
-    ChangePasswordModel? changePasswordModel = await authServices.changePassword(oldPassword, password, confirmPassword);
-    if (changePasswordModel.message != null) {
-      if (changePasswordModel.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          changePasswordModel.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        HelperFunctions.setLoginStatus(false);
-        Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
-      } else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      ChangePasswordModel? changePasswordModel = await authServices.changePassword(oldPassword, password, confirmPassword);
+      if (changePasswordModel.message != null) {
+        if (changePasswordModel.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            changePasswordModel.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          HelperFunctions.setLoginStatus(false);
+          Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            changePasswordModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+        setState(() {
+          isLoading = false;
+        });
+      } else{
         CustomApiSnackbar.show(
           context,
           'Error',
-          changePasswordModel.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-      setState(() {
-        isLoading = false;
-      });
-    } else{
+    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;

@@ -148,29 +148,20 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
             setState(() {
               submitted = true;
             });
-            if (HelperFunctions.checkInternet() == false) {
-              CustomApiSnackbar.show(
-                context,
-                'Warning',
-                'No internet connection',
-                mode: SnackbarMode.warning,
-              );
-            } else {
-              setState(() {
-                isLoading = !isLoading;
-              });
-              Map<String, dynamic> body = {
-                "user_id": HelperFunctions.getUserID(),
-                "invoice_id": widget.invoiceId,
-                "sell_id": widget.sellId,
-                "transport_date": DateFormat('yyyy-MM-dd').format(selectedDate),
-                "transport_id": selectedTransport.toString(),
-                "hammal_id": selectedHammal.toString(),
-              };
-              print('Body: $body');
-              if (widget.sellId == null && widget.invoiceId == null) {
-                _addTransportDetail(body);
-              }
+            setState(() {
+              isLoading = !isLoading;
+            });
+            Map<String, dynamic> body = {
+              "user_id": HelperFunctions.getUserID(),
+              "invoice_id": widget.invoiceId,
+              "sell_id": widget.sellId,
+              "transport_date": DateFormat('yyyy-MM-dd').format(selectedDate),
+              "transport_id": selectedTransport.toString(),
+              "hammal_id": selectedHammal.toString(),
+            };
+            print('Body: $body');
+            if (widget.sellId == null && widget.invoiceId == null) {
+              _addTransportDetail(body);
             }
           },
           buttonText: "Submit",
@@ -205,35 +196,44 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
         isLoading = true;
       });
 
-      AddTransportDetailModel? addInvoiceModel = await invoiceServices.addTransportDetail((body));
-      if (addInvoiceModel?.message != null) {
-        if (addInvoiceModel?.success == true) {
-          widget.addDeliveryDetails(
-            DateFormat('dd-MM-yyyy').format(selectedDate),
-            selectedTransportName,
-            selectedHammalName,
-          );
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            addInvoiceModel!.message.toString(),
-            mode: SnackbarMode.success,
-          );
-          Navigator.pop(context);
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        AddTransportDetailModel? addInvoiceModel = await invoiceServices.addTransportDetail((body));
+        if (addInvoiceModel?.message != null) {
+          if (addInvoiceModel?.success == true) {
+            widget.addDeliveryDetails(
+              DateFormat('dd-MM-yyyy').format(selectedDate),
+              selectedTransportName,
+              selectedHammalName,
+            );
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              addInvoiceModel!.message.toString(),
+              mode: SnackbarMode.success,
+            );
+            Navigator.pop(context);
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              addInvoiceModel!.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            addInvoiceModel!.message.toString(),
+            'Something went wrong, please try again',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } catch (error) {

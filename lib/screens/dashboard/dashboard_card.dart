@@ -32,8 +32,8 @@ class _DashboardCardState extends State<DashboardCard> {
 
   DateTime firstDate = DateTime(2000);
   DateTime lastDate = DateTime(2050);
-  String startDateString = "2024-02-01";
-  String endDateString = "2024-02-19";
+  String startDateString = DateTime.now().toString();
+  String endDateString = DateTime.now().toString();
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +146,7 @@ class _DashboardCardState extends State<DashboardCard> {
                                 children: [
                                   const Icon(Icons.currency_rupee,
                                     color: AppTheme.secondary,),
-                                  Text(widget.value ?? "" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                  Text(widget.value ?? "0.00" ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                 ],
                               )
                             ],

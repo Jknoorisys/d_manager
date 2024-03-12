@@ -162,7 +162,10 @@ class _FirmListState extends State<FirmList> {
                                                 child: BigText(text: firm.ownerName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                               ),
                                               SizedBox(width: Dimensions.width10),
-                                              SmallText(text: firm.ownerName!, color: AppTheme.black, size: Dimensions.font12),
+                                              SizedBox(
+                                                  width: Dimensions.screenWidth * 0.5,
+                                                  child: SmallText(text: firm.ownerName!, color: AppTheme.black, size: Dimensions.font12)
+                                              ),
                                             ],
                                           ),
                                         ],

@@ -4,6 +4,7 @@ const String baseUrl = 'https://dm.techtrial.work';
 
 // Auth URLS
 const String loginUrl = '$baseUrl/api/login';
+const String googleLoginUrl = '$baseUrl/api/google-login-callback';
 const String forgotPasswordUrl = '$baseUrl/api/forgot-password';
 const String resetPasswordUrl = '$baseUrl/api/reset-password';
 const String verifyOtpUrl = '$baseUrl/api/confirm-otp';

@@ -5,6 +5,7 @@ import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/auth_models/change_password_model.dart';
 import 'package:d_manager/models/auth_models/forget_password_model.dart';
 import 'package:d_manager/models/auth_models/login_model.dart';
+import 'package:d_manager/models/auth_models/login_with_google_model.dart';
 import 'package:d_manager/models/auth_models/reset_password_model.dart';
 import 'package:d_manager/models/auth_models/verify_otp_model.dart';
 import 'package:http/http.dart';
@@ -28,6 +29,30 @@ class AuthServices {
         return LoginModel.fromJson(data);
       }
     } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<LoginWithGoogleModel?> loginWithGoogle(String email, String? socialID) async {
+    try {
+      String deviceType = Platform.isAndroid ? "android" : "ios";
+      Map<String, dynamic> body = {
+        "email": email,
+        "social_id": socialID,
+        "device_type": deviceType,
+        "device_token": "deviceToken",
+        "fcm_token": 'fcmToken',
+      };
+      Response response = await post(Uri.parse(googleLoginUrl), body: body);
+      var data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        return LoginWithGoogleModel.fromJson(data);
+      } else {
+        return LoginWithGoogleModel.fromJson(data);
+      }
+    } catch (e) {
+      print(e.toString());
       return null;
     }
   }
@@ -45,6 +70,7 @@ class AuthServices {
         return ForgetPasswordModel.fromJson(data);
       }
     } catch (e) {
+      print(e.toString());
       return ForgetPasswordModel();
     }
   }

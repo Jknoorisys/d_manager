@@ -384,49 +384,40 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+
+                            for (int i = 0; i < rowsData.length; i++) {
+                              baleNumbersList.add(baleNumberControllers[i].text);
+                              thanList.add(thanControllers[i].text);
+                              meterList.add(meterControllers[i].text);
+                            }
+
+                            Map<String, dynamic> body = {
+                              "invoice_id": "${widget.invoiceID}",
+                              "user_id": HelperFunctions.getUserID(),
+                              "sell_id":  '${widget.sellID}',
+                              "invoice_date": DateFormat('yyyy-MM-dd').format(invoiceDate),
+                              "rate": rateController.text,
+                              "invoice_number": invoiceNumberController.text,
+                              "bale_number": baleNumbersList,
+                              "than": thanList,
+                              "meter": meterList,
+                              "discount": discountController.text,
+                              "payment_type": paymentType == 'Current' ? 'current' : 'dhara',
+                              'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
+                              'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
+                              "paid_status": isPaymentReceived ? 'yes' : 'no',
+                              "payment_method": isPaymentReceived ? paymentMethod : '',
+                              "received_amount": isPaymentReceived ? amountReceivedController.text : '',
+                              "payment_date": isPaymentReceived ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
+                              "reason": paymentRemarkController.text ?? '',
+                            };
+                            if (widget.invoiceID == null) {
+                              _addInvoice(body);
                             } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-
-                              for (int i = 0; i < rowsData.length; i++) {
-                                baleNumbersList.add(baleNumberControllers[i].text);
-                                thanList.add(thanControllers[i].text);
-                                meterList.add(meterControllers[i].text);
-                              }
-
-                              Map<String, dynamic> body = {
-                                "invoice_id": "${widget.invoiceID}",
-                                "user_id": HelperFunctions.getUserID(),
-                                "sell_id":  '${widget.sellID}',
-                                "invoice_date": DateFormat('yyyy-MM-dd').format(invoiceDate),
-                                "rate": rateController.text,
-                                "invoice_number": invoiceNumberController.text,
-                                "bale_number": baleNumbersList,
-                                "than": thanList,
-                                "meter": meterList,
-                                "discount": discountController.text,
-                                "payment_type": paymentType == 'Current' ? 'current' : 'dhara',
-                                'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
-                                'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
-                                "paid_status": isPaymentReceived ? 'yes' : 'no',
-                                "payment_method": isPaymentReceived ? paymentMethod : '',
-                                "received_amount": isPaymentReceived ? amountReceivedController.text : '',
-                                "payment_date": isPaymentReceived ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
-                                "reason": paymentRemarkController.text ?? '',
-                              };
-                              if (widget.invoiceID == null) {
-                                _addInvoice(body);
-                              } else {
-                                _updateInvoice(body);
-                              }
+                              _updateInvoice(body);
                             }
                           }
                         },
@@ -697,50 +688,63 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     setState(() {
       isLoading = true;
     });
-    GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(widget.invoiceID!, widget.sellID!);
-    if (invoiceDetailModel?.message != null) {
-      if (invoiceDetailModel?.success == true) {
-        baleNumberControllers.clear();
-        thanControllers.clear();
-        meterControllers.clear();
-        rowsData.clear();
-        var invoiceModel = invoiceDetailModel?.data!;
-        invoiceDate = invoiceModel?.invoiceDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel!.invoiceDate.toString()) : DateTime.now();
-        rateController.text = invoiceModel!.rate.toString();
-        invoiceNumberController.text = invoiceModel.invoiceNumber.toString();
-        discountController.text = invoiceModel.discount.toString();
-        amountReceivedController.text = invoiceModel.receivedAmount.toString();
-        paymentRemarkController.text = invoiceModel.reason.toString();
-        selectedPaidDate = invoiceModel.paymentDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel.paymentDate.toString()) : DateTime.now();
-        selectedDueDate = invoiceModel.paymentDueDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel.paymentDueDate.toString()) : DateTime.now();
-        isPaymentReceived = invoiceModel.paidStatus == 'yes' ? true : false;
-        paymentMethod = invoiceModel.paymentMethod.toString() == 'cheque' ? 'Cheque' : 'RTGS';
-        paymentType = invoiceModel.paymentType.toString() == 'current' ? 'Current' : 'Dhara';
-        dharaOption = invoiceModel.dharaDays.toString();
-        for (var baleDetail in invoiceModel.baleDetails!) {
-          baleNumberControllers.add(TextEditingController(text: baleDetail.baleNumber.toString()));
-          thanControllers.add(TextEditingController(text: baleDetail.than.toString()));
-          meterControllers.add(TextEditingController(text: baleDetail.meter.toString()));
-          rowsData.add(RowData(baleNumber: baleDetail.baleNumber.toString(), than: baleDetail.than.toString(), meter: baleDetail.meter.toString()));
-        }
 
-        setState(() {
-          isLoading = false;
-        });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      GetInvoiceModel? invoiceDetailModel = await invoiceServices.viewInvoice(widget.invoiceID!, widget.sellID!);
+      if (invoiceDetailModel?.message != null) {
+        if (invoiceDetailModel?.success == true) {
+          baleNumberControllers.clear();
+          thanControllers.clear();
+          meterControllers.clear();
+          rowsData.clear();
+          var invoiceModel = invoiceDetailModel?.data!;
+          invoiceDate = invoiceModel?.invoiceDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel!.invoiceDate.toString()) : DateTime.now();
+          rateController.text = invoiceModel!.rate.toString();
+          invoiceNumberController.text = invoiceModel.invoiceNumber.toString();
+          discountController.text = invoiceModel.discount.toString();
+          amountReceivedController.text = invoiceModel.receivedAmount.toString();
+          paymentRemarkController.text = invoiceModel.reason.toString();
+          selectedPaidDate = invoiceModel.paymentDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel.paymentDate.toString()) : DateTime.now();
+          selectedDueDate = invoiceModel.paymentDueDate != null ? DateFormat('yyyy-MM-dd').parse(invoiceModel.paymentDueDate.toString()) : DateTime.now();
+          isPaymentReceived = invoiceModel.paidStatus == 'yes' ? true : false;
+          paymentMethod = invoiceModel.paymentMethod.toString() == 'cheque' ? 'Cheque' : 'RTGS';
+          paymentType = invoiceModel.paymentType.toString() == 'current' ? 'Current' : 'Dhara';
+          dharaOption = invoiceModel.dharaDays.toString();
+          for (var baleDetail in invoiceModel.baleDetails!) {
+            baleNumberControllers.add(TextEditingController(text: baleDetail.baleNumber.toString()));
+            thanControllers.add(TextEditingController(text: baleDetail.than.toString()));
+            meterControllers.add(TextEditingController(text: baleDetail.meter.toString()));
+            rowsData.add(RowData(baleNumber: baleDetail.baleNumber.toString(), than: baleDetail.than.toString(), meter: baleDetail.meter.toString()));
+          }
+
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            invoiceDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          invoiceDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
+      setState(() {
+        isLoading = false;
+      });
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
     }
   }
@@ -751,31 +755,40 @@ class _InvoiceAddState extends State<InvoiceAdd> {
         isLoading = true;
       });
 
-      UpdateInvoiceModel? updateInvoiceModel = await invoiceServices.updateInvoice(body);
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateInvoiceModel? updateInvoiceModel = await invoiceServices.updateInvoice(body);
 
-      if (updateInvoiceModel?.message != null) {
-        if (updateInvoiceModel?.success == true) {
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updateInvoiceModel!.message.toString(),
-            mode: SnackbarMode.success,
-          );
-          Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellView, arguments: {'sellID': widget.sellID});
+        if (updateInvoiceModel?.message != null) {
+          if (updateInvoiceModel?.success == true) {
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updateInvoiceModel!.message.toString(),
+              mode: SnackbarMode.success,
+            );
+            Navigator.of(context).pushReplacementNamed(AppRoutes.clothSellView, arguments: {'sellID': widget.sellID});
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updateInvoiceModel!.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateInvoiceModel!.message.toString(),
+            'Something went wrong, please try again',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } catch (error) {

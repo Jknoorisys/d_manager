@@ -92,7 +92,7 @@ class HelperFunctions {
 
   static String getUserImage() {
     String? userImage = pref.getString('UserImage');
-    return '$baseUrl/$userImage' ?? '';
+    return userImage ?? '';
   }
 
   static Future<bool> setApiKey(String apiKey) async {

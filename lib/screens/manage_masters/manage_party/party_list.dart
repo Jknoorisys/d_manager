@@ -161,7 +161,10 @@ class _PartyListState extends State<PartyList> {
                                                 child: BigText(text: party.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                               ),
                                               SizedBox(width: Dimensions.width10),
-                                              SmallText(text: party.firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                              SizedBox(
+                                                  width: Dimensions.screenWidth * 0.5,
+                                                  child: SmallText(text: party.firmName!, color: AppTheme.black, size: Dimensions.font12)
+                                              ),
                                             ],
                                           ),
                                         ],

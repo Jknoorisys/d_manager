@@ -1,25 +1,21 @@
-// To parse this JSON data, do
-//
-//     final loginModel = loginModelFromJson(jsonString);
-
 import 'dart:convert';
 
-LoginModel loginModelFromJson(String str) => LoginModel.fromJson(json.decode(str));
+LoginWithGoogleModel loginWithGoogleModelFromJson(String str) => LoginWithGoogleModel.fromJson(json.decode(str));
 
-String loginModelToJson(LoginModel data) => json.encode(data.toJson());
+String loginWithGoogleModelToJson(LoginWithGoogleModel data) => json.encode(data.toJson());
 
-class LoginModel {
+class LoginWithGoogleModel {
   bool? success;
   String? message;
   Data? data;
 
-  LoginModel({
+  LoginWithGoogleModel({
     this.success,
     this.message,
     this.data,
   });
 
-  factory LoginModel.fromJson(Map<String, dynamic> json) => LoginModel(
+  factory LoginWithGoogleModel.fromJson(Map<String, dynamic> json) => LoginWithGoogleModel(
     success: json["success"],
     message: json["message"],
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
@@ -33,53 +29,69 @@ class LoginModel {
 }
 
 class Data {
-  String? apiKey;
   int? userId;
   String? userName;
   String? email;
-  String? profilePic;
+  dynamic otp;
+  String? otpVerified;
+  dynamic profilePic;
   int? isSocial;
   String? socialId;
   String? deviceType;
   String? deviceToken;
-  String? fcmToken;
+  dynamic fcmToken;
+  dynamic createdAt;
+  dynamic updatedAt;
+  String? apiKey;
 
   Data({
-    this.apiKey,
     this.userId,
     this.userName,
     this.email,
+    this.otp,
+    this.otpVerified,
     this.profilePic,
     this.isSocial,
     this.socialId,
     this.deviceType,
     this.deviceToken,
     this.fcmToken,
+    this.createdAt,
+    this.updatedAt,
+    this.apiKey,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-    apiKey: json["X-API-Key"],
     userId: json["user_id"],
     userName: json["user_name"],
     email: json["email"],
+    otp: json["otp"],
+    otpVerified: json["otp_verified"],
     profilePic: json["profile_pic"],
     isSocial: json["is_social"],
     socialId: json["social_id"],
     deviceType: json["device_type"],
     deviceToken: json["device_token"],
     fcmToken: json["fcm_token"],
+    createdAt: json["created_at"],
+    updatedAt: json["updated_at"],
+    apiKey: json["X-API-Key"],
   );
 
   Map<String, dynamic> toJson() => {
-    "X-API-Key": apiKey,
     "user_id": userId,
     "user_name": userName,
     "email": email,
+    "otp": otp,
+    "otp_verified": otpVerified,
     "profile_pic": profilePic,
     "is_social": isSocial,
     "social_id": socialId,
     "device_type": deviceType,
     "device_token": deviceToken,
     "fcm_token": fcmToken,
+    "created_at": createdAt,
+    "updated_at": updatedAt,
+    "X-API-Key": apiKey,
   };
 }

@@ -100,19 +100,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
-                            } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-                              _forgotPassword(emailController.text);
-                            }
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            _forgotPassword(emailController.text);
                           }
                         },
                         buttonText: S.of(context).sendCode,
@@ -157,36 +148,45 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<void> _forgotPassword(String email) async {
-    Map<String, dynamic> body = {
-      "email": email,
-    };
-    ForgetPasswordModel? forgetPasswordModel = await authServices.forgotPassword(email);
-    if (forgetPasswordModel.message != null) {
-      if (forgetPasswordModel.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          forgetPasswordModel.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushNamed(AppRoutes.forgotPasswordCode, arguments: {'emailAddress': email});
-      } else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      ForgetPasswordModel? forgetPasswordModel = await authServices.forgotPassword(email);
+      if (forgetPasswordModel.message != null) {
+        if (forgetPasswordModel.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            forgetPasswordModel.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushNamed(AppRoutes.forgotPasswordCode, arguments: {'emailAddress': email});
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            forgetPasswordModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+        setState(() {
+          isLoading = false;
+        });
+      } else{
         CustomApiSnackbar.show(
           context,
           'Error',
-          forgetPasswordModel.message.toString(),
+          'Something went wrong. Please try again later.',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-      setState(() {
-        isLoading = false;
-      });
-    } else{
+    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong. Please try again later.',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;

@@ -131,19 +131,10 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                           submitted = true;
                         });
                         if (_isFormValid()) {
-                          if (HelperFunctions.checkInternet() == false) {
-                            CustomApiSnackbar.show(
-                              context,
-                              'Warning',
-                              'No internet connection',
-                              mode: SnackbarMode.warning,
-                            );
-                          } else {
-                            setState(() {
-                              isLoading = !isLoading;
-                            });
-                            _resetPassword(widget.email, passwordController.text, confirmPasswordController.text);
-                          }
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+                          _resetPassword(widget.email, passwordController.text, confirmPasswordController.text);
                         }
                       },
                       buttonText: S.of(context).resetPassword,
@@ -204,33 +195,46 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
   }
 
   Future<void> _resetPassword(String email, String password, String confirmPassword) async {
-    ResetPasswordModel? resetPasswordModel = await authServices.resetPassword(email, password, confirmPassword);
-    if (resetPasswordModel.message != null) {
-      if (resetPasswordModel.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          resetPasswordModel.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushNamed(AppRoutes.login);
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      ResetPasswordModel? resetPasswordModel =
+          await authServices.resetPassword(email, password, confirmPassword);
+      if (resetPasswordModel.message != null) {
+        if (resetPasswordModel.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            resetPasswordModel.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushNamed(AppRoutes.login);
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            resetPasswordModel.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+        setState(() {
+          isLoading = false;
+        });
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          resetPasswordModel.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-      setState(() {
-        isLoading = false;
-      });
-    } else{
+    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;

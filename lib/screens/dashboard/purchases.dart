@@ -3,6 +3,7 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +24,7 @@ class _PurchasesState extends State<Purchases> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(Dimensions.height15),
-      child: ListView.builder(
+      child: widget.purchaseDeals == null ? const NoRecordFound() : ListView.builder(
         itemCount: widget.purchaseDeals.length,
         itemBuilder: (context, index) {
           return CustomAccordion(

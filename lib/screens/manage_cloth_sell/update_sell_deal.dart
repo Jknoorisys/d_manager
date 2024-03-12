@@ -355,7 +355,7 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
         )
     );
   }
-  Future<void> _handleUpdateSellDeal()async{
+  Future<void> _handleUpdateSellDeal() async{
     UpdateSellDeal(
       context,
       selectedDate,
@@ -380,22 +380,43 @@ class _UpdateSellDealState extends State<UpdateSellDeal> {
     try {
       String formattedSellDate = DateFormat('yyyy-MM-dd').format(sellDate);
       String formattedSellDueDate = DateFormat('yyyy-MM-dd').format(sellDueDate);
-      UpdateSellDealModel? model = await sellDealDetails.updateSellDealApi(
-        widget.sellID.toString(),
-        formattedSellDate,
-        firmID,
-        partyID,
-        qualityID,
-        totalThan,
-        rate,
-        formattedSellDueDate
-      );
-
-      if (model?.success == true) {
-        Navigator.of(context).pushNamed(AppRoutes.clothSellList);
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateSellDealModel? model = await sellDealDetails.updateSellDealApi(
+            widget.sellID.toString(),
+            formattedSellDate,
+            firmID,
+            partyID,
+            qualityID,
+            totalThan,
+            rate,
+            formattedSellDueDate
+        );
+        if (model?.success == true) {
+          Navigator.of(context).pushNamed(AppRoutes.clothSellList);
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Warning',
+          'No Internet Connection!',
+          mode: SnackbarMode.warning,
+        );
       }
     } catch (e) {
       print("Error occurred: $e");
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again later.',
+        mode: SnackbarMode.error,
+      );
     }
   }
   Future<void> _loadData() async {

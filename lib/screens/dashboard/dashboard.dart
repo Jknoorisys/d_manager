@@ -31,12 +31,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late List<SellDeal> sellDeal = [];
   bool isLoading = false;
   bool isNetworkAvailable = true;
+  bool noRecordFound = false;
   DashboardServices dashboardServices = DashboardServices();
   late Widget dynamicDashboardCard = Container();
   DashboardModel? dashboardModel;
 
-  String purchaseAmount = "";
-  String saleAmount = "";
+  String purchaseAmount = "0.00";
+  String saleAmount = "0.00";
 
   @override
   void initState() {
@@ -45,21 +46,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void fetchData() async {
-    HelperFunctions.isInternetAvailable().then((value) {
-      setState(() {
-        isNetworkAvailable = value;
-      });
-    });
-    setState(() {
-      isLoading = true;
-    });
     try {
-      dashboardModel = await GetDashboardData();
-      setState(() {
-        isLoading = false;
-      });
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        dashboardModel = await GetDashboardData();
+        setState(() {
+          isLoading = false;
+        });
+      } else{
+        setState(() {
+          purchaseAmount = "0.00";
+          saleAmount = "0.00";
+        });
+      }
     } catch (e) {
-      print("Error occurred: $e");
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong. Please try again later.',
+        mode: SnackbarMode.error,
+      );
     }
     finally{
       setState(() {
@@ -80,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         dynamicDashboardCard = DashboardCard(
           title: 'Total Yarn Purchases',
-          value:purchaseAmount, // You can update this with the actual data
+          value:(purchaseAmount),
           date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
           image: AppImages.purchaseIcon,
           fetchDataCallback: () {
@@ -94,13 +99,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         dynamicDashboardCard = DashboardCard(
           title: 'Total Cloth Sells Deals',
-          value: saleAmount, // You can update this with the actual data
+          value: saleAmount,
           date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
           image: AppImages.salesIcon,
           fetchDataCallback: () {
             fetchData();
           },
-
         );
       });
     }
@@ -116,6 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         content: _pages.isNotEmpty ? _pages[_currentIndex] : SizedBox(),
         isLoading: isLoading,
         internetNotAvailable: isNetworkAvailable,
+        noRecordFound: noRecordFound,
         bottomNavigationBar: Container(
           padding: EdgeInsets.all(Dimensions.width20),
           height: Dimensions.height60 + Dimensions.height10,
@@ -190,29 +195,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
       isLoading = true;
     });
     try {
-      DashboardModel? model = await dashboardServices.showDashboardData();
-      if (model?.success == true) {
-        // purchaseDeals?.addAll(model!.data!.purchaseDeals!);
-        setState(() {
-          dashboardModel = model;
-          purchaseAmount = "${dashboardModel?.purchaseAmount}";
-          saleAmount = "${dashboardModel?.sellAmount}";
-          purchaseDeals.addAll(model!.data!.purchaseDeals!);
-          sellDeal.addAll(model.data!.sellDeal!);
-        });
-        updateDashboardCard();
-        updatePages();
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        DashboardModel? model = await dashboardServices.showDashboardData();
+        if (model?.success == true) {
+          // purchaseDeals?.addAll(model!.data!.purchaseDeals!);
+         if (model?.data != null) {
+           setState(() {
+             dashboardModel = model;
+             purchaseAmount = "${dashboardModel?.purchaseAmount}";
+             saleAmount = "${dashboardModel?.sellAmount}";
+             purchaseDeals.addAll(model!.data!.purchaseDeals!);
+             sellDeal.addAll(model.data!.sellDeal!);
+           });
+           updateDashboardCard();
+           updatePages();
+         } else {
+           noRecordFound = true;
+         }
+        } else {
+          Navigator.of(context).pop(); // Close the loading dialog
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            model!.message!,
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
-        Navigator.of(context).pop(); // Close the loading dialog
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          model!.message!,
-          mode: SnackbarMode.error,
-        );
+        isNetworkAvailable = false;
+        purchaseAmount = "0.00";
+        saleAmount = "0.00";
       }
     } catch (e) {
-      print("Error occurred: $e");
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong. Please try again later.',
+        mode: SnackbarMode.error,
+      );
     }finally {
       // Update isLoading state regardless of success or failure
       setState(() {

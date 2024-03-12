@@ -42,6 +42,7 @@ class _ClothSellViewState extends State<ClothSellView> {
   ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
   GetSellDealModel? getSellDealModel;
   bool noRecordFound = false;
+  bool isNetworkAvailable = true;
   @override
   void initState() {
     super.initState();
@@ -62,6 +63,8 @@ class _ClothSellViewState extends State<ClothSellView> {
     return CustomDrawer(
         content: CustomBody(
           isLoading:_isLoading,
+          noRecordFound: noRecordFound,
+          internetNotAvailable: isNetworkAvailable,
           title: S.of(context).clothSellDealDetails,
           content: getSellDealModel?.data! == null ? Container() :  Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
@@ -307,14 +310,6 @@ class _ClothSellViewState extends State<ClothSellView> {
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                                     ),
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          //unfilteredDeliveryDetailList.removeAt(index);
-                                        });
-                                      },
-                                      icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
-                                    ),
                                     GFCheckbox(
                                       size: Dimensions.height20,
                                       type: GFCheckboxType.custom,
@@ -377,23 +372,29 @@ class _ClothSellViewState extends State<ClothSellView> {
       _isLoading = true;
     });
     try {
-      GetSellDealModel? model = await sellDealDetails.getSellDealApi(
-          widget.sellID.toString());
-      if (model!.success == true) {
-        setState(() {
-        if (model.data != null) {
-          getSellDealModel = model;
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        GetSellDealModel? model = await sellDealDetails.getSellDealApi(
+            widget.sellID.toString());
+        if (model!.success == true) {
+          setState(() {
+            if (model.data != null) {
+              getSellDealModel = model;
+            } else {
+              noRecordFound = true;
+            }
+          });
         } else {
-          noRecordFound = true;
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            'Something went wrong, please try again later.',
+            mode: SnackbarMode.error,
+          );
         }
-      });
-      } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+      }else {
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     }
     finally {
@@ -407,32 +408,38 @@ class _ClothSellViewState extends State<ClothSellView> {
       _isLoading = true;
     });
     try {
-      InvoiceListModel? model = await manageInvoiceServices.showInvoiceList(
-        widget.sellID.toString(),
-        pageNo.toString(),
-        search,
-      );
-      if (model != null) {
-        if (model.success == true) {
-          if (model.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              manageInvoiceList.clear();
+      if(await HelperFunctions.isPossiblyNetworkAvailable()) {
+        InvoiceListModel? model = await manageInvoiceServices.showInvoiceList(
+          widget.sellID.toString(),
+          pageNo.toString(),
+          search,
+        );
+        if (model != null) {
+          if (model.success == true) {
+            if (model.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                manageInvoiceList.clear();
+              }
+              setState(() {
+                manageInvoiceList.addAll(model.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
             }
-            setState(() {
-              manageInvoiceList.addAll(model.data!);
-              currentPage++;
-            });
           } else {
-             _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              model.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
-        } else {
-          CustomApiSnackbar.show(
-            context,
-            'Error',
-            model.message.toString(),
-            mode: SnackbarMode.error,
-          );
         }
+      } else {
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {

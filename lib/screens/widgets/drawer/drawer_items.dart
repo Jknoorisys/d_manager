@@ -1,4 +1,5 @@
 import 'package:d_manager/constants/app_theme.dart';
+import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/constants/routes.dart';
@@ -41,7 +42,7 @@ class DrawerItems extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: Dimensions.height40,
-                      backgroundImage: HelperFunctions.getUserImage() != null ? NetworkImage(HelperFunctions.getUserImage()) : const AssetImage(AppImages.userImage) as ImageProvider,
+                      backgroundImage: HelperFunctions.getUserImage() != null ? NetworkImage('$baseUrl/${HelperFunctions.getUserImage()}') : const AssetImage(AppImages.userImage) as ImageProvider,
                     ),
                     SizedBox(height: Dimensions.height10),
                     SmallText(text: HelperFunctions.getUserName(), color: AppTheme.secondaryLight, size: Dimensions.font14),

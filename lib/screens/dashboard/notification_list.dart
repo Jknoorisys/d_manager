@@ -1,18 +1,10 @@
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
-import 'package:flutter/cupertino.dart';
 import '../../constants/dimension.dart';
-import '../../generated/l10n.dart';
-import 'package:d_manager/screens/manage_cloth_sell/update_sell_deal.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/checkbox/gf_checkbox.dart';
-import 'package:getwidget/types/gf_checkbox_type.dart';
-import '../../models/sell_models/active_parties_model.dart';
-import '../../models/dropdown_models/dropdown_cloth_quality_list_model.dart';
-import '../../models/sell_models/active_firms_model.dart';
 
 class NotificationList extends StatefulWidget {
   const NotificationList({super.key});
