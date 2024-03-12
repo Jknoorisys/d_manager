@@ -128,24 +128,22 @@ class HelperFunctions {
   }
 
 
-  // Dates
-
+  // Dates for dashboard
   static Future<bool> setStartDate(String startDate) async {
-    return pref.setString("start", startDate);
+    return pref.setString("startDate", startDate);
   }
   static String getStartDate() {
-    String? startDate = pref.getString('start');
+    String? startDate = pref.getString('startDate');
     return startDate ?? '';
   }
   static Future<bool> setEndDate(String endDate) async {
-    return pref.setString("end", endDate);
+    return pref.setString("endDate", endDate);
   }
   static String getEndDate() {
-    String? endDate = pref.getString('end');
+    String? endDate = pref.getString('endDate');
     return endDate ?? '';
   }
   // Sell history filter date
-
   static Future<bool> setStartDateForSellHistory(String startDate) async {
     return pref.setString("start", startDate);
   }
@@ -160,9 +158,24 @@ class HelperFunctions {
     String? endDate = pref.getString('end');
     return endDate ?? '';
   }
+  // Purchase History filter date
+
+  static Future<bool> setStartDateForPurchaseHistory(String startDate) async {
+    return pref.setString("startPurchaseDate", startDate);
+  }
+  static String getStartDateForPurchaseHistory() {
+    String? startDate = pref.getString('startPurchaseDate');
+    return startDate ?? '';
+  }
+  static Future<bool> setEndDateForPurchaseHistory(String endDate) async {
+    return pref.setString("endPurchaseDate", endDate);
+  }
+  static String getEndDateForPurchaseHistory() {
+    String? endDate = pref.getString('endPurchaseDate');
+    return endDate ?? '';
+  }
 
   // GST return amount date
-
   static Future<bool> setSelectedMonth(String selectedMonth) async {
     return pref.setString("selectedMonth", selectedMonth);
   }

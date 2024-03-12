@@ -1,6 +1,5 @@
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/screens/widgets/body.dart';
-import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,33 +17,10 @@ import '../../helpers/helper_functions.dart';
 import '../../models/history_models/purchase_history_model.dart';
 import '../manage_yarn_purchase/yarn_purchase_view.dart';
 import '../widgets/snackbar.dart';
-
 import 'package:d_manager/api/manage_sell_deals.dart';
-import 'package:d_manager/constants/routes.dart';
-import 'package:d_manager/generated/l10n.dart';
-import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:d_manager/screens/manage_cloth_sell/update_sell_deal.dart';
-import 'package:d_manager/screens/widgets/body.dart';
-import 'package:d_manager/screens/widgets/custom_dropdown.dart';
-import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
-import 'package:d_manager/constants/app_theme.dart';
-import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/screens/widgets/buttons.dart';
-import 'package:d_manager/screens/widgets/custom_accordion.dart';
-import 'package:d_manager/screens/widgets/text_field.dart';
-import 'package:d_manager/screens/widgets/texts.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gap/gap.dart';
-import 'package:getwidget/components/checkbox/gf_checkbox.dart';
-import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
-import '../../models/sell_models/status_sell_deal_model.dart';
 import '../widgets/new_custom_dropdown.dart';
-import '../widgets/snackbar.dart';
 import '../../api/dropdown_services.dart';
 import '../../api/manage_firm_services.dart';
 import '../../api/manage_party_services.dart';
@@ -115,6 +91,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   HelperFunctions helperFunctions = HelperFunctions();
 
   bool isFilterApplied = false;
+  DateTime firstDateForPurchase = DateTime(2000);
+  DateTime lastDateForPurchase = DateTime(2050);
+
 
 
 
@@ -153,13 +132,11 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                 GestureDetector(
                   onTap: () {
                     if (isFilterApplied) {
-                      // If filters are applied, clear the filters
                       clearFilters();
                       setState(() {
                         isFilterApplied = false; // Reset the filter applied flag
                       });
                     } else {
-                      // Otherwise, show the filter bottom sheet
                       _showBottomSheet(context);
                     }
                   },
@@ -571,19 +548,28 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                     Gap(Dimensions.height10/2),
                     GestureDetector(
                       onTap: () async {
-                        DateTime? pickedDate = (
-                            await showDateRangePicker(
-                              initialEntryMode: DatePickerEntryMode.input,
-                              helpText: S.of(context).selectDate,
-                              context: context,
-                              firstDate: firstDate,
-                              lastDate: lastDate,
-                            )
-                        ) as DateTime?;
+                        DateTimeRange? pickedDateRange = await showDateRangePicker(
+                          initialEntryMode: DatePickerEntryMode.input,
+                          helpText: S.of(context).selectDate,
+                          context: context,
+                          initialDateRange: DateTimeRange(
+                            start: DateTime.now(),
+                            end: DateTime.now().add(const Duration(days: 7)),
+                          ),
+                          firstDate: firstDateForPurchase,
+                          lastDate: lastDateForPurchase,
+                        );
 
-                        if (pickedDate != null && pickedDate != firstDate) {
+                        if (pickedDateRange != null) {
+                          DateTime startDateForPurchaseHistory = pickedDateRange.start;
+                          DateTime endDateForPurchaseHistory = pickedDateRange.end;
+                          String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDateForPurchaseHistory);
+                          String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDateForPurchaseHistory);
+                          await HelperFunctions.setStartDateForPurchaseHistory(formattedStartDate);
+                          await HelperFunctions.setEndDateForPurchaseHistory(formattedEndDate);
                           setState(() {
-                            firstDate = pickedDate;
+                            firstDateForPurchase = startDateForPurchaseHistory;
+                            lastDateForPurchase = endDateForPurchaseHistory;
                           });
                         }
                       },
@@ -649,6 +635,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
         pageNo.toString(),
         search,
       );
+
       if (model != null) {
         if (model.success == true) {
           if (model.data!.isNotEmpty) {
@@ -803,13 +790,19 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     await HelperFunctions.setFirmID('');
     await HelperFunctions.setPartyID('');
     await HelperFunctions.setClothID('');
+    await HelperFunctions.setStartDateForPurchaseHistory('');
+    await HelperFunctions.setEndDateForPurchaseHistory('');
     setState(() {
       selectedFirm = null;
       selectedParty = null;
       selectedClothQuality = null;
-      // Assuming 'On Going' is the default status
     });
-
-    getPurchaseHistory(1, ''); // Assuming you're resetting to the first page and empty search query
+    if (firstDateForPurchase != DateTime(2000) || lastDateForPurchase != DateTime(2050)) {
+      setState(() {
+        firstDateForPurchase = DateTime(2000);
+        lastDateForPurchase = DateTime(2050);
+      });
+    }
+    getPurchaseHistory(1, '');
   }
 }

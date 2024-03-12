@@ -512,8 +512,6 @@ class _SellHistoryState extends State<SellHistory> {
                                       firstDateForSell = startDateForSellHistory;
                                       lastDateForSell = endDateForSellHistory;
                                     });
-                                    print("StartDate## $formattedStartDate");
-                                    print("EndDate##  $formattedEndDate");
                                   }
                                 },
                                 child: Container(

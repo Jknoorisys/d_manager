@@ -66,7 +66,7 @@ class PurchaseHistoryList {
   String? yarnTypeName;
   int? totalDeliveries;
   int? totalDeliveryBox;
-  int? totalGrossWeight;
+  double? totalGrossWeight;
   double? totalNetWeight;
   int? totalBillAmount;
   int? totalPaidAmount;
@@ -133,7 +133,7 @@ class PurchaseHistoryList {
     yarnTypeName: json["yarn_type_name"],
     totalDeliveries: json["total_deliveries"],
     totalDeliveryBox: json["total_delivery_box"],
-    totalGrossWeight: json["total_gross_weight"],
+    totalGrossWeight: json["total_gross_weight"]?.toDouble(),
     totalNetWeight: json["total_net_weight"]?.toDouble(),
     totalBillAmount: json["total_bill_amount"],
     totalPaidAmount: json["total_paid_amount"],
@@ -180,8 +180,8 @@ class Filter {
   dynamic firmId;
   dynamic partyId;
   dynamic yarnTypeId;
-  String? startDate;
-  String? endDate;
+  dynamic startDate;
+  dynamic endDate;
 
   Filter({
     this.firmId,
