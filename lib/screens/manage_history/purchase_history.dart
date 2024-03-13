@@ -14,8 +14,10 @@ import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../api/manage_history_services.dart';
 import '../../helpers/helper_functions.dart';
+import '../../models/dropdown_models/dropdown_yarn_list_model.dart';
 import '../../models/history_models/purchase_history_model.dart';
 import '../manage_yarn_purchase/yarn_purchase_view.dart';
+import '../widgets/custom_dropdown.dart';
 import '../widgets/snackbar.dart';
 import 'package:d_manager/api/manage_sell_deals.dart';
 import '../../models/sell_models/active_parties_model.dart';
@@ -35,13 +37,34 @@ class PurchaseHistory extends StatefulWidget {
 
 class _PurchaseHistoryState extends State<PurchaseHistory> {
   final searchController = TextEditingController();
+  List<Map<String, dynamic>> purchaseHistory = [
+    {'no': 1, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Mehta and Sons Yarn Traders', 'yarnName':'Golden', 'yarnType':'Roto', 'lotNumber':'25', 'paymentType':'Dhara', 'boxReceived':'300', 'rate':'22.20', 'netWeight':'4990', 'billAmount':'25,00,000', 'GST12%':'12%', 'dueDate':'2024-01-29', 'paidDate':'2024-01-25', 'amountPaid' : '25,00,000', 'differenceAmount':'300','paymentMethod':'Cheque', 'cops' : '4000', 'diener':'34', 'billReceived':'Yes',},
+    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Tulsi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rahun Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'SK Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Diamond Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
+  ];
   List<PurchaseHistoryList> purchaseHistoryList = [];
+  String myFirm = 'Danish Textiles';
+  String partyName = 'Mehta and Sons Yarn Trades';
+  String yarnName = 'Golden';
+  String yarnType = 'Roto';
+
+  DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 30));
   ManageHistoryServices manageHistoryServices = ManageHistoryServices();
   bool isLoading = false;
   int currentPage = 1;
   final RefreshController _refreshController = RefreshController();
+
+  SellDealDetails sellDealDetails = SellDealDetails();
+
+  SellDealListModel? sellDealListModel;
+
+  List<SellDeal> clothSellList = [];
 
   ManageFirmServices firmServices = ManageFirmServices();
 
@@ -55,6 +78,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
 
   List<ClothQuality> activeClothQuality = [];
 
+  List<Yarn> yarns = [];
+
   ActiveFirmsList? selectedFirm;
 
   ActivePartiesList? selectedParty;
@@ -66,10 +91,15 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   String? partyID;
 
   String? clothID;
+  var selectedYarn;
+
+  HelperFunctions helperFunctions = HelperFunctions();
 
   bool isFilterApplied = false;
   DateTime firstDateForPurchase = DateTime(2000);
   DateTime lastDateForPurchase = DateTime(2050);
+
+
 
 
   @override
@@ -90,12 +120,11 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     }
     _loadData();
     _loadPartyData();
-    _loadClothData();
+    _getYarns();
   }
   @override
   Widget build(BuildContext context) {
-    return
-      CustomDrawer(
+    return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
             title: S.of(context).purchaseHistory,
@@ -205,9 +234,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 children: [
-                                                  SizedBox(
-                                                      width: Dimensions.screenWidth * 0.5,
-                                                      child: BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
+                                                  BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
                                                   Row(
                                                     children: [
                                                       CircleAvatar(
@@ -216,9 +243,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                                         child: BigText(text: purchaseHistoryList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                                       ),
                                                       SizedBox(width: Dimensions.width10),
-                                                      SizedBox(
-                                                          width: Dimensions.screenWidth * 0.5,
-                                                          child: SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
+                                                      SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
                                                     ],
                                                   ),
                                                 ],
@@ -273,7 +298,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                       SizedBox(width: Dimensions.width20),
                                       Expanded(flex:1,child: _buildInfoColumn('Amount Paid', purchaseHistoryList[index].totalPaidAmount!.toString())),
                                       SizedBox(width: Dimensions.width20),
-                                      Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString() == 'ongoing' ? 'On Going' : 'Completed')),
+                                      Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString())),
                                     ],
                                   ),
                                   SizedBox(height: Dimensions.height10),
@@ -281,7 +306,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                     children: [
                                       Container(
                                           width: MediaQuery.of(context).size.width/2.65,
-                                          height: Dimensions.height40*2.5,
+                                          height: Dimensions.height40*2,
                                           padding: EdgeInsets.all(Dimensions.height10),
                                           decoration: BoxDecoration(
                                             color: AppTheme.white,
@@ -316,7 +341,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                       SizedBox(width: Dimensions.width20),
                                       Container(
                                           width: MediaQuery.of(context).size.width/2.65,
-                                          height: Dimensions.height40* 2.5,
+                                          height: Dimensions.height40*2,
                                           padding: EdgeInsets.all(Dimensions.height10),
                                           decoration: BoxDecoration(
                                             color: AppTheme.white,
@@ -326,7 +351,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              BigText(text: 'Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                              BigText(text: 'Total Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                               // BigText(text: '${purchaseHistoryList[index].grossReceivedWeight}',color: AppTheme.primary, size: Dimensions.font18),
                                               // BigText(text: 'Ton',color: AppTheme.primary, size: Dimensions.font12),
                                               RichText(
@@ -495,27 +520,16 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                   children: [
                     BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
                     Gap(Dimensions.height10/2),
-                    CustomDropdownNew<ClothQuality>(
-                      hintText: 'Cloth Quality',
-                      dropdownItems:activeClothQuality ?? [],
-                      selectedValue:selectedClothQuality,
-                      onChanged:(newValue)async{
-                        if (newValue != null) {
-                          clothID = newValue.qualityId.toString();
-                          await HelperFunctions.setClothID(clothID!);
-                          print("ClothIDisselected===== $clothID");
-                        } else {
-                          await HelperFunctions.setClothID('');
-                          clothID = null; // Reset firmID if selectedFirm is null
+                    CustomApiDropdown(
+                        hintText: 'Select Yarn',
+                        dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
+                        selectedValue: selectedYarn,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedYarn = newValue!;
+                          });
                         }
-                        setState((){
-                          selectedClothQuality = newValue;
-                        });
-                      } ,
-                      displayTextFunction: (ClothQuality? cloth){
-                        return cloth!.qualityName!;
-                      },
-                    ),
+                    )
                   ],
                 ),
                 Gap(Dimensions.height10),
@@ -544,8 +558,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                           DateTime endDateForPurchaseHistory = pickedDateRange.end;
                           String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDateForPurchaseHistory);
                           String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDateForPurchaseHistory);
-                          // await HelperFunctions.setStartDateForPurchaseHistory(formattedStartDate);
-                          // await HelperFunctions.setEndDateForPurchaseHistory(formattedEndDate);
+                          await HelperFunctions.setStartDateForPurchaseHistory(formattedStartDate);
+                          await HelperFunctions.setEndDateForPurchaseHistory(formattedEndDate);
                           setState(() {
                             firstDateForPurchase = startDateForPurchaseHistory;
                             lastDateForPurchase = endDateForPurchaseHistory;
@@ -726,55 +740,18 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       });
     }
   }
-  Future<void> _loadClothData() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      DropdownClothQualityListModel? activeClothQualityModel = await dropdownServices.clothQualityList();
-      if (activeClothQualityModel != null) {
-        if (activeClothQualityModel.success == true) {
-          if (activeClothQualityModel.data!.isNotEmpty) {
-            setState(() {
-              activeClothQuality.clear();
-              activeClothQuality.addAll(activeClothQualityModel.data!);
-            });
-          } else {
-            _refreshController.loadNoData();
-          }
-        } else {
-          CustomApiSnackbar.show(
-            context,
-            'Error',
-            activeClothQualityModel.message.toString(),
-            mode: SnackbarMode.error,
-          );
-        }
-      } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
-      }
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
   void clearFilters() async {
     // Clear the preferences
     await HelperFunctions.setFirmID('');
     await HelperFunctions.setPartyID('');
-    await HelperFunctions.setClothID('');
-    // await HelperFunctions.setStartDateForPurchaseHistory('');
-    // await HelperFunctions.setEndDateForPurchaseHistory('');
+    await HelperFunctions.setYarnID('');
+    await HelperFunctions.setStartDateForPurchaseHistory('');
+    await HelperFunctions.setEndDateForPurchaseHistory('');
     setState(() {
       selectedFirm = null;
       selectedParty = null;
       selectedClothQuality = null;
+      selectedYarn = null;
     });
     if (firstDateForPurchase != DateTime(2000) || lastDateForPurchase != DateTime(2050)) {
       setState(() {
@@ -783,5 +760,15 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       });
     }
     getPurchaseHistory(1, '');
+  }
+
+  Future<void> _getYarns() async {
+    DropdownYarnListModel? response = await dropdownServices.yarnList();
+    if (response != null) {
+      setState(() {
+        yarns.addAll(response.data!);
+        isLoading = false;
+      });
+    }
   }
 }

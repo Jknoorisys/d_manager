@@ -66,17 +66,24 @@ class HelperFunctions {
     return getParty ?? '';
   }
   // Cloth Quality ID
-
   static Future<bool> setClothID(String clothID) async {
     return pref.setString("clothID", clothID);
   }
-
   static String getClothID() {
     String? getCloth = pref.getString('clothID');
     return getCloth ?? '';
   }
-  // Deal Status
 
+  // Yarn ID
+
+  static Future<bool> setYarnID(String yarnID) async {
+    return pref.setString("yarnID", yarnID);
+  }
+  static String getYarnID() {
+    String? getYarn = pref.getString('yarnID');
+    return getYarn ?? '';
+  }
+  // Deal Status
   static Future<bool> setDealStatus(String status) async {
     return pref.setString("status", status);
   }
