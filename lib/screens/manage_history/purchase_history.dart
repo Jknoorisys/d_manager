@@ -14,8 +14,10 @@ import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../api/manage_history_services.dart';
 import '../../helpers/helper_functions.dart';
+import '../../models/dropdown_models/dropdown_yarn_list_model.dart';
 import '../../models/history_models/purchase_history_model.dart';
 import '../manage_yarn_purchase/yarn_purchase_view.dart';
+import '../widgets/custom_dropdown.dart';
 import '../widgets/snackbar.dart';
 import 'package:d_manager/api/manage_sell_deals.dart';
 import '../../models/sell_models/active_parties_model.dart';
@@ -76,6 +78,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
 
   List<ClothQuality> activeClothQuality = [];
 
+  List<Yarn> yarns = [];
+
   ActiveFirmsList? selectedFirm;
 
   ActivePartiesList? selectedParty;
@@ -87,6 +91,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   String? partyID;
 
   String? clothID;
+  var selectedYarn;
 
   HelperFunctions helperFunctions = HelperFunctions();
 
@@ -115,12 +120,11 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     }
     _loadData();
     _loadPartyData();
-    _loadClothData();
+    _getYarns();
   }
   @override
   Widget build(BuildContext context) {
-    return
-      CustomDrawer(
+    return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
             title: S.of(context).purchaseHistory,
@@ -516,27 +520,16 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                   children: [
                     BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
                     Gap(Dimensions.height10/2),
-                    CustomDropdownNew<ClothQuality>(
-                      hintText: 'Cloth Quality',
-                      dropdownItems:activeClothQuality ?? [],
-                      selectedValue:selectedClothQuality,
-                      onChanged:(newValue)async{
-                        if (newValue != null) {
-                          clothID = newValue.qualityId.toString();
-                          await HelperFunctions.setClothID(clothID!);
-                          print("ClothIDisselected===== $clothID");
-                        } else {
-                          await HelperFunctions.setClothID('');
-                          clothID = null; // Reset firmID if selectedFirm is null
+                    CustomApiDropdown(
+                        hintText: 'Select Yarn',
+                        dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
+                        selectedValue: selectedYarn,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedYarn = newValue!;
+                          });
                         }
-                        setState((){
-                          selectedClothQuality = newValue;
-                        });
-                      } ,
-                      displayTextFunction: (ClothQuality? cloth){
-                        return cloth!.qualityName!;
-                      },
-                    ),
+                    )
                   ],
                 ),
                 Gap(Dimensions.height10),
@@ -747,55 +740,18 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       });
     }
   }
-  Future<void> _loadClothData() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      DropdownClothQualityListModel? activeClothQualityModel = await dropdownServices.clothQualityList();
-      if (activeClothQualityModel != null) {
-        if (activeClothQualityModel.success == true) {
-          if (activeClothQualityModel.data!.isNotEmpty) {
-            setState(() {
-              activeClothQuality.clear();
-              activeClothQuality.addAll(activeClothQualityModel.data!);
-            });
-          } else {
-            _refreshController.loadNoData();
-          }
-        } else {
-          CustomApiSnackbar.show(
-            context,
-            'Error',
-            activeClothQualityModel.message.toString(),
-            mode: SnackbarMode.error,
-          );
-        }
-      } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
-      }
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
   void clearFilters() async {
     // Clear the preferences
     await HelperFunctions.setFirmID('');
     await HelperFunctions.setPartyID('');
-    await HelperFunctions.setClothID('');
+    await HelperFunctions.setYarnID('');
     await HelperFunctions.setStartDateForPurchaseHistory('');
     await HelperFunctions.setEndDateForPurchaseHistory('');
     setState(() {
       selectedFirm = null;
       selectedParty = null;
       selectedClothQuality = null;
+      selectedYarn = null;
     });
     if (firstDateForPurchase != DateTime(2000) || lastDateForPurchase != DateTime(2050)) {
       setState(() {
@@ -804,5 +760,15 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       });
     }
     getPurchaseHistory(1, '');
+  }
+
+  Future<void> _getYarns() async {
+    DropdownYarnListModel? response = await dropdownServices.yarnList();
+    if (response != null) {
+      setState(() {
+        yarns.addAll(response.data!);
+        isLoading = false;
+      });
+    }
   }
 }
