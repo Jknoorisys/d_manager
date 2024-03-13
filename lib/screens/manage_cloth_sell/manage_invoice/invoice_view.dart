@@ -1,7 +1,12 @@
+import 'package:d_manager/api/dropdown_services.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_hammal_list_model.dart';
+import 'package:d_manager/models/dropdown_models/dropdown_transport_list_model.dart';
 import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
+import 'package:d_manager/screens/widgets/custom_datepicker.dart';
+import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
@@ -9,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import '../../../api/manage_invoice_services.dart';
 import '../../../models/invoice_models/invoice_detail_model.dart';
@@ -24,33 +30,14 @@ class InvoiceView extends StatefulWidget {
 }
 
 class _InvoiceViewState extends State<InvoiceView> {
-  //
-  List<DeliveryDetails> transportDetails = [];
   GetInvoiceModel? getInvoiceModel;
 
   bool isLoading = false;
+  DateTime selectedDate = DateTime.now();
   bool noRecordFound = false;
   bool isNetworkAvailable = true;
+
   ManageInvoiceServices invoiceServices = ManageInvoiceServices();
-
-  void _addTransportDetails(
-      String deliveryDate, String transportName, String hammalName) {
-      setState(() {
-        transportDetails.add(
-          DeliveryDetails(
-            deliveryDate: deliveryDate,
-            transportName: transportName,
-            hammalName: hammalName,
-          ),
-        );
-      });
-  }
-
-  void _deleteDeliveryDetails(int index) {
-    setState(() {
-      transportDetails.removeAt(index);
-    });
-  }
 
   @override
   void initState() {
@@ -109,17 +96,6 @@ class _InvoiceViewState extends State<InvoiceView> {
                         ],
                       ),
                       SizedBox(height: Dimensions.height10),
-                      // Row(
-                      //   children: [
-                      //     _buildInfoColumn('Cloth Quality',getInvoiceModel!.data!.!),
-                      //     SizedBox(width: Dimensions.width20),
-                      //     _buildInfoColumn('GST', widget.invoiceData?['gst']),
-                      //     SizedBox(width: Dimensions.width20),
-                      //     _buildInfoColumn('Invoice Amount',
-                      //         widget.invoiceData?['invoiceAmount']),
-                      //   ],
-                      // ),
-                      SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
                           _buildInfoColumn(
@@ -135,31 +111,32 @@ class _InvoiceViewState extends State<InvoiceView> {
                         children: [
                           _buildInfoColumn('Payment Amount Received',getInvoiceModel!.data!.invoiceAmount! ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Difference in Amount', getInvoiceModel!.data!.differenceAmount!),
+                          _buildInfoColumn('Difference in Amount', getInvoiceModel!.data!.differenceAmount ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Payment Method', getInvoiceModel!.data!.paymentMethod!),
+                          _buildInfoColumn('Payment Method', getInvoiceModel!.data!.paymentMethod ?? 'N/A'),
                         ],
                       ),
                       SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
-                          _buildInfoColumn('Due Date', getInvoiceModel!.data!.dueDate!.toString()),
+                          _buildInfoColumn('Due Date', getInvoiceModel!.data!.dueDate.toString() ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Payment Received Date', getInvoiceModel!.data!.paymentDate!.toString()),
+                          _buildInfoColumn('Payment Received Date', getInvoiceModel!.data!.paymentDate.toString() ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Reason', getInvoiceModel!.data!.reason!),
+                          _buildInfoColumn('Reason', getInvoiceModel!.data!.reason ?? 'N/A'),
                         ],
                       ),
-                      SizedBox(height: Dimensions.height10),
-                      Row(
-                        children: [
-                          _buildInfoColumn('View PDF', 'viewPDF'),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Status', 'status'),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('GST Portal', 'abc'),
-                        ],
-                      ),
+                      // link to GST portal part here ...
+                      // SizedBox(height: Dimensions.height10),
+                      // Row(
+                      //   children: [
+                      //     _buildInfoColumn('Status', getInvoiceModel!.data!.status! == 'active' ? 'Active' : 'Inactive'),
+                      //     SizedBox(width: Dimensions.width20),
+                      //     _buildInfoColumn('', ''),
+                      //     SizedBox(width: Dimensions.width20),
+                      //     _buildInfoColumn('', ''),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),
@@ -171,87 +148,54 @@ class _InvoiceViewState extends State<InvoiceView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Add Transport Details', style: AppTheme.heading2),
-                      CustomIconButton(
+                      Text(getInvoiceModel!.data!.transportDetails == null ? 'Add Transport Details' : 'Transport Details', style: AppTheme.heading2),
+                      getInvoiceModel!.data!.transportDetails == null ? CustomIconButton(
                           radius: Dimensions.radius10,
                           backgroundColor: AppTheme.primary,
                           iconColor: AppTheme.white,
                           iconData: Icons.add,
                           onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return TransportDetailAdd(
-                                    addDeliveryDetails: _addTransportDetails
-                                );
-                              },
+                            // addTransportDialog(context);
+                            showDialog(context: context,
+                                builder: (BuildContext context) {
+                                  return TransportDetailAdd(invoiceId: widget.invoiceId.toString(), sellId: widget.sellId);
+                                }
                             );
-                          }),
+                          }) : Container(),
                     ],
                   ),
                 ),
                 SizedBox(height: Dimensions.height10),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 1.5,
-                  child:transportDetails.isEmpty?
-                  const NoRecordFound() : ListView.builder(
-                      itemCount: transportDetails.length,
-                      itemBuilder: (context, index) {
-                        final delivery = transportDetails[index];
-                        return CustomAccordionWithoutExpanded(
-                          titleChild: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  _buildInfoColumn(
-                                      'Delivery Date', delivery.deliveryDate),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn(
-                                      'Hammal Name', delivery.hammalName),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height20),
-                              Row(
-                                children: [
-                                  _buildInfoColumn(
-                                      'Transport Name', delivery.transportName),
-                                ],
-                              ),
-                            ],
-                          ),
-                          contentChild: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      //Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'invoiceData': invoiceDataList[index]});
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return TransportDetailAdd(
-                                              addDeliveryDetails: _addTransportDetails
-                                          );
-                                        },
-                                      );
-                                    },
-                                    icon: const Icon(Icons.edit_outlined,
-                                        color: AppTheme.primary),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      _deleteDeliveryDetails(index);
-                                    },
-                                    icon: const Icon(Icons.delete_outline,
-                                        color: AppTheme.primary),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                getInvoiceModel!.data!.transportDetails == null ?
+                Column(
+                  children: [
+                    SizedBox(height: Dimensions.height30),
+                    const NoRecordFound(),
+                  ],
+                ) : Card(
+                  elevation: 10,
+                  color: AppTheme.white,
+                  shadowColor: AppTheme.nearlyWhite,
+                  surfaceTintColor: AppTheme.nearlyWhite,
+                  child: Padding(
+                    padding: EdgeInsets.all(Dimensions.height15),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildInfoColumn(
+                                'Delivery Date', getInvoiceModel!.data!.transportDetails!.transportDate.toString()),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn(
+                                'Hammal Name', getInvoiceModel!.data!.transportDetails!.hammalName.toString()),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn(
+                                'Transport Name', getInvoiceModel!.data!.transportDetails!.transportName.toString()),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -328,16 +272,4 @@ class _InvoiceViewState extends State<InvoiceView> {
       });
     }
   }
-}
-
-class DeliveryDetails {
-  String deliveryDate;
-  String transportName;
-  String hammalName;
-
-  DeliveryDetails({
-    required this.deliveryDate,
-    required this.transportName,
-    required this.hammalName,
-  });
 }

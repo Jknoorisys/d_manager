@@ -66,142 +66,153 @@ class _ClothSellViewState extends State<ClothSellView> {
           noRecordFound: noRecordFound,
           internetNotAvailable: isNetworkAvailable,
           title: S.of(context).clothSellDealDetails,
-          content: getSellDealModel?.data! == null ? Container() :  Padding(
-            padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
-            child: Column(
-               children: [
-                CustomAccordionWithoutExpanded(
-                  titleChild: Column(
+          content: getSellDealModel?.data! == null ? Container() :  SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
+              child: Column(
+                 children: [
+                  CustomAccordionWithoutExpanded(
+                    titleChild: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(width: Dimensions.width10),
+                                CircleAvatar(
+                                  backgroundColor: AppTheme.secondary,
+                                  radius: Dimensions.height20,
+                                  child: BigText(text: getSellDealModel!.data!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                ),
+                                SizedBox(width: Dimensions.height10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                        width: Dimensions.screenWidth * 0.5,
+                                        child: BigText(text: getSellDealModel!.data!.partyName!, color: AppTheme.primary, size: Dimensions.font16)),
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: AppTheme.black,
+                                          radius: Dimensions.height10,
+                                          child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                        ),
+                                        SizedBox(width: Dimensions.width10),
+                                        SizedBox(
+                                            width: Dimensions.screenWidth * 0.5,
+                                            child: SmallText(text: getSellDealModel!.data!.firmName!, color: AppTheme.black, size: Dimensions.font12)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        AppTheme.divider,
+                        SizedBox(height: Dimensions.height10),
+                        Row(
+                          children: [
+                            _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!.toString()),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Rate', '₹ ${getSellDealModel!.data!.rate!}'),
+                          ],
+                        ),
+                      ],
+                    ),
+                    contentChild: Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildInfoColumn('Total Than', getSellDealModel!.data!.totalThan!),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Than Delivered', getSellDealModel!.data!.thanDelivered!),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Than Remaining', getSellDealModel!.data!.thanRemaining!),
+                          ],
+                        ),
+                        SizedBox(height: Dimensions.height10),
+                        Row(
+                          children: [
+                            _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus! == 'ongoing' ? 'Ongoing' : 'Completed'),
+                            SizedBox(width: Dimensions.width20),
+                            _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: Dimensions.height10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Text('Invoice List', style: AppTheme.heading2),
+                      CustomIconButton(
+                          radius: Dimensions.radius10,
+                          backgroundColor: AppTheme.primary,
+                          iconColor: AppTheme.white,
+                          iconData: Icons.add,
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID});
+                          }
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: Dimensions.height10),
+                  AppTheme.divider,
+                  SizedBox(height: Dimensions.height10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              SizedBox(width: Dimensions.width10),
-                              CircleAvatar(
-                                backgroundColor: AppTheme.secondary,
-                                radius: Dimensions.height20,
-                                child: BigText(text: getSellDealModel!.data!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
-                              ),
-                              SizedBox(width: Dimensions.height10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  BigText(text: getSellDealModel!.data!.partyName!, color: AppTheme.primary, size: Dimensions.font16),
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: AppTheme.black,
-                                        radius: Dimensions.height10,
-                                        child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                      ),
-                                      SizedBox(width: Dimensions.width10),
-                                      SmallText(text: getSellDealModel!.data!.firmName!, color: AppTheme.black, size: Dimensions.font12),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
+                          BigText(text: 'Bill Received', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomDropdown(
+                            dropdownItems: const ['Yes', 'No'],
+                            selectedValue: billReceived,
+                            onChanged: (newValue) {
+                              setState(() {
+                                billReceived = newValue!;
+                              });
+                            },
                           ),
                         ],
                       ),
-                      AppTheme.divider,
-                      SizedBox(height: Dimensions.height10),
-                      Row(
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!.toString()),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Rate', '₹ ${getSellDealModel!.data!.rate!}'),
+                          BigText(text: 'Payment Paid', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomDropdown(
+                            dropdownItems: const ['Yes', 'No'],
+                            selectedValue: paymentPaid,
+                            onChanged: (newValue) {
+                              setState(() {
+                                paymentPaid = newValue!;
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ],
                   ),
-                  contentChild: Column(
-                    children: [
-                      Row(
-                        children: [
-                          _buildInfoColumn('Total Than', getSellDealModel!.data!.totalThan!),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Than Delivered', getSellDealModel!.data!.thanDelivered!),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Than Remaining', getSellDealModel!.data!.thanRemaining!),
-                        ],
-                      ),
-                      SizedBox(height: Dimensions.height10),
-                      Row(
-                        children: [
-                          _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus! == 'ongoing' ? 'Ongoing' : 'Completed'),
-                          SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: Dimensions.height10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Invoice List', style: AppTheme.heading2),
-                    CustomIconButton(
-                        radius: Dimensions.radius10,
-                        backgroundColor: AppTheme.primary,
-                        iconColor: AppTheme.white,
-                        iconData: Icons.add,
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID});
-                        }
-                    ),
-                  ],
-                ),
-                SizedBox(height: Dimensions.height10),
-                AppTheme.divider,
-                SizedBox(height: Dimensions.height10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BigText(text: 'Bill Received', size: Dimensions.font12,),
-                        Gap(Dimensions.height10/2),
-                        CustomDropdown(
-                          dropdownItems: const ['Yes', 'No'],
-                          selectedValue: billReceived,
-                          onChanged: (newValue) {
-                            setState(() {
-                              billReceived = newValue!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BigText(text: 'Payment Paid', size: Dimensions.font12,),
-                        Gap(Dimensions.height10/2),
-                        CustomDropdown(
-                          dropdownItems: const ['Yes', 'No'],
-                          selectedValue: paymentPaid,
-                          onChanged: (newValue) {
-                            setState(() {
-                              paymentPaid = newValue!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: Dimensions.height10),
-                Expanded(
-                  child: manageInvoiceList.isEmpty ? NoRecordFound() :SmartRefresher(
+                  SizedBox(height: Dimensions.height10),
+                 manageInvoiceList.isEmpty ? Column(
+                   children: [
+                     SizedBox(height: Dimensions.height30),
+                     const NoRecordFound(),
+                   ],
+                 ) : SizedBox(
+                   height: MediaQuery.of(context).size.height / 1.5,
+                   child: SmartRefresher(
                     enablePullUp: true,
                     controller: _refreshController,
                     onRefresh: () async {
@@ -247,7 +258,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName!)),
+                                    // Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName!)),
                                     SizedBox(width: Dimensions.width20),
                                     Expanded(flex:1,child: _buildInfoColumn('GST', manageInvoiceList[index].gst!)),
                                     SizedBox(width: Dimensions.width20),
@@ -287,9 +298,9 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('View PDF', manageInvoiceList[index].invoiceNumber!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Status', manageInvoiceList[index].status! == 'active' ? 'Active' : 'Inactive')),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Status', manageInvoiceList[index].status!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
                                     SizedBox(width: Dimensions.width20),
                                     Expanded(flex:1,child: _buildInfoColumn('', '')),
                                   ],
@@ -310,21 +321,21 @@ class _ClothSellViewState extends State<ClothSellView> {
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                                     ),
-                                    GFCheckbox(
-                                      size: Dimensions.height20,
-                                      type: GFCheckboxType.custom,
-                                      inactiveBgColor: AppTheme.nearlyWhite,
-                                      inactiveBorderColor: AppTheme.primary,
-                                      customBgColor: AppTheme.primary,
-                                      activeBorderColor: AppTheme.primary,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          manageInvoiceList[index].status = value == true ? 'Completed' : 'On Going';
-                                        });
-                                      },
-                                      value: manageInvoiceList[index].status == 'completed' ? true : false,
-                                      inactiveIcon: null,
-                                    ),
+                                    // GFCheckbox(
+                                    //   size: Dimensions.height20,
+                                    //   type: GFCheckboxType.custom,
+                                    //   inactiveBgColor: AppTheme.nearlyWhite,
+                                    //   inactiveBorderColor: AppTheme.primary,
+                                    //   customBgColor: AppTheme.primary,
+                                    //   activeBorderColor: AppTheme.primary,
+                                    //   onChanged: (value) {
+                                    //     setState(() {
+                                    //       manageInvoiceList[index].status = value == true ? 'Active' : 'Inactive';
+                                    //     });
+                                    //   },
+                                    //   value: manageInvoiceList[index].status == 'active' ? true : false,
+                                    //   inactiveIcon: null,
+                                    // ),
                                   ],
                                 ),
                               ],
@@ -335,7 +346,8 @@ class _ClothSellViewState extends State<ClothSellView> {
                     ),
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         )

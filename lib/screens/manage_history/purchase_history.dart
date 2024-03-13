@@ -35,34 +35,13 @@ class PurchaseHistory extends StatefulWidget {
 
 class _PurchaseHistoryState extends State<PurchaseHistory> {
   final searchController = TextEditingController();
-  List<Map<String, dynamic>> purchaseHistory = [
-    {'no': 1, 'dealDate': '2024-01-25', 'myFirm': 'Danish Textiles', 'partyName': 'Mehta and Sons Yarn Traders', 'yarnName':'Golden', 'yarnType':'Roto', 'lotNumber':'25', 'paymentType':'Dhara', 'boxReceived':'300', 'rate':'22.20', 'netWeight':'4990', 'billAmount':'25,00,000', 'GST12%':'12%', 'dueDate':'2024-01-29', 'paidDate':'2024-01-25', 'amountPaid' : '25,00,000', 'differenceAmount':'300','paymentMethod':'Cheque', 'cops' : '4000', 'diener':'34', 'billReceived':'Yes',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Tulsi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rahun Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'SK Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Diamond Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-    {'no': 2, 'dealDate': '2024-01-26', 'myFirm': 'Danish Textiles', 'partyName': 'Rathi Yarn Agency', 'yarnName':'Bhilosa', 'yarnType':'Zero', 'lotNumber':'289', 'paymentType':'Current', 'boxReceived':'350', 'rate':'21.20', 'netWeight':'6900', 'billAmount':'28,00,000', 'GST12%':'12%', 'dueDate':'2024-01-24', 'paidDate':'2024-01-25', 'amountPaid' : '28,00,000', 'differenceAmount':'1000', 'paymentMethod':'Cheque', 'cops' : '5500', 'diener':'30', 'billReceived':'No',},
-  ];
   List<PurchaseHistoryList> purchaseHistoryList = [];
-  String myFirm = 'Danish Textiles';
-  String partyName = 'Mehta and Sons Yarn Trades';
-  String yarnName = 'Golden';
-  String yarnType = 'Roto';
-
-  DateTime selectedDate = DateTime.now();
   DateTime firstDate = DateTime.now();
   DateTime lastDate = DateTime.now().add(const Duration(days: 30));
   ManageHistoryServices manageHistoryServices = ManageHistoryServices();
   bool isLoading = false;
   int currentPage = 1;
   final RefreshController _refreshController = RefreshController();
-
-  SellDealDetails sellDealDetails = SellDealDetails();
-
-  SellDealListModel? sellDealListModel;
-
-  List<SellDeal> clothSellList = [];
 
   ManageFirmServices firmServices = ManageFirmServices();
 
@@ -88,13 +67,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
 
   String? clothID;
 
-  HelperFunctions helperFunctions = HelperFunctions();
-
   bool isFilterApplied = false;
   DateTime firstDateForPurchase = DateTime(2000);
   DateTime lastDateForPurchase = DateTime(2050);
-
-
 
 
   @override
@@ -230,7 +205,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 children: [
-                                                  BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                                                  SizedBox(
+                                                      width: Dimensions.screenWidth * 0.5,
+                                                      child: BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
                                                   Row(
                                                     children: [
                                                       CircleAvatar(
@@ -239,7 +216,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                                         child: BigText(text: purchaseHistoryList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                                       ),
                                                       SizedBox(width: Dimensions.width10),
-                                                      SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                                      SizedBox(
+                                                          width: Dimensions.screenWidth * 0.5,
+                                                          child: SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
                                                     ],
                                                   ),
                                                 ],
@@ -294,7 +273,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                       SizedBox(width: Dimensions.width20),
                                       Expanded(flex:1,child: _buildInfoColumn('Amount Paid', purchaseHistoryList[index].totalPaidAmount!.toString())),
                                       SizedBox(width: Dimensions.width20),
-                                      Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString())),
+                                      Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString() == 'ongoing' ? 'On Going' : 'Completed')),
                                     ],
                                   ),
                                   SizedBox(height: Dimensions.height10),
@@ -302,7 +281,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                     children: [
                                       Container(
                                           width: MediaQuery.of(context).size.width/2.65,
-                                          height: Dimensions.height40*2,
+                                          height: Dimensions.height40*2.5,
                                           padding: EdgeInsets.all(Dimensions.height10),
                                           decoration: BoxDecoration(
                                             color: AppTheme.white,
@@ -337,7 +316,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                       SizedBox(width: Dimensions.width20),
                                       Container(
                                           width: MediaQuery.of(context).size.width/2.65,
-                                          height: Dimensions.height40*2,
+                                          height: Dimensions.height40* 2.5,
                                           padding: EdgeInsets.all(Dimensions.height10),
                                           decoration: BoxDecoration(
                                             color: AppTheme.white,
@@ -347,7 +326,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              BigText(text: 'Total Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                              BigText(text: 'Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                               // BigText(text: '${purchaseHistoryList[index].grossReceivedWeight}',color: AppTheme.primary, size: Dimensions.font18),
                                               // BigText(text: 'Ton',color: AppTheme.primary, size: Dimensions.font12),
                                               RichText(
@@ -565,8 +544,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                           DateTime endDateForPurchaseHistory = pickedDateRange.end;
                           String formattedStartDate = DateFormat('yyyy-MM-dd').format(startDateForPurchaseHistory);
                           String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDateForPurchaseHistory);
-                          await HelperFunctions.setStartDateForPurchaseHistory(formattedStartDate);
-                          await HelperFunctions.setEndDateForPurchaseHistory(formattedEndDate);
+                          // await HelperFunctions.setStartDateForPurchaseHistory(formattedStartDate);
+                          // await HelperFunctions.setEndDateForPurchaseHistory(formattedEndDate);
                           setState(() {
                             firstDateForPurchase = startDateForPurchaseHistory;
                             lastDateForPurchase = endDateForPurchaseHistory;
@@ -790,8 +769,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     await HelperFunctions.setFirmID('');
     await HelperFunctions.setPartyID('');
     await HelperFunctions.setClothID('');
-    await HelperFunctions.setStartDateForPurchaseHistory('');
-    await HelperFunctions.setEndDateForPurchaseHistory('');
+    // await HelperFunctions.setStartDateForPurchaseHistory('');
+    // await HelperFunctions.setEndDateForPurchaseHistory('');
     setState(() {
       selectedFirm = null;
       selectedParty = null;

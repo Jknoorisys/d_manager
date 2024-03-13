@@ -42,7 +42,7 @@ class PurchaseHistoryModel {
 
 class PurchaseHistoryList {
   int? purchaseId;
-  DateTime? purchaseDate;
+  String? purchaseDate;
   String? firmId;
   String? partyId;
   String? yarnTypeId;
@@ -56,7 +56,7 @@ class PurchaseHistoryList {
   String? denier;
   String? cops;
   String? paymentType;
-  DateTime? paymentDueDate;
+  String? paymentDueDate;
   String? dharaDays;
   String? status;
   String? dealStatus;
@@ -109,7 +109,7 @@ class PurchaseHistoryList {
 
   factory PurchaseHistoryList.fromJson(Map<String, dynamic> json) => PurchaseHistoryList(
     purchaseId: json["purchase_id"],
-    purchaseDate: json["purchase_date"] == null ? null : DateTime.parse(json["purchase_date"]),
+    purchaseDate: json["purchase_date"],
     firmId: json["firm_id"],
     partyId: json["party_id"],
     yarnTypeId: json["yarn_type_id"],
@@ -123,7 +123,7 @@ class PurchaseHistoryList {
     denier: json["denier"],
     cops: json["cops"],
     paymentType: json["payment_type"],
-    paymentDueDate: json["payment_due_date"] == null ? null : DateTime.parse(json["payment_due_date"]),
+    paymentDueDate: json["payment_due_date"],
     dharaDays: json["dhara_days"],
     status: json["status"],
     dealStatus: json["deal_status"],
@@ -143,7 +143,7 @@ class PurchaseHistoryList {
 
   Map<String, dynamic> toJson() => {
     "purchase_id": purchaseId,
-    "purchase_date": "${purchaseDate!.year.toString().padLeft(4, '0')}-${purchaseDate!.month.toString().padLeft(2, '0')}-${purchaseDate!.day.toString().padLeft(2, '0')}",
+    "purchase_date": purchaseDate,
     "firm_id": firmId,
     "party_id": partyId,
     "yarn_type_id": yarnTypeId,
@@ -157,7 +157,7 @@ class PurchaseHistoryList {
     "denier": denier,
     "cops": cops,
     "payment_type": paymentType,
-    "payment_due_date": "${paymentDueDate!.year.toString().padLeft(4, '0')}-${paymentDueDate!.month.toString().padLeft(2, '0')}-${paymentDueDate!.day.toString().padLeft(2, '0')}",
+    "payment_due_date": paymentDueDate,
     "dhara_days": dharaDays,
     "status": status,
     "deal_status": dealStatus,
@@ -180,8 +180,8 @@ class Filter {
   dynamic firmId;
   dynamic partyId;
   dynamic yarnTypeId;
-  dynamic startDate;
-  dynamic endDate;
+  String? startDate;
+  String? endDate;
 
   Filter({
     this.firmId,

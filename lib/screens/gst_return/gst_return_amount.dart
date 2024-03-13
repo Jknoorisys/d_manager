@@ -22,30 +22,13 @@ class GSTReturnAmount extends StatefulWidget {
 class _GSTReturnAmountState extends State<GSTReturnAmount> {
   DateTime selectedDate = DateTime.now();
   GstReturnServices gstReturnServices = GstReturnServices();
-  bool _isLoading = true;
+  bool _isLoading = false;
   GstReturnAmountModel? gstReturnAmountModel;
 
   @override
   void initState() {
     super.initState();
-    print("Get Return Amount Called");
-    setState(() {
-      _isLoading = !_isLoading;
-    });
     gstReturnAmount();
-    // if (HelperFunctions.checkInternet() == false) {
-    //   CustomApiSnackbar.show(
-    //     context,
-    //     'Warning',
-    //     'No internet connection',
-    //     mode: SnackbarMode.warning,
-    //   );
-    // } else {
-    //   setState(() {
-    //     _isLoading = !_isLoading;
-    //   });
-    //   gstReturnAmount();
-    // }
   }
 
   @override
@@ -75,7 +58,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
             },
             icon: const Icon(Icons.calendar_month, color: AppTheme.black),
           ),
-          content: Padding(
+          content: gstReturnAmountModel != null ? Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: SingleChildScrollView(
               child: Column(
@@ -188,7 +171,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                                  Text(gstReturnAmountModel!.filter!.lastMonth!.toString(),
+                                  Text('${gstReturnAmountModel!.filter!.lastMonth!.toString()} - ${gstReturnAmountModel!.filter!.lastYear!.toString()}',
                                       style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                                 ],
                               )
@@ -201,7 +184,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                 ],
               ),
             ),
-          ),
+          ) : Container(),
           
         )
     );
@@ -212,20 +195,29 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
       _isLoading = true;
     });
     try {
-      GstReturnAmountModel? model = await gstReturnServices.showGstReturnAmount();
-      if (model!.success == true) {
-        setState(() {
-          if (model.data != null) {
-            gstReturnAmountModel = model;
-          }
-          print("modelOfGSTReturnAmount=== $gstReturnAmountModel");
-        });
+      if(await HelperFunctions.isPossiblyNetworkAvailable() ) {
+        GstReturnAmountModel? model = await gstReturnServices.showGstReturnAmount();
+        if (model!.success == true) {
+          setState(() {
+            if (model.data != null) {
+              gstReturnAmountModel = model;
+            }
+            print("modelOfGSTReturnAmount=== $gstReturnAmountModel");
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            'Something went wrong, please try again later.',
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     }

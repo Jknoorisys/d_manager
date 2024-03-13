@@ -2,6 +2,7 @@ import 'package:d_manager/api/dropdown_services.dart';
 import 'package:d_manager/api/manage_invoice_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_hammal_list_model.dart';
@@ -17,12 +18,10 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 class TransportDetailAdd extends StatefulWidget {
-  final Map<String, dynamic>? transportDetailData;
   final String? sellId;
   final String? invoiceId;
-  final void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails;
-  //const TransportDetailAdd({Key? key, this.transportDetailData, required void Function(String deliveryDate, String transportName, String hammalName) addDeliveryDetails}) : super(key: key);
-  const TransportDetailAdd({Key? key, required this.addDeliveryDetails, this.transportDetailData, this.sellId, this.invoiceId}) : super(key: key);
+
+  const TransportDetailAdd({Key? key, this.sellId, this.invoiceId}) : super(key: key);
   @override
   _TransportDetailAddState createState() => _TransportDetailAddState();
 }
@@ -47,9 +46,7 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
     isLoading = true;
     _getTransports();
     _getHammals();
-    if (widget.transportDetailData != null) {
-      selectedDate = DateFormat('dd-MM-yyyy').parse(widget.transportDetailData!['transportDate']);
-    }
+    selectedDate = DateTime.now();
   }
   @override
   Widget build(BuildContext context) {
@@ -159,10 +156,8 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
               "transport_id": selectedTransport.toString(),
               "hammal_id": selectedHammal.toString(),
             };
-            print('Body: $body');
-            if (widget.sellId == null && widget.invoiceId == null) {
-              _addTransportDetail(body);
-            }
+
+            _addTransportDetail(body);
           },
           buttonText: "Submit",
         )
@@ -195,16 +190,12 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
       setState(() {
         isLoading = true;
       });
+      print("Transport UIBody: $body");
 
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
         AddTransportDetailModel? addInvoiceModel = await invoiceServices.addTransportDetail((body));
         if (addInvoiceModel?.message != null) {
           if (addInvoiceModel?.success == true) {
-            widget.addDeliveryDetails(
-              DateFormat('dd-MM-yyyy').format(selectedDate),
-              selectedTransportName,
-              selectedHammalName,
-            );
             CustomApiSnackbar.show(
               context,
               'Success',

@@ -51,8 +51,8 @@ class ManageHistoryServices{
         "firm_id":HelperFunctions.getFirmID() ?? "",
         "party_id":HelperFunctions.getPartyID() ?? "",
         "quality_id":HelperFunctions.getClothID() ?? "",
-        "start_date":HelperFunctions.getStartDateForPurchaseHistory() ?? "",
-        "end_date":HelperFunctions.getEndDateForPurchaseHistory() ?? ""
+        // "start_date":HelperFunctions.getStartDateForPurchaseHistory() ?? "",
+        // "end_date":HelperFunctions.getEndDateForPurchaseHistory() ?? ""
       };
       Response response = await dio.post(purchaseHistoryApi, data: body,
         options: Options(

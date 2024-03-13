@@ -55,6 +55,8 @@ class Data {
   String? transportDate;
   String? transportName;
   String? hammalName;
+
+  TransportDetails? transportDetails;
   List<BaleDetail>? baleDetails;
 
   Data({
@@ -80,6 +82,7 @@ class Data {
     this.transportDate,
     this.transportName,
     this.hammalName,
+    this.transportDetails,
     this.baleDetails,
   });
 
@@ -106,6 +109,7 @@ class Data {
     transportDate: json["transport_date"],
     transportName: json["transport_name"],
     hammalName: json["hammal_name"],
+    transportDetails: json["transport_details"] == null ? null : TransportDetails.fromJson(json["transport_details"]),
     baleDetails: json["bale_details"] == null ? [] : List<BaleDetail>.from(json["bale_details"]!.map((x) => BaleDetail.fromJson(x))),
   );
 
@@ -132,6 +136,7 @@ class Data {
     "transport_date": transportDate,
     "transport_name": transportName,
     "hammal_name": hammalName,
+    "transport_details": transportDetails == null ? null : transportDetails!.toJson(),
     "bale_details": baleDetails == null ? [] : List<dynamic>.from(baleDetails!.map((x) => x.toJson())),
   };
 }
@@ -159,3 +164,28 @@ class BaleDetail {
     "meter": meter,
   };
 }
+
+class TransportDetails {
+  String? transportDate;
+  String? transportName;
+  String? hammalName;
+
+  TransportDetails({
+    this.transportDate,
+    this.transportName,
+    this.hammalName,
+  });
+
+  factory TransportDetails.fromJson(Map<String, dynamic> json) => TransportDetails(
+    transportDate: json["transport_date"],
+    transportName: json["transport_name"],
+    hammalName: json["hammal_name"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "transport_date": transportDate,
+    "transport_name": transportName,
+    "hammal_name": hammalName,
+  };
+}
+

@@ -77,6 +77,7 @@ class ManageInvoiceServices{
         return getInvoiceModelFromJson(response.body);
       }
     } catch (e) {
+      print(e.toString());
       return null;
     }
   }
