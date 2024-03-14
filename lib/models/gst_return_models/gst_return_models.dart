@@ -59,7 +59,7 @@ class Data {
 class Filter {
   String? month;
   String? year;
-  int? lastMonth;
+  String? lastMonth;
   String? lastYear;
 
   Filter({

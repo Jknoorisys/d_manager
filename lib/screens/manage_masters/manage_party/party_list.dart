@@ -37,15 +37,10 @@ class _PartyListState extends State<PartyList> {
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      isNetworkAvailable = false;
-      isLoading = false;
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
   @override
   void dispose() {
@@ -265,25 +260,37 @@ class _PartyListState extends State<PartyList> {
     });
 
     try {
-      PartyListModel? partyListModel = await partyServices.partyList(pageNo, search);
-      if (partyListModel != null) {
-        if (partyListModel.success == true) {
-          if(partyListModel.total == 0) {
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        PartyListModel? partyListModel = await partyServices.partyList(pageNo, search);
+        if (partyListModel != null) {
+          if (partyListModel.success == true) {
+            if(partyListModel.total == 0) {
+              setState(() {
+                noRecordFound = true;
+              });
+            }
+            if (partyListModel.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                parties.clear();
+              }
+
+              setState(() {
+                parties.addAll(partyListModel.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
+          } else {
             setState(() {
               noRecordFound = true;
             });
-          }
-          if (partyListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              parties.clear();
-            }
-
-            setState(() {
-              parties.addAll(partyListModel.data!);
-              currentPage++;
-            });
-          } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              partyListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           setState(() {
@@ -292,20 +299,14 @@ class _PartyListState extends State<PartyList> {
           CustomApiSnackbar.show(
             context,
             'Error',
-            partyListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         setState(() {
-          noRecordFound = true;
+          isNetworkAvailable = false;
         });
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
       }
     } finally {
       setState(() {
@@ -320,34 +321,43 @@ class _PartyListState extends State<PartyList> {
     });
 
     try {
-      UpdatePartyStatusModel? updatePartyStatusModel = await partyServices.updatePartyStatus(partyId, status);
-      if (updatePartyStatusModel != null) {
-        if (updatePartyStatusModel.success == true) {
-          setState(() {
-            parties.clear();
-            currentPage = 1;
-          });
-          await _loadData(currentPage, '');
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updatePartyStatusModel.message.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdatePartyStatusModel? updatePartyStatusModel = await partyServices.updatePartyStatus(partyId, status);
+        if (updatePartyStatusModel != null) {
+          if (updatePartyStatusModel.success == true) {
+            setState(() {
+              parties.clear();
+              currentPage = 1;
+            });
+            await _loadData(currentPage, '');
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updatePartyStatusModel.message.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updatePartyStatusModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updatePartyStatusModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } finally {

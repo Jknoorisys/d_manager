@@ -31,24 +31,16 @@ class _TransportListState extends State<TransportList> {
   List<TransportDetail> transports = [];
   int currentPage = 1;
   bool isLoading = false;
+  bool isNetworkAvailable = true;
   ManageTransportServices transportServices = ManageTransportServices();
 
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
 
   @override
@@ -64,6 +56,7 @@ class _TransportListState extends State<TransportList> {
       content: CustomBody(
         title: S.of(context).transportList,
         isLoading: isLoading,
+        internetNotAvailable: isNetworkAvailable,
         content: Padding(
           padding: EdgeInsets.all(Dimensions.height15),
           child: Column(
@@ -248,36 +241,42 @@ class _TransportListState extends State<TransportList> {
     });
 
     try {
-      TransportListModel? transportListModel = await transportServices.transportList(pageNo, search);
-      if (transportListModel != null) {
-        if (transportListModel.success == true) {
-          if (transportListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              transports.clear();
-            }
+      if (await HelperFunctions.isPossiblyNetworkAvailable()){
+        TransportListModel? transportListModel = await transportServices.transportList(pageNo, search);
+        if (transportListModel != null) {
+          if (transportListModel.success == true) {
+            if (transportListModel.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                transports.clear();
+              }
 
-            setState(() {
-              transports.addAll(transportListModel.data!);
-              currentPage++;
-            });
+              setState(() {
+                transports.addAll(transportListModel.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
           } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              transportListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            transportListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {
@@ -292,34 +291,43 @@ class _TransportListState extends State<TransportList> {
     });
 
     try {
-      UpdateTransportStatusModel? updateTransportStatusModel = await transportServices.updateTransportStatus(transportTypeId, status);
-      if (updateTransportStatusModel != null) {
-        if (updateTransportStatusModel.success == true) {
-          setState(() {
-            transports.clear();
-            currentPage = 1;
-          });
-          await _loadData(currentPage, '');
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updateTransportStatusModel.message.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateTransportStatusModel? updateTransportStatusModel = await transportServices.updateTransportStatus(transportTypeId, status);
+        if (updateTransportStatusModel != null) {
+          if (updateTransportStatusModel.success == true) {
+            setState(() {
+              transports.clear();
+              currentPage = 1;
+            });
+            await _loadData(currentPage, '');
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updateTransportStatusModel.message.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updateTransportStatusModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateTransportStatusModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } finally {

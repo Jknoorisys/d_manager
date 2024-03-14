@@ -5,11 +5,45 @@ import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/delivery_models/AddDeliveryModel.dart';
 import 'package:d_manager/models/delivery_models/DeliveryDetailModel.dart';
+import 'package:d_manager/models/delivery_models/DeliveryListModel.dart';
 import 'package:d_manager/models/delivery_models/UpdateDeliveryModel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart';
 
 class ManageDeliveryServices {
+  Future<DeliveryListModel?> deliveryList(int pageNo, String purchaseId, [String? isPaid, String? isBillReceived]) async {
+    try {
+      Map<String, String> body = {
+        "user_id" : HelperFunctions.getUserID(),
+        "page_no": pageNo.toString(),
+        "purchase_id": purchaseId,
+      };
+
+      if (isPaid != null && isPaid.isNotEmpty) {
+        body["paid_status"] = isPaid;
+      }
+
+      if (isBillReceived != null && isBillReceived.isNotEmpty) {
+        body["bill_received"] = isBillReceived;
+      }
+
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+      };
+      print("Delivery List Body: $body");
+      Response response = await post(Uri.parse(deliveryDetailListUrl), body: body, headers: headers);
+      print("Delivery List Response: ${response.body}");
+      if (response.statusCode == 200) {
+        return deliveryListModelFromJson(response.body);
+      } else {
+        return deliveryListModelFromJson(response.body);
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
   Future<AddDeliveryModel?> addDelivery(Map<String, String> body, [File? billUrl]) async {
     try {
       Map<String, String> headers = {
@@ -25,6 +59,7 @@ class ManageDeliveryServices {
       }
       var response = await request.send();
       var data = json.decode(await response.stream.bytesToString());
+      print("Add Delivery Response: $data");
 
       if (response.statusCode == 200) {
         return AddDeliveryModel.fromJson(data);
@@ -52,6 +87,7 @@ class ManageDeliveryServices {
       }
       var response = await request.send();
       var data = json.decode(await response.stream.bytesToString());
+      print("Update Delivery Response: $data");
 
       if (response.statusCode == 200) {
         return UpdateDeliveryModel.fromJson(data);
@@ -86,4 +122,5 @@ class ManageDeliveryServices {
       return null;
     }
   }
+
 }

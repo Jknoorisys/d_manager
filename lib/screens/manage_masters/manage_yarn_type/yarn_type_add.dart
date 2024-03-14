@@ -95,28 +95,19 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                if (HelperFunctions.checkInternet() == false) {
-                  CustomApiSnackbar.show(
-                    context,
-                    'Warning',
-                    'No internet connection',
-                    mode: SnackbarMode.warning,
-                  );
+                setState(() {
+                  isLoading = !isLoading;
+                });
+                Map<String, dynamic> body = {
+                  "yarn_type_id": widget.yarnTypeId != null ? widget.yarnTypeId.toString() : "",
+                  "user_id" : HelperFunctions.getUserID(),
+                  "yarn_name": yarnNameController.text,
+                  "type_name": yarnTypeController.text,
+                };
+                if (widget.yarnTypeId == null) {
+                  _addYarn(body);
                 } else {
-                  setState(() {
-                    isLoading = !isLoading;
-                  });
-                  Map<String, dynamic> body = {
-                    "yarn_type_id": widget.yarnTypeId != null ? widget.yarnTypeId.toString() : "",
-                    "user_id" : HelperFunctions.getUserID(),
-                    "yarn_name": yarnNameController.text,
-                    "type_name": yarnTypeController.text,
-                  };
-                  if (widget.yarnTypeId == null) {
-                    _addYarn(body);
-                  } else {
-                    _updateYarn(body);
-                  }
+                  _updateYarn(body);
                 }
               }
             },
@@ -148,34 +139,46 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
   }
 
   Future<void> _addYarn(Map<String, dynamic> body) async {
-    AddYarnModel? addYarnModel = await yarnServices.addYarn(body);
-    if (addYarnModel?.message != null) {
-      if (addYarnModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addYarnModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.yarnTypeList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddYarnModel? addYarnModel = await yarnServices.addYarn(body);
+      if (addYarnModel?.message != null) {
+        if (addYarnModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addYarnModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.yarnTypeList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addYarnModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addYarnModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -184,34 +187,46 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
   }
 
   Future<void> _updateYarn(Map<String, dynamic> body) async {
-    UpdateYarnModel? updateYarnModel = await yarnServices.updateYarn(body);
-    if (updateYarnModel?.message != null) {
-      if (updateYarnModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateYarnModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.yarnTypeList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdateYarnModel? updateYarnModel = await yarnServices.updateYarn(body);
+      if (updateYarnModel?.message != null) {
+        if (updateYarnModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateYarnModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.yarnTypeList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateYarnModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          updateYarnModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -223,29 +238,41 @@ class _YarnTypeAddState extends State<YarnTypeAdd> {
     setState(() {
       isLoading = true;
     });
-    YarnDetailModel? yarnDetailModel = await yarnServices.viewYarn(widget.yarnTypeId!);
-    if (yarnDetailModel?.message != null) {
-      if (yarnDetailModel?.success == true) {
-        yarnNameController.text = yarnDetailModel!.data!.yarnName.toString();
-        yarnTypeController.text = yarnDetailModel.data!.typeName.toString();
-        setState(() {
-          isLoading = false;
-        });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      YarnDetailModel? yarnDetailModel = await yarnServices.viewYarn(widget.yarnTypeId!);
+      if (yarnDetailModel?.message != null) {
+        if (yarnDetailModel?.success == true) {
+          yarnNameController.text = yarnDetailModel!.data!.yarnName.toString();
+          yarnTypeController.text = yarnDetailModel.data!.typeName.toString();
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            yarnDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          yarnDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

@@ -32,24 +32,16 @@ class _ClothQualityListState extends State<ClothQualityList> {
   List<ClothQuality> qualities = [];
   int currentPage = 1;
   bool isLoading = false;
+  bool isNetworkAvailable = true;
   ManageClothQualityServices clothQualityServices = ManageClothQualityServices();
 
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
 
   @override
@@ -64,6 +56,7 @@ class _ClothQualityListState extends State<ClothQualityList> {
       content: CustomBody(
         title: S.of(context).clothQualityList,
           isLoading: isLoading,
+          internetNotAvailable: isNetworkAvailable,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -229,36 +222,42 @@ class _ClothQualityListState extends State<ClothQualityList> {
     });
 
     try {
-      ClothQualityListModel? clothQualityListModel = await clothQualityServices.clothQualityList(pageNo, search);
-      if (clothQualityListModel != null) {
-        if (clothQualityListModel.success == true) {
-          if (clothQualityListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              qualities.clear();
-            }
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        ClothQualityListModel? clothQualityListModel = await clothQualityServices.clothQualityList(pageNo, search);
+        if (clothQualityListModel != null) {
+          if (clothQualityListModel.success == true) {
+            if (clothQualityListModel.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                qualities.clear();
+              }
 
-            setState(() {
-              qualities.addAll(clothQualityListModel.data!);
-              currentPage++;
-            });
+              setState(() {
+                qualities.addAll(clothQualityListModel.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
           } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              clothQualityListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            clothQualityListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {
@@ -273,34 +272,43 @@ class _ClothQualityListState extends State<ClothQualityList> {
     });
 
     try {
-      UpdateClothQualityStatusModel? updateClothQualityStatusModel = await clothQualityServices.updateClothQualityStatus(clothQualityId, status);
-      if (updateClothQualityStatusModel != null) {
-        if (updateClothQualityStatusModel.success == true) {
-          setState(() {
-            qualities.clear();
-            currentPage = 1;
-          });
-          await _loadData(currentPage, '');
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updateClothQualityStatusModel.message.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateClothQualityStatusModel? updateClothQualityStatusModel = await clothQualityServices.updateClothQualityStatus(clothQualityId, status);
+        if (updateClothQualityStatusModel != null) {
+          if (updateClothQualityStatusModel.success == true) {
+            setState(() {
+              qualities.clear();
+              currentPage = 1;
+            });
+            await _loadData(currentPage, '');
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updateClothQualityStatusModel.message.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updateClothQualityStatusModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateClothQualityStatusModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } finally {

@@ -203,6 +203,7 @@ class _TransportDetailAddState extends State<TransportDetailAdd> {
               mode: SnackbarMode.success,
             );
             Navigator.pop(context);
+            Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'sellId': int.parse(widget.sellId.toString()), 'invoiceId': int.parse(widget.invoiceId.toString())});
           } else {
             CustomApiSnackbar.show(
               context,

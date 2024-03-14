@@ -31,24 +31,16 @@ class _YarnTypeListState extends State<YarnTypeList> {
   List<YarnDetail> yarns = [];
   int currentPage = 1;
   bool isLoading = false;
+  bool isNetworkAvailable = false;
   ManageYarnServices yarnServices = ManageYarnServices();
 
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
 
   @override
@@ -63,6 +55,7 @@ class _YarnTypeListState extends State<YarnTypeList> {
       content: CustomBody(
         title: S.of(context).yarnTypeList,
           isLoading: isLoading,
+          internetNotAvailable: isNetworkAvailable,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -247,36 +240,42 @@ class _YarnTypeListState extends State<YarnTypeList> {
     });
 
     try {
-      YarnListModel? yarnListModel = await yarnServices.yarnList(pageNo, search);
-      if (yarnListModel != null) {
-        if (yarnListModel.success == true) {
-          if (yarnListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              yarns.clear();
-            }
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        YarnListModel? yarnListModel = await yarnServices.yarnList(pageNo, search);
+        if (yarnListModel != null) {
+          if (yarnListModel.success == true) {
+            if (yarnListModel.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                yarns.clear();
+              }
 
-            setState(() {
-              yarns.addAll(yarnListModel.data!);
-              currentPage++;
-            });
+              setState(() {
+                yarns.addAll(yarnListModel.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
           } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              yarnListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            yarnListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = true;
+        });
       }
     } finally {
       setState(() {
@@ -291,34 +290,43 @@ class _YarnTypeListState extends State<YarnTypeList> {
     });
 
     try {
-      UpdateYarnStatusModel? updateYarnStatusModel = await yarnServices.updateYarnStatus(yarnTypeId, status);
-      if (updateYarnStatusModel != null) {
-        if (updateYarnStatusModel.success == true) {
-          setState(() {
-            yarns.clear();
-            currentPage = 1;
-          });
-          await _loadData(currentPage, '');
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updateYarnStatusModel.message.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateYarnStatusModel? updateYarnStatusModel = await yarnServices.updateYarnStatus(yarnTypeId, status);
+        if (updateYarnStatusModel != null) {
+          if (updateYarnStatusModel.success == true) {
+            setState(() {
+              yarns.clear();
+              currentPage = 1;
+            });
+            await _loadData(currentPage, '');
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updateYarnStatusModel.message.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updateYarnStatusModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateYarnStatusModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } finally {

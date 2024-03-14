@@ -105,8 +105,11 @@ const String getInvoiceApi = '$baseUrl/api/get-invoice';
 const String dashBoardApi = '$baseUrl/api/dashboard';
 
 // GST Return
-
 const String gstReturnApi = '$baseUrl/api/gst-difference';
+
+// Notification
+const String notificationListApi = '$baseUrl/api/notification-list';
+const String readNotificationApi = '$baseUrl/api/notification-read';
 
 
 

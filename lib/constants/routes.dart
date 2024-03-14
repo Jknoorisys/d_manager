@@ -194,6 +194,7 @@ class AppRoutes {
       final int? invoiceID = args?['invoiceID'];
       return InvoiceAdd(sellID: sellID, invoiceID: invoiceID);
     },
+
     invoiceView: (context) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       final int? invoiceId = args?['invoiceId'];

@@ -51,15 +51,10 @@ class _PartyAddState extends State<PartyAdd> {
   @override
   void initState() {
     super.initState();
-     if (HelperFunctions.checkInternet() == false) {
-       isNetworkAvailable = false;
-       isLoading = false;
-     } else {
-       _getStates();
-       if (widget.partyId != null) {
-         _getPartyDetails();
-       }
-     }
+    _getStates();
+    if (widget.partyId != null) {
+      _getPartyDetails();
+    }
   }
 
   @override
@@ -273,32 +268,28 @@ class _PartyAddState extends State<PartyAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            if (HelperFunctions.checkInternet() == false) {
-                              isNetworkAvailable = false;
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            Map<String, dynamic> body = {
+                              "party_id": widget.partyId != null ? widget.partyId.toString() : "",
+                              "user_id" : HelperFunctions.getUserID(),
+                              "party_name": partyNameController.text,
+                              "firm_name": firmNameController.text,
+                              "address": addressController.text,
+                              "gst_number": gstNumberController.text,
+                              "pan_number": panNumberController.text,
+                              "phone_number": phoneNumberController.text,
+                              "account_holder_name": accountHolderNameController.text,
+                              "bank_name": bankNameController.text,
+                              "ifsc_code": ifscCodeController.text,
+                              "account_number": accountNumberController.text,
+                              "state_id": selectedState.toString(),
+                            };
+                            if (widget.partyId == null) {
+                              _addParty(body);
                             } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-                              Map<String, dynamic> body = {
-                                "party_id": widget.partyId != null ? widget.partyId.toString() : "",
-                                "user_id" : HelperFunctions.getUserID(),
-                                "party_name": partyNameController.text,
-                                "firm_name": firmNameController.text,
-                                "address": addressController.text,
-                                "gst_number": gstNumberController.text,
-                                "pan_number": panNumberController.text,
-                                "phone_number": phoneNumberController.text,
-                                "account_holder_name": accountHolderNameController.text,
-                                "bank_name": bankNameController.text,
-                                "ifsc_code": ifscCodeController.text,
-                                "account_number": accountNumberController.text,
-                                "state_id": selectedState.toString(),
-                              };
-                              if (widget.partyId == null) {
-                                _addParty(body);
-                              } else {
-                                _updateParty(body);
-                              }
+                              _updateParty(body);
                             }
                           }
                         },
@@ -447,74 +438,98 @@ class _PartyAddState extends State<PartyAdd> {
   }
 
   Future<void> _addParty(Map<String, dynamic> body) async {
-    AddPartyModel? addPartyModel = await partyServices.addParty(body);
-    if (addPartyModel?.message != null) {
-      if (addPartyModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addPartyModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddPartyModel? addPartyModel = await partyServices.addParty(body);
+      if (addPartyModel?.message != null) {
+        if (addPartyModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addPartyModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addPartyModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addPartyModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
+    } else {
       setState(() {
         isLoading = false;
       });
-    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
   Future<void> _updateParty(Map<String, dynamic> body) async {
-    UpdatePartyModel? updatePartyModel = await partyServices.updateParty(body);
-    if (updatePartyModel?.message != null) {
-      if (updatePartyModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updatePartyModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdatePartyModel? updatePartyModel = await partyServices.updateParty(body);
+      if (updatePartyModel?.message != null) {
+        if (updatePartyModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updatePartyModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.partyList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updatePartyModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          updatePartyModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
+    } else {
       setState(() {
         isLoading = false;
       });
-    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
@@ -522,31 +537,43 @@ class _PartyAddState extends State<PartyAdd> {
     setState(() {
       isLoading = true;
     });
-    PartyDetailModel? partyDetailModel = await partyServices.viewParty(widget.partyId!);
-    if (partyDetailModel?.message != null) {
-      if (partyDetailModel?.success == true) {
-       if (partyDetailModel?.data != null) {
-         partyNameController.text = partyDetailModel!.data!.partyName ?? '';
-         firmNameController.text = partyDetailModel.data!.firmName ?? '';
-         addressController.text = partyDetailModel.data!.address ?? '';
-         gstNumberController.text = partyDetailModel.data!.gstNumber ?? '';
-         panNumberController.text = partyDetailModel.data!.panNumber ?? '';
-         phoneNumberController.text = partyDetailModel.data!.phoneNumber ?? '';
-         accountHolderNameController.text = partyDetailModel.data!.bankDetails?.accountHolderName ?? '';
-         bankNameController.text = partyDetailModel.data!.bankDetails?.bankName ?? '';
-         ifscCodeController.text = partyDetailModel.data!.bankDetails?.ifscCode ?? '';
-         accountNumberController.text = partyDetailModel.data!.bankDetails?.accountNumber ?? '';
-         // isInMaharashtra = partyDetailModel.data!.state == 'maharashtra' ? true : false;
-          selectedState = partyDetailModel.data!.stateId;
-         setState(() {
-           isLoading = false;
-         });
-       } else {
-         setState(() {
-           noRecordFound = true;
-           isLoading = false;
-         });
-       }
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      PartyDetailModel? partyDetailModel = await partyServices.viewParty(widget.partyId!);
+      if (partyDetailModel?.message != null) {
+        if (partyDetailModel?.success == true) {
+          if (partyDetailModel?.data != null) {
+            partyNameController.text = partyDetailModel!.data!.partyName ?? '';
+            firmNameController.text = partyDetailModel.data!.firmName ?? '';
+            addressController.text = partyDetailModel.data!.address ?? '';
+            gstNumberController.text = partyDetailModel.data!.gstNumber ?? '';
+            panNumberController.text = partyDetailModel.data!.panNumber ?? '';
+            phoneNumberController.text = partyDetailModel.data!.phoneNumber ?? '';
+            accountHolderNameController.text = partyDetailModel.data!.bankDetails?.accountHolderName ?? '';
+            bankNameController.text = partyDetailModel.data!.bankDetails?.bankName ?? '';
+            ifscCodeController.text = partyDetailModel.data!.bankDetails?.ifscCode ?? '';
+            accountNumberController.text = partyDetailModel.data!.bankDetails?.accountNumber ?? '';
+            // isInMaharashtra = partyDetailModel.data!.state == 'maharashtra' ? true : false;
+            selectedState = partyDetailModel.data!.stateId;
+            setState(() {
+              isLoading = false;
+            });
+          } else {
+            setState(() {
+              noRecordFound = true;
+              isLoading = false;
+            });
+          }
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            partyDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         setState(() {
           isLoading = false;
@@ -554,7 +581,7 @@ class _PartyAddState extends State<PartyAdd> {
         CustomApiSnackbar.show(
           context,
           'Error',
-          partyDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
@@ -564,9 +591,9 @@ class _PartyAddState extends State<PartyAdd> {
       });
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
     }
   }

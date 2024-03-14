@@ -3,6 +3,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/models/delivery_models/DeliveryDetailModel.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -23,6 +24,7 @@ class DeliveryDetailView extends StatefulWidget {
 class _DeliveryDetailViewState extends State<DeliveryDetailView> {
   bool isLoading = false;
   bool noRecordFound = false;
+  bool isNetworkAvailable = true;
   ManageDeliveryServices deliveryServices = ManageDeliveryServices();
   Data? deliveryDetailData;
 
@@ -46,6 +48,7 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
             title: S.of(context).deliveryDetail,
             isLoading: isLoading,
             noRecordFound: noRecordFound,
+            internetNotAvailable: isNetworkAvailable,
             content: deliveryDetailData == null ? Container() : SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
@@ -166,37 +169,43 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
         isLoading = true;
       });
 
-      DeliveryDetailModel? dealDetailModel = await deliveryServices.viewDeliveryDetail(
-        int.parse(widget.purchaseID!),
-        int.parse(widget.deliveryID!),
-      );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        DeliveryDetailModel? dealDetailModel = await deliveryServices.viewDeliveryDetail(
+          int.parse(widget.purchaseID!),
+          int.parse(widget.deliveryID!),
+        );
 
-      if (dealDetailModel?.message != null) {
-        if (dealDetailModel?.success == true) {
-          if (dealDetailModel!.data != null) {
-            setState(() {
-              deliveryDetailData = dealDetailModel.data;
-            });
+        if (dealDetailModel?.message != null) {
+          if (dealDetailModel?.success == true) {
+            if (dealDetailModel!.data != null) {
+              setState(() {
+                deliveryDetailData = dealDetailModel.data;
+              });
+            } else {
+              setState(() {
+                noRecordFound = true;
+              });
+            }
           } else {
-            setState(() {
-              noRecordFound = true;
-            });
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              dealDetailModel!.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            dealDetailModel!.message.toString(),
+            'Something went wrong, please try again',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } catch (error) {
       print('Error: $error');

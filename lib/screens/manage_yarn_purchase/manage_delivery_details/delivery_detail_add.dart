@@ -134,7 +134,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
         errorCops = submitted == true ? _validateCops(copsController.text) : null;
     return CustomDrawer(
         content: CustomBody(
-          title: widget.purchaseID == null ? 'Create Delivery Detail' : 'Update Delivery Detail',
+          title: widget.deliveryID == null ? 'Create Delivery Detail' : 'Update Delivery Detail',
           content: Padding(
             padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
             child: Card(
@@ -517,6 +517,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                                 isLoading = !isLoading;
                               });
                               Map<String, String> body = {
+                                'delivery_id': '${widget.deliveryID}' ?? '',
                                 'purchase_id': '${widget.purchaseID}',
                                 'user_id': HelperFunctions.getUserID(),
                                 'delivery_date': DateFormat('yyyy-MM-dd').format(selectedDeliveryDate),
@@ -535,10 +536,13 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                                 'next_delivery_date': isPaid ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
                                 'bill_received': isBillReceived ? 'yes' : 'no',
                               };
-                              if (widget.purchaseID != null) {
-                                _addDeliveryDetail(body, _selectedFile!);
+
+                              if (widget.deliveryID == null) {
+
+                                _addDeliveryDetail(body, _selectedFile is File ? _selectedFile : null);
                               } else {
-                                _updateDeliveryDetail(body, _selectedFile!);
+                                var billUrl = _selectedFile != null ? _selectedFile is File ? _selectedFile : null : null;
+                                _updateDeliveryDetail(body, billUrl);
                               }
                             }
                           }
@@ -625,24 +629,11 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
           borderRadius: BorderRadius.circular(Dimensions.radius10),
         ),
         shadowColor: AppTheme.nearlyWhite,
-        // title: Row(
-        //   children: [
-        //     Text('Choose option',
-        //         style: AppTheme.hintText),
-        //     Spacer(),
-        //     IconButton(
-        //       icon: Icon(Icons.close, color: AppTheme.deactivatedText),
-        //       onPressed: () {
-        //         Navigator.of(context).pop();
-        //       },
-        //     ),
-        //   ],
-        // ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('Choose from', style: AppTheme.hintText),
+            Text('Choose From', style: AppTheme.hintText),
             const SizedBox(
               height: 15,
             ),
@@ -741,35 +732,47 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
   }
 
   Future<void> _addDeliveryDetail(Map<String, String> body, File? billUrl) async {
-    AddDeliveryModel? addDeliveryModel = await deliveryServices.addDelivery(body, billUrl);
-    print("Add Delivery Model: ${addDeliveryModel?.toJson()}");
-    if (addDeliveryModel?.message != null) {
-      if (addDeliveryModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addDeliveryModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseID});
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddDeliveryModel? addDeliveryModel = await deliveryServices.addDelivery(body, billUrl);
+
+      if (addDeliveryModel?.message != null) {
+        if (addDeliveryModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addDeliveryModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseID});
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addDeliveryModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addDeliveryModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -779,35 +782,47 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
 
   Future<void> _updateDeliveryDetail(Map<String, String> body, File? billUrl) async {
 
-    UpdateDeliveryModel? updateDeliveryModel = await deliveryServices.updateDelivery(body, billUrl);
-    print("Update Delivery Model: ${updateDeliveryModel?.toJson()}");
-    if (updateDeliveryModel?.message != null) {
-      if (updateDeliveryModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateDeliveryModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseID});
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdateDeliveryModel? updateDeliveryModel = await deliveryServices.updateDelivery(body, billUrl);
+
+      if (updateDeliveryModel?.message != null) {
+        if (updateDeliveryModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateDeliveryModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseID});
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateDeliveryModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          updateDeliveryModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -821,53 +836,63 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
         isLoading = true;
       });
 
-      DeliveryDetailModel? dealDetailModel = await deliveryServices.viewDeliveryDetail(
-        int.parse(widget.purchaseID!),
-        int.parse(widget.deliveryID!),
-      );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        DeliveryDetailModel? dealDetailModel = await deliveryServices.viewDeliveryDetail(
+          int.parse(widget.purchaseID!),
+          int.parse(widget.deliveryID!),
+        );
 
-      if (dealDetailModel?.message != null) {
-        if (dealDetailModel?.success == true) {
-          if (dealDetailModel!.data != null) {
-            setState(() {
-              deliveryDetailData = dealDetailModel.data;
-              selectedDeliveryDate = deliveryDetailData!.deliveryDate != null ? DateTime.parse(deliveryDetailData!.deliveryDate!) : DateTime.now();
-              selectedDueDate = deliveryDetailData!.paymentDueDate != null ? DateTime.parse(deliveryDetailData!.paymentDueDate!) : DateTime.now();
-              selectedPaidDate = deliveryDetailData!.paymentDate != null ? DateTime.parse(deliveryDetailData!.paymentDate!) : DateTime.now();
-              paymentType = deliveryDetailData!.paymentType != null ? (deliveryDetailData!.paymentType! == 'current' ? 'Current' : 'Dhara') : 'Current';
-              dharaOption = deliveryDetailData!.dharaDays != null ? deliveryDetailData!.dharaDays! : '15 days';
-              isPaid = deliveryDetailData!.paidStatus == 'yes' ? true : false;
-              paymentMethod = deliveryDetailData!.paymentMethod != null ? deliveryDetailData!.paymentMethod! : 'RTGS';
-              amountPaid = deliveryDetailData!.paidAmount != null ? double.parse(deliveryDetailData!.paidAmount!) : 0.0;
-              isBillReceived = deliveryDetailData!.billReceived == 'yes' ? true : false;
-              copsController.text = deliveryDetailData!.cops != null ? deliveryDetailData!.cops! : '';
-              denierController.text = deliveryDetailData!.denier != null ? deliveryDetailData!.denier! : '';
-              grossReceivedController.text = deliveryDetailData!.deliveredBoxCount != null ? deliveryDetailData!.deliveredBoxCount! : '';
-              netWeightController.text = deliveryDetailData!.netWeight != null ? deliveryDetailData!.netWeight! : '';
-              rateController.text = deliveryDetailData!.rate != null ? deliveryDetailData!.rate! : '';
-              amountPaidController.text = deliveryDetailData!.paidAmount != null ? deliveryDetailData!.paidAmount! : '';
-              paymentRemarkController.text = deliveryDetailData!.paymentNotes != null ? deliveryDetailData!.paymentNotes! : '';
-              _selectedFile = deliveryDetailData!.billUrl != null ? deliveryDetailData!.billUrl : null;
-            });
+        if (dealDetailModel?.message != null) {
+          if (dealDetailModel?.success == true) {
+            if (dealDetailModel!.data != null) {
+              setState(() {
+                deliveryDetailData = dealDetailModel.data;
+                selectedDeliveryDate = deliveryDetailData!.deliveryDate != null ? DateTime.parse(deliveryDetailData!.deliveryDate!) : DateTime.now();
+                selectedDueDate = deliveryDetailData!.paymentDueDate != null ? DateTime.parse(deliveryDetailData!.paymentDueDate!) : DateTime.now();
+                selectedPaidDate = deliveryDetailData!.paymentDate != null ? DateTime.parse(deliveryDetailData!.paymentDate!) : DateTime.now();
+                paymentType = deliveryDetailData!.paymentType != null ? (deliveryDetailData!.paymentType! == 'current' ? 'Current' : 'Dhara') : 'Current';
+                dharaOption = deliveryDetailData!.dharaDays.toString() == '15' ? '15 days' : deliveryDetailData!.dharaDays.toString() == '40' ? '40 days' : 'Other';
+                isPaid = deliveryDetailData!.paidStatus == 'yes' ? true : false;
+                paymentMethod = deliveryDetailData!.paymentMethod != null ? deliveryDetailData!.paymentMethod! : 'RTGS';
+                amountPaid = deliveryDetailData!.paidAmount != null ? double.parse(deliveryDetailData!.paidAmount!) : 0.0;
+                isBillReceived = deliveryDetailData!.billReceived == 'yes' ? true : false;
+                copsController.text = deliveryDetailData!.cops != null ? deliveryDetailData!.cops! : '';
+                denierController.text = deliveryDetailData!.denier != null ? deliveryDetailData!.denier! : '';
+                grossReceivedController.text = deliveryDetailData!.deliveredBoxCount != null ? deliveryDetailData!.deliveredBoxCount! : '';
+                netWeightController.text = deliveryDetailData!.netWeight != null ? deliveryDetailData!.netWeight! : '';
+                rateController.text = deliveryDetailData!.rate != null ? deliveryDetailData!.rate! : '';
+                amountPaidController.text = deliveryDetailData!.paidAmount != null ? deliveryDetailData!.paidAmount! : '';
+                paymentRemarkController.text = deliveryDetailData!.paymentNotes != null ? deliveryDetailData!.paymentNotes! : '';
+                _selectedFile = deliveryDetailData!.billUrl;
+                grossReceivedController.text = deliveryDetailData!.grossWeight != null ? deliveryDetailData!.grossWeight! : '';
+              });
+            } else {
+              setState(() {
+                noRecordFound = true;
+              });
+            }
           } else {
-            setState(() {
-              noRecordFound = true;
-            });
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              dealDetailModel!.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            dealDetailModel!.message.toString(),
+            'Something went wrong, please try again',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } catch (error) {

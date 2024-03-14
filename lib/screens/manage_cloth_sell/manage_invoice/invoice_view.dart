@@ -1,12 +1,6 @@
-import 'package:d_manager/api/dropdown_services.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
-import 'package:d_manager/models/dropdown_models/dropdown_hammal_list_model.dart';
-import 'package:d_manager/models/dropdown_models/dropdown_transport_list_model.dart';
-import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
-import 'package:d_manager/screens/widgets/custom_datepicker.dart';
-import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
@@ -14,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
-import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 import '../../../api/manage_invoice_services.dart';
 import '../../../models/invoice_models/invoice_detail_model.dart';
 import '../../widgets/buttons.dart';
@@ -119,9 +111,9 @@ class _InvoiceViewState extends State<InvoiceView> {
                       SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
-                          _buildInfoColumn('Due Date', getInvoiceModel!.data!.dueDate.toString() ?? 'N/A'),
+                          _buildInfoColumn('Due Date', getInvoiceModel!.data!.dueDate ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Payment Received Date', getInvoiceModel!.data!.paymentDate.toString() ?? 'N/A'),
+                          _buildInfoColumn('Payment Received Date', getInvoiceModel!.data!.paymentDate ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Reason', getInvoiceModel!.data!.reason ?? 'N/A'),
                         ],
@@ -206,25 +198,13 @@ class _InvoiceViewState extends State<InvoiceView> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
-    String formattedValue = value;
-    if (title == 'Invoice Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }
-    else if (title == 'Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Payment Received Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: value, color: AppTheme.primary, size: Dimensions.font12),
         ],
       ),
     );

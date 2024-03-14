@@ -15,6 +15,7 @@ class ManagePurchaseServices {
       };
 
       Response response = await post(Uri.parse(addYarnPurchaseDealUrl), body: body, headers: headers);
+      print("Add Purchase: " + response.body);
       if (response.statusCode == 200) {
         return addYarnPurchaseModelFromJson(response.body);
       } else {
@@ -42,7 +43,6 @@ class ManagePurchaseServices {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
       Response response = await post(Uri.parse(yarnPurchaseDealListUrl), body: body, headers: headers);
-      print(response.body);
       if (response.statusCode == 200) {
         return yarnPurchaseListModelFromJson(response.body);
       } else {
@@ -74,12 +74,14 @@ class ManagePurchaseServices {
     }
   }
 
-  Future<UpdateYarnPurchaseModel?> updatePurchase(Map<String, dynamic> body) async {
+  Future<UpdateYarnPurchaseModel?> updatePurchase(Map<String, String> body) async {
     try {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json",
       };
-      Response response = await post(Uri.parse(updateYarnPurchaseDealUrl), body: body, headers: headers);
+
+      Response response = await post(Uri.parse(updateYarnPurchaseDealUrl), body: jsonEncode(body), headers: headers);
       var data = json.decode(response.body);
       if (response.statusCode == 200) {
         return UpdateYarnPurchaseModel.fromJson(data);
@@ -87,6 +89,7 @@ class ManagePurchaseServices {
         return UpdateYarnPurchaseModel.fromJson(data);
       }
     } catch (e) {
+      print(e);
       return null;
     }
   }
@@ -96,7 +99,7 @@ class ManagePurchaseServices {
       Map<String, String> body = {
         "user_id" : HelperFunctions.getUserID(),
         "purchase_id": purchaseId.toString(),
-        "status": status,
+        "deal_status": status,
       };
 
       Map<String, String> headers = {

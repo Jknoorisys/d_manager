@@ -68,7 +68,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     discountController.text = '9';
     baleNumberControllers = [TextEditingController()];
@@ -82,7 +81,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     rateController.dispose();
     invoiceNumberController.dispose();
     amountReceivedController.dispose();
@@ -709,7 +707,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
           isPaymentReceived = invoiceModel.paidStatus == 'yes' ? true : false;
           paymentMethod = invoiceModel.paymentMethod.toString() == 'cheque' ? 'Cheque' : 'RTGS';
           paymentType = invoiceModel.paymentType.toString() == 'current' ? 'Current' : 'Dhara';
-          dharaOption = invoiceModel.dharaDays.toString();
+          dharaOption = invoiceModel.dharaDays.toString() == '15' ? '15 days' : invoiceModel.dharaDays.toString() == '40' ? '40 days' : 'Other';
           for (var baleDetail in invoiceModel.baleDetails!) {
             baleNumberControllers.add(TextEditingController(text: baleDetail.baleNumber.toString()));
             thanControllers.add(TextEditingController(text: baleDetail.than.toString()));

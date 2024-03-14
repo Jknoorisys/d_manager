@@ -31,24 +31,16 @@ class _HammalListState extends State<HammalList> {
   List<HammalDetail> hammals = [];
   int currentPage = 1;
   bool isLoading = false;
+  bool isNetworkAvailable = true;
   ManageHammalServices hammalServices = ManageHammalServices();
 
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
 
   @override
@@ -63,6 +55,7 @@ class _HammalListState extends State<HammalList> {
       content: CustomBody(
         title: S.of(context).hammalList,
         isLoading: isLoading,
+        internetNotAvailable: isNetworkAvailable,
         content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -244,36 +237,42 @@ class _HammalListState extends State<HammalList> {
     });
 
     try {
-      HammalListModel? hammalListModel = await hammalServices.hammalList(pageNo, search);
-      if (hammalListModel != null) {
-        if (hammalListModel.success == true) {
-          if (hammalListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              hammals.clear();
-            }
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        HammalListModel? hammalListModel = await hammalServices.hammalList(pageNo, search);
+        if (hammalListModel != null) {
+          if (hammalListModel.success == true) {
+            if (hammalListModel.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                hammals.clear();
+              }
 
-            setState(() {
-              hammals.addAll(hammalListModel.data!);
-              currentPage++;
-            });
+              setState(() {
+                hammals.addAll(hammalListModel.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
           } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              hammalListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            hammalListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {
@@ -288,35 +287,41 @@ class _HammalListState extends State<HammalList> {
     });
 
     try {
-      UpdateHammalStatusModel? updateHammalStatusModel = await hammalServices.updateHammalStatus(hammalId, status);
-      if (updateHammalStatusModel != null) {
-        if (updateHammalStatusModel.success == true) {
-          setState(() {
-            hammals.clear();
-            currentPage = 1;
-          });
-          await _loadData(currentPage, '');
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updateHammalStatusModel.message.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateHammalStatusModel? updateHammalStatusModel = await hammalServices.updateHammalStatus(hammalId, status);
+        if (updateHammalStatusModel != null) {
+          if (updateHammalStatusModel.success == true) {
+            setState(() {
+              hammals.clear();
+              currentPage = 1;
+            });
+            await _loadData(currentPage, '');
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updateHammalStatusModel.message.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updateHammalStatusModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateHammalStatusModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {

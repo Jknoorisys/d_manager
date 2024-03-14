@@ -46,6 +46,14 @@ class HelperFunctions {
     String? userName = pref.getString('UserName');
     return userName ?? '';
   }
+
+  static Future<bool> setNotificationCount(int unreadCount) async {
+    return pref.setInt("unreadCount", unreadCount);
+  }
+  static int getNotificationCount() {
+    int? getYarn = pref.getInt('unreadCount');
+    return getYarn ?? 0;
+  }
 // Firm ID
   static Future<bool> setFirmID(String firmID) async {
     return pref.setString("firmID", firmID);
@@ -170,33 +178,9 @@ class HelperFunctions {
   static Future<bool> setStartDateForPurchaseHistory(String startDate) async {
     return pref.setString("startPurchaseDate", startDate);
   }
-  static String getStartDateForPurchaseHistory() {
-    String? startDate = pref.getString('startPurchaseDate');
-    return startDate ?? '';
-  }
+
   static Future<bool> setEndDateForPurchaseHistory(String endDate) async {
     return pref.setString("endPurchaseDate", endDate);
-  }
-  static String getEndDateForPurchaseHistory() {
-    String? endDate = pref.getString('endPurchaseDate');
-    return endDate ?? '';
-  }
-
-  // GST return amount date
-  static Future<bool> setSelectedMonth(String selectedMonth) async {
-    return pref.setString("selectedMonth", selectedMonth);
-  }
-  static String getSelectedMonth() {
-    String? selectedMonth = pref.getString('selectedMonth');
-    return selectedMonth ?? '';
-  }
-
-  static Future<bool> setSelectedYear(String selectedYear) async {
-    return pref.setString("selectedYear", selectedYear);
-  }
-  static String getSelectedYear() {
-    String? selectedYear = pref.getString('selectedYear');
-    return selectedYear ?? '';
   }
 
   static Future<bool> checkInternet() async {
@@ -210,10 +194,6 @@ class HelperFunctions {
     } on SocketException catch (_) {
       return false;
     }
-  }
-
-  static Future<bool> setSellId(String id) async {
-    return pref.setString("dealStatus", id);
   }
 
   static Future<bool> isNetworkResponsive() async {

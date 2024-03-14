@@ -46,12 +46,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
         dashboardModel = await GetDashboardData();
-        setState(() {
-          isLoading = false;
-        });
       } else{
         setState(() {
           purchaseAmount = "0.00";
@@ -198,7 +198,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
         DashboardModel? model = await dashboardServices.showDashboardData();
         if (model?.success == true) {
-          // purchaseDeals?.addAll(model!.data!.purchaseDeals!);
          if (model?.data != null) {
            setState(() {
              dashboardModel = model;

@@ -108,7 +108,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               CustomDropdownNew<ActiveFirmsList>(
                                 hintText: 'Select Firm',
                                 dropdownItems:firms ?? [],
-                                selectedValue:selectedFirm,
+                                selectedValue:firms.any((firm) => firm.firmId == selectedFirm) ? selectedFirm : null,
                                 errorText: selectedFirm == null ? 'Firm is required' : null,
                                 onChanged:(newValue){
                                   setState(() {
@@ -141,7 +141,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               CustomDropdownNew<ActivePartiesList>(
                                 hintText: 'Select Party',
                                 dropdownItems:parties ?? [],
-                                selectedValue:selectedParty,
+                                selectedValue: parties.any((party) => party.partyId == selectedParty) ? selectedParty : null,
                                 errorText: selectedParty == null ? 'Party is required' : null,
                                 onChanged:(newValue){
                                   setState(() {
@@ -169,7 +169,7 @@ class _ClothSellAddState extends State<ClothSellAdd> {
                               CustomDropdownNew<ClothQuality>(
                                 hintText: 'Cloth Quality',
                                 dropdownItems:activeClothQuality ?? [],
-                                selectedValue:selectedClothQuality,
+                                selectedValue: activeClothQuality.any((cloth) => cloth.qualityId == selectedClothQuality) ? selectedClothQuality : null,
                                 errorText: selectedClothQuality == null ? 'Cloth Quality is required' : null,
                                 onChanged:(newValue){
                                   setState(() {

@@ -27,6 +27,7 @@ class BoxToBeReceived extends StatefulWidget {
 
 class _BoxToBeReceivedState extends State<BoxToBeReceived> {
   bool _isLoading = false;
+  bool isNetworkAvailable = true;
   int currentPage = 1;
   List<YarnToBeReceivedReminderList> reminderForYarnToBeReceived = [];
   ManageYarnReminderServices manageYarnReminderServices = ManageYarnReminderServices();
@@ -35,19 +36,10 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        _isLoading = !_isLoading;
-      });
-      yarnToBeReceivedData(currentPage.toString());
-    }
+    setState(() {
+      _isLoading = !_isLoading;
+    });
+    yarnToBeReceivedData(currentPage.toString());
   }
   @override
   Widget build(BuildContext context) {
@@ -55,10 +47,10 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
       CustomDrawer(
         content: CustomBody(
             isLoading: _isLoading,
+            internetNotAvailable: isNetworkAvailable,
             title: S.of(context).yarnToBeReceived,
             content:reminderForYarnToBeReceived.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
-            ) :
-            Padding(
+            ) : Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:
               SmartRefresher(
@@ -279,20 +271,26 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
       _isLoading = true; // Show loader before making API call
     });
     try {
-      YarnToBeReceivedModel? model = await manageYarnReminderServices.yarnToBeReceived(
-          pageNo);
-      if (model!.success == true) {
-        setState(() {
-          reminderForYarnToBeReceived.addAll(model.data!);
-          currentPage++;
-        });
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        YarnToBeReceivedModel? model = await manageYarnReminderServices.yarnToBeReceived(
+            pageNo);
+        if (model!.success == true) {
+          setState(() {
+            reminderForYarnToBeReceived.addAll(model.data!);
+            currentPage++;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            'Something went wrong, please try again later.',
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     }
     finally {

@@ -322,37 +322,29 @@ class _FirmAddState extends State<FirmAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            Map<String, String> body = {
+                              "firm_id": widget.firmId != null ? widget.firmId.toString() : "",
+                              "user_id" : HelperFunctions.getUserID(),
+                              "owner_name": partyNameController.text,
+                              "firm_name": firmNameController.text,
+                              "address": addressController.text,
+                              "gst_number": gstNumberController.text,
+                              "pan_number": panNumberController.text,
+                              "phone_number": phoneNumberController.text,
+                              "account_holder_name": accountHolderNameController.text,
+                              "bank_name": bankNameController.text,
+                              "ifsc_code": ifscCodeController.text,
+                              "account_number": accountNumberController.text,
+                              "group_code": groupCodeController.text,
+                            };
+                            if (widget.firmId == null) {
+                              _addFirm(body, _selectedFile);
                             } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-                              Map<String, String> body = {
-                                "firm_id": widget.firmId != null ? widget.firmId.toString() : "",
-                                "user_id" : HelperFunctions.getUserID(),
-                                "owner_name": partyNameController.text,
-                                "firm_name": firmNameController.text,
-                                "address": addressController.text,
-                                "gst_number": gstNumberController.text,
-                                "pan_number": panNumberController.text,
-                                "phone_number": phoneNumberController.text,
-                                "account_holder_name": accountHolderNameController.text,
-                                "bank_name": bankNameController.text,
-                                "ifsc_code": ifscCodeController.text,
-                                "account_number": accountNumberController.text,
-                                "group_code": groupCodeController.text,
-                              };
-                              if (widget.firmId == null) {
-                                _addFirm(body, _selectedFile);
-                              } else {
-                                _updateFirm(body, _selectedFile);
-                              }
+                              var imageUrl = _selectedFile != null ? _selectedFile is File ? _selectedFile : null : null;
+                              _updateFirm(body, imageUrl);
                             }
                           }
                         },
@@ -554,96 +546,26 @@ class _FirmAddState extends State<FirmAdd> {
   }
 
   Future<void> _addFirm(Map<String, String> body, File? signature) async {
-    AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body, signature);
-    if (addFirmModel?.message != null) {
-      if (addFirmModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addFirmModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
-      }  else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          addFirmModel!.message.toString(),
-          mode: SnackbarMode.error,
-        );
-      }
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddFirmModel? addFirmModel = await manageFirmServices.addFirm(body, signature);
+      if (addFirmModel?.message != null) {
+        if (addFirmModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addFirmModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addFirmModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
 
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      CustomApiSnackbar.show(
-        context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
-      );
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _updateFirm(Map<String, String> body, File? signature) async {
-    UpdateFirmModel? updateFirmModel = await manageFirmServices.updateFirm(body, signature);
-    if (updateFirmModel?.message != null) {
-      if (updateFirmModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateFirmModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
-      }  else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          updateFirmModel!.message.toString(),
-          mode: SnackbarMode.error,
-        );
-      }
-
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      CustomApiSnackbar.show(
-        context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
-      );
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _getFirmDetails() async {
-    setState(() {
-      isLoading = true;
-    });
-    FirmDetailModel? firmDetailModel = await manageFirmServices.viewFirm(widget.firmId!);
-    if (firmDetailModel?.message != null) {
-      if (firmDetailModel?.success == true) {
-        partyNameController.text = firmDetailModel!.data!.ownerName ?? '';
-        firmNameController.text = firmDetailModel.data!.firmName ?? '';
-        addressController.text = firmDetailModel.data!.address ?? '';
-        gstNumberController.text = firmDetailModel.data!.gstNumber ?? '';
-        panNumberController.text = firmDetailModel.data!.panNumber ?? '';
-        phoneNumberController.text = firmDetailModel.data!.phoneNumber ?? '';
-        accountHolderNameController.text = firmDetailModel.data!.bankDetails?.accountHolderName ?? '';
-        bankNameController.text = firmDetailModel.data!.bankDetails?.bankName ?? '';
-        ifscCodeController.text = firmDetailModel.data!.bankDetails?.ifscCode ?? '';
-        accountNumberController.text = firmDetailModel.data!.bankDetails?.accountNumber ?? '';
-        groupCodeController.text = firmDetailModel.data!.groupCode ?? '';
-        _selectedFile = firmDetailModel.data!.signature ?? null;
         setState(() {
           isLoading = false;
         });
@@ -651,16 +573,122 @@ class _FirmAddState extends State<FirmAdd> {
         CustomApiSnackbar.show(
           context,
           'Error',
-          firmDetailModel!.message.toString(),
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    }
+  }
+
+  Future<void> _updateFirm(Map<String, String> body, File? signature) async {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()){
+      UpdateFirmModel? updateFirmModel = await manageFirmServices.updateFirm(body, signature);
+      if (updateFirmModel?.message != null) {
+        if (updateFirmModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateFirmModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateFirmModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
+      );
+    }
+  }
+
+  Future<void> _getFirmDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      FirmDetailModel? firmDetailModel = await manageFirmServices.viewFirm(widget.firmId!);
+      if (firmDetailModel?.message != null) {
+        if (firmDetailModel?.success == true) {
+          partyNameController.text = firmDetailModel!.data!.ownerName ?? '';
+          firmNameController.text = firmDetailModel.data!.firmName ?? '';
+          addressController.text = firmDetailModel.data!.address ?? '';
+          gstNumberController.text = firmDetailModel.data!.gstNumber ?? '';
+          panNumberController.text = firmDetailModel.data!.panNumber ?? '';
+          phoneNumberController.text = firmDetailModel.data!.phoneNumber ?? '';
+          accountHolderNameController.text = firmDetailModel.data!.bankDetails?.accountHolderName ?? '';
+          bankNameController.text = firmDetailModel.data!.bankDetails?.bankName ?? '';
+          ifscCodeController.text = firmDetailModel.data!.bankDetails?.ifscCode ?? '';
+          accountNumberController.text = firmDetailModel.data!.bankDetails?.accountNumber ?? '';
+          groupCodeController.text = firmDetailModel.data!.groupCode ?? '';
+          _selectedFile = firmDetailModel.data!.signature ?? null;
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            firmDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
+      setState(() {
+        isLoading = false;
+      });
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No internet connection',
+        mode: SnackbarMode.warning,
       );
     }
   }

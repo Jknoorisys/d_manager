@@ -34,17 +34,17 @@ class GetInvoiceModel {
 
 class Data {
   int? invoiceId;
-  DateTime? invoiceDate;
+  String? invoiceDate;
   String? invoiceNumber;
   String? sellId;
   String? paymentType;
-  DateTime? paymentDueDate;
+  String? paymentDueDate;
   dynamic dharaDays;
   String? rate;
   String? discount;
   String? invoiceAmount;
   String? gst;
-  DateTime? dueDate;
+  String? dueDate;
   String? paidStatus;
   String? receivedAmount;
   String? differenceAmount;
@@ -88,17 +88,17 @@ class Data {
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     invoiceId: json["invoice_id"],
-    invoiceDate: json["invoice_date"] == null ? null : DateTime.parse(json["invoice_date"]),
+    invoiceDate: json["invoice_date"],
     invoiceNumber: json["invoice_number"],
     sellId: json["sell_id"],
     paymentType: json["payment_type"],
-    paymentDueDate: json["payment_due_date"] == null ? null : DateTime.parse(json["payment_due_date"]),
+    paymentDueDate: json["payment_due_date"],
     dharaDays: json["dhara_days"],
     rate: json["rate"],
     discount: json["discount"],
     invoiceAmount: json["invoice_amount"],
     gst: json["gst"],
-    dueDate: json["due_date"] == null ? null : DateTime.parse(json["due_date"]),
+    dueDate: json["due_date"],
     paidStatus: json["paid_status"],
     receivedAmount: json["received_amount"],
     differenceAmount: json["difference_amount"],
@@ -115,17 +115,17 @@ class Data {
 
   Map<String, dynamic> toJson() => {
     "invoice_id": invoiceId,
-    "invoice_date": "${invoiceDate!.year.toString().padLeft(4, '0')}-${invoiceDate!.month.toString().padLeft(2, '0')}-${invoiceDate!.day.toString().padLeft(2, '0')}",
+    "invoice_date": invoiceDate,
     "invoice_number": invoiceNumber,
     "sell_id": sellId,
     "payment_type": paymentType,
-    "payment_due_date": "${paymentDueDate!.year.toString().padLeft(4, '0')}-${paymentDueDate!.month.toString().padLeft(2, '0')}-${paymentDueDate!.day.toString().padLeft(2, '0')}",
+    "payment_due_date": paymentDueDate,
     "dhara_days": dharaDays,
     "rate": rate,
     "discount": discount,
     "invoice_amount": invoiceAmount,
     "gst": gst,
-    "due_date": "${dueDate!.year.toString().padLeft(4, '0')}-${dueDate!.month.toString().padLeft(2, '0')}-${dueDate!.day.toString().padLeft(2, '0')}",
+    "due_date": dueDate,
     "paid_status": paidStatus,
     "received_amount": receivedAmount,
     "difference_amount": differenceAmount,

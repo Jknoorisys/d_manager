@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final deliveryListModel = deliveryListModelFromJson(jsonString);
-
 import 'dart:convert';
 
 DeliveryListModel deliveryListModelFromJson(String str) => DeliveryListModel.fromJson(json.decode(str));
@@ -48,7 +44,6 @@ class DeliveryDetails {
   String? rate;
   String? grossWeight;
   String? netWeight;
-  DateTime? nextDeliveryDate;
   String? cops;
   String? denier;
   String? purchaseAmount;
@@ -72,7 +67,6 @@ class DeliveryDetails {
     this.rate,
     this.grossWeight,
     this.netWeight,
-    this.nextDeliveryDate,
     this.cops,
     this.denier,
     this.purchaseAmount,
@@ -97,7 +91,6 @@ class DeliveryDetails {
     rate: json["rate"],
     grossWeight: json["gross_weight"],
     netWeight: json["net_weight"],
-    nextDeliveryDate: json["next_delivery_date"] == null ? null : DateTime.parse(json["next_delivery_date"]),
     cops: json["cops"],
     denier: json["denier"],
     purchaseAmount: json["purchase_amount"],
@@ -122,7 +115,6 @@ class DeliveryDetails {
     "rate": rate,
     "gross_weight": grossWeight,
     "net_weight": netWeight,
-    "next_delivery_date": "${nextDeliveryDate!.year.toString().padLeft(4, '0')}-${nextDeliveryDate!.month.toString().padLeft(2, '0')}-${nextDeliveryDate!.day.toString().padLeft(2, '0')}",
     "cops": cops,
     "denier": denier,
     "purchase_amount": purchaseAmount,

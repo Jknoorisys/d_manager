@@ -83,27 +83,18 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                if (HelperFunctions.checkInternet() == false) {
-                  CustomApiSnackbar.show(
-                    context,
-                    'Warning',
-                    'No internet connection',
-                    mode: SnackbarMode.warning,
-                  );
+                setState(() {
+                  isLoading = !isLoading;
+                });
+                Map<String, dynamic> body = {
+                  "quality_id": widget.clothQualityId != null ? widget.clothQualityId.toString() : "",
+                  "user_id" : HelperFunctions.getUserID(),
+                  "quality_name": clothQualityController.text,
+                };
+                if (widget.clothQualityId == null) {
+                  _addClothQuality(body);
                 } else {
-                  setState(() {
-                    isLoading = !isLoading;
-                  });
-                  Map<String, dynamic> body = {
-                    "quality_id": widget.clothQualityId != null ? widget.clothQualityId.toString() : "",
-                    "user_id" : HelperFunctions.getUserID(),
-                    "quality_name": clothQualityController.text,
-                  };
-                  if (widget.clothQualityId == null) {
-                    _addClothQuality(body);
-                  } else {
-                    _updateClothQuality(body);
-                  }
+                  _updateClothQuality(body);
                 }
               }
             },
@@ -127,34 +118,49 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
   }
 
   Future<void> _addClothQuality(Map<String, dynamic> body) async {
-    AddClothQualityModel? addClothQualityModel = await clothQualityServices.addClothQuality(body);
-    if (addClothQualityModel?.message != null) {
-      if (addClothQualityModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addClothQualityModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.clothQualityList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddClothQualityModel? addClothQualityModel = await clothQualityServices.addClothQuality(body);
+      if (addClothQualityModel?.message != null) {
+        if (addClothQualityModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addClothQualityModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.clothQualityList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addClothQualityModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addClothQualityModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
+    } else {
       setState(() {
         isLoading = false;
       });
-    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -163,34 +169,49 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
   }
 
   Future<void> _updateClothQuality(Map<String, dynamic> body) async {
-    UpdateClothQualityModel? updateClothQualityModel = await clothQualityServices.updateClothQuality(body);
-    if (updateClothQualityModel?.message != null) {
-      if (updateClothQualityModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateClothQualityModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.clothQualityList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdateClothQualityModel? updateClothQualityModel = await clothQualityServices.updateClothQuality(body);
+      if (updateClothQualityModel?.message != null) {
+        if (updateClothQualityModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateClothQualityModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.clothQualityList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateClothQualityModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          updateClothQualityModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
+    } else {
       setState(() {
         isLoading = false;
       });
-    } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -202,28 +223,43 @@ class _ClothQualityAddState extends State<ClothQualityAdd> {
     setState(() {
       isLoading = true;
     });
-    ClothQualityDetailModel? yarnDetailModel = await clothQualityServices.viewClothQuality(widget.clothQualityId!);
-    if (yarnDetailModel?.message != null) {
-      if (yarnDetailModel?.success == true) {
-        clothQualityController.text = yarnDetailModel!.data!.qualityName.toString();
-        setState(() {
-          isLoading = false;
-        });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      ClothQualityDetailModel? yarnDetailModel = await clothQualityServices.viewClothQuality(widget.clothQualityId!);
+      if (yarnDetailModel?.message != null) {
+        if (yarnDetailModel?.success == true) {
+          clothQualityController.text = yarnDetailModel!.data!.qualityName.toString();
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            yarnDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          yarnDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
+      setState(() {
+        isLoading = false;
+      });
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

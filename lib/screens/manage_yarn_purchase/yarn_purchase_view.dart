@@ -1,8 +1,11 @@
+import 'package:d_manager/api/manage_delivery_services.dart';
 import 'package:d_manager/api/manage_purchase_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/delivery_models/DeliveryListModel.dart';
 import 'package:d_manager/models/yarn_purchase_models/yarn_purchase_detail_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
@@ -13,9 +16,9 @@ import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:getwidget/components/checkbox/gf_checkbox.dart';
-import 'package:getwidget/types/gf_checkbox_type.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class YarnPurchaseView extends StatefulWidget {
   final String purchaseId;
@@ -26,27 +29,28 @@ class YarnPurchaseView extends StatefulWidget {
 }
 
 class _YarnPurchaseViewState extends State<YarnPurchaseView> {
+
+  final RefreshController _refreshController = RefreshController();
+  List<DeliveryDetails> deliveries = [];
+  int currentPage = 1;
+  bool isFilterApplied = false;
+  ManagePurchaseServices purchaseServices = ManagePurchaseServices();
+  var selectedBillRecieved;
+  var selectedPaymentPaid;
+
   String billReceived = 'Yes'; 
   String paymentPaid = 'Yes';
   bool isLoading = false;
+  bool isNetworkAvailable = true;
   Data? yarnPurchaseData;
   bool noRecordFound = false;
-
-  ManagePurchaseServices purchaseServices = ManagePurchaseServices();
-
-  List<Map<String, dynamic>> deliveryDetailList = [
-    {'no': 1, 'dealDate': '2024-01-25', 'paymentType': 'Current', 'paymentMethod': 'Cheque', 'boxReceived': '500', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-10', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
-    {'no': 2, 'dealDate': '2024-01-26', 'paymentType': 'Dhara', 'paymentMethod': 'RTGS', 'boxReceived': '400', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-12', 'paid': true, 'paidDate': '2024-02-05', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
-    {'no': 3, 'dealDate': '2024-01-27', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '650', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-15', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'Completed'},
-    {'no': 4, 'dealDate': '2024-01-28', 'paymentType': 'Dhara', 'paymentMethod': 'Cheque', 'boxReceived': '550', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-18', 'paid': true, 'paidDate': '2024-02-10', 'amountPaid': '123750', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': true, 'viewPDF': 'invoice.pdf', 'status': 'On Going'},
-    {'no': 5, 'dealDate': '2024-01-29', 'paymentType': 'Current', 'paymentMethod': 'RTGS', 'boxReceived': '600', 'grossWeight': '4950', 'rate': '25', 'billAmount': '123750', 'GST': '18562.5', 'dueDate': '2024-02-20', 'paid': false, 'paidDate': '2024-02-05', 'amountPaid': '0', 'differenceInAmount': '0', 'cops': '2000', 'denyar': '30', 'billReceived': false, 'viewPDF': 'sample.pdf', 'status': 'On Going'},
-  ];
-
+  ManageDeliveryServices deliveryServices = ManageDeliveryServices();
   @override
   void initState() {
     isLoading = true;
   if (widget.purchaseId != null) {
     _getPurchaseDetails();
+    _loadData(currentPage);
   } else {
     setState(() {
       noRecordFound = true;
@@ -92,7 +96,9 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  BigText(text: yarnPurchaseData!.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                  SizedBox(
+                                    width: Dimensions.screenWidth * 0.5,
+                                      child: BigText(text: yarnPurchaseData!.partyName!, color: AppTheme.primary, size: Dimensions.font16)),
                                   Row(
                                     children: [
                                       CircleAvatar(
@@ -101,7 +107,9 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                                         child: BigText(text: yarnPurchaseData!.firmName![0] ?? '', color: AppTheme.secondaryLight, size: Dimensions.font12),
                                       ),
                                       SizedBox(width: Dimensions.width10),
-                                      SmallText(text: yarnPurchaseData!.firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                      SizedBox(
+                                          width: Dimensions.screenWidth * 0.5,
+                                          child: SmallText(text: yarnPurchaseData!.firmName!, color: AppTheme.black, size: Dimensions.font12)),
                                     ],
                                   ),
                                 ],
@@ -249,6 +257,12 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                             onChanged: (newValue) {
                               setState(() {
                                 billReceived = newValue!;
+                                selectedBillRecieved = newValue == 'Yes' ? 'yes' : 'no';
+                                isLoading = true;
+                                deliveries.clear();
+                                currentPage = 1;
+                                isFilterApplied = true;
+                                _loadData(currentPage);
                               });
                             },
                           ),
@@ -266,200 +280,233 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
                             onChanged: (newValue) {
                               setState(() {
                                 paymentPaid = newValue!;
+                                selectedPaymentPaid = newValue == 'Yes' ? 'yes' : 'no';
+                                isLoading = true;
+                                deliveries.clear();
+                                currentPage = 1;
+                                isFilterApplied = true;
+                                _loadData(currentPage);
                               });
                             },
                           ),
                         ],
                       ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: '', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          IconButton(
+                            tooltip: 'Clear Filter',
+                              onPressed: () {
+                                setState(() {
+                                  isLoading = true;
+                                  deliveries.clear();
+                                  currentPage = 1;
+                                  isFilterApplied = false;
+                                  selectedBillRecieved = null;
+                                  selectedPaymentPaid = null;
+                                  _loadData(currentPage);
+                                });
+                              },
+                            icon: const FaIcon(FontAwesomeIcons.filterCircleXmark, color: AppTheme.black),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                   SizedBox(height: Dimensions.height10),
-                  SizedBox(
+                  deliveries.isNotEmpty ? SizedBox(
                     height: MediaQuery.of(context).size.height / 1.5,
-                    child: ListView.builder(
-                      itemCount: deliveryDetailList.length,
-                      itemBuilder: (context, index) {
-                        return CustomAccordion(
-                          titleChild: Row(
-                            children: [
-                              _buildInfoColumn('Delivery Date', deliveryDetailList[index]['dealDate']),
-                              SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Payment Type', deliveryDetailList[index]['paymentType']),
-                              SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Payment Method', deliveryDetailList[index]['paymentMethod']),
-                            ],
-                          ),
-                          contentChild: Column(
-                            children: [
-                              SizedBox(height: Dimensions.height10),
-                              AppTheme.divider,
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Box Ordered', yarnPurchaseData!.orderedBoxCount!),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Received', deliveryDetailList[index]['boxReceived']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Remaining', yarnPurchaseData!.deliveredBoxCount!),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Paid Date', deliveryDetailList[index]['paidDate']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Amount Paid', deliveryDetailList[index]['amountPaid']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Bill Amount', deliveryDetailList[index]['billAmount']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('GST', deliveryDetailList[index]['GST']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Due Date', deliveryDetailList[index]['dueDate']),
-                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Difference In Amount', deliveryDetailList[index]['differenceInAmount']),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Denier', deliveryDetailList[index]['denyar']),
-                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Cops', deliveryDetailList[index]['cops']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Net Weight', '${deliveryDetailList[index]['netWeight']} Kg'),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('View PDF', deliveryDetailList[index]['viewPDF']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Status', deliveryDetailList[index]['status']),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('', ''),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  // _buildInfoColumn('View PDF', deliveryDetailList[index]['viewPDF']),
-                                  // // SizedBox(width: Dimensions.width20),
-                                  // _buildInfoColumn('Status', deliveryDetailList[index]['status']),
-                                  // SizedBox(width: Dimensions.width20),
-                                  // _buildInfoColumn('', ''),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
-                                      padding: EdgeInsets.all(Dimensions.height10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                        border: Border.all(color: AppTheme.primary),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          BigText(text: 'Gross wt (ton)', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          RichText(
-                                            text: TextSpan(
-                                              style: TextStyle(
-                                                color: AppTheme.primary,
-                                                fontSize: Dimensions.font18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text: deliveryDetailList[index]['netWeight'],
-                                                ),
-                                                TextSpan(
-                                                  text: ' kg',
-                                                  style: TextStyle(
-                                                    fontSize: Dimensions.font12,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          BigText(text: 'Gross Weight ${yarnPurchaseData!.grossWeight!} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                        ],
-                                      )
-                                  ),
-                                  SizedBox(width: Dimensions.width20),
-                                  Container(
-                                      width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
-                                      padding: EdgeInsets.all(Dimensions.height10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                        border: Border.all(color: AppTheme.primary),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '₹ ${yarnPurchaseData!.rate!}',color: AppTheme.primary, size: Dimensions.font18)
-                                        ],
-                                      )
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailView, arguments: {'purchaseID' : widget.purchaseId, 'deliveryID': deliveryDetailList[index]['id'].toString()});
-                                    },
-                                    icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd, arguments: {'purchaseID': widget.purchaseId, 'deliveryID': deliveryDetailList[index]['id'].toString()});
-                                    },
-                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        deliveryDetailList.removeAt(index);
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete_outline, color: AppTheme.primary),
-                                  ),
-                                  GFCheckbox(
-                                    size: Dimensions.height20,
-                                    type: GFCheckboxType.custom,
-                                    inactiveBgColor: AppTheme.nearlyWhite,
-                                    inactiveBorderColor: AppTheme.primary,
-                                    customBgColor: AppTheme.primary,
-                                    activeBorderColor: AppTheme.primary,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        deliveryDetailList[index]['status'] = value == true ? 'Completed' : 'On Going';
-                                      });
-                                    },
-                                    value: deliveryDetailList[index]['status'] == 'Completed' ? true : false,
-                                    inactiveIcon: null,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
+                    child: SmartRefresher(
+                      controller: _refreshController,
+                      enablePullUp: true,
+                      onRefresh: () async {
+                        setState(() {
+                          deliveries.clear();
+                          currentPage = 1;
+                        });
+                        await _loadData(currentPage);
+                        _refreshController.refreshCompleted();
                       },
+                      onLoading: () async {
+                        await _loadData(currentPage);
+                        _refreshController.loadComplete();
+                      },
+                      child: ListView.builder(
+                        itemCount: deliveries.length,
+                        itemBuilder: (context, index) {
+                          var delivery = deliveries[index];
+                          return CustomAccordion(
+                            titleChild: Row(
+                              children: [
+                                _buildInfoColumn('Delivery Date', delivery.deliveryDate!.toString().split(' ')[0]),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Payment Type', delivery.paymentType! == 'current' ? 'Current' : 'Dhara'),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Payment Method', delivery.paymentMethod == null ? 'N/A' : delivery.paymentMethod!),
+                              ],
+                            ),
+                            contentChild: Column(
+                              children: [
+                                SizedBox(height: Dimensions.height10),
+                                AppTheme.divider,
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    _buildInfoColumn('Box Ordered', yarnPurchaseData!.orderedBoxCount!),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Box Received', delivery.deliveredBoxCount!),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Box Remaining', (int.parse(yarnPurchaseData!.orderedBoxCount!) - int.parse(delivery.deliveredBoxCount!)).toString()),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    _buildInfoColumn('Paid Date', delivery.paymentDate == null ? 'N/A' : delivery.paymentDate!.toString().split(' ')[0]),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Amount Paid', '₹ ${delivery.paidAmount}'),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Bill Amount', '₹ ${delivery.purchaseAmount}'),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    _buildInfoColumn('GST', '₹ ${delivery.gstBillAmount}'),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Due Date', delivery.paymentDueDate != null ? delivery.paymentDueDate!.toString().split(' ')[0] : 'N/A'),
+                                     SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Dhara Days', delivery.dharaDays ?? 'N/A'),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    _buildInfoColumn('Denier', delivery.denier!),
+                                     SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Cops', delivery.cops!),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('Net Weight', delivery.netWeight!),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    _buildInfoColumn('Payment Notes', delivery.paymentNotes == null ? 'N/A' : delivery.paymentNotes!),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('', ''),
+                                    SizedBox(width: Dimensions.width20),
+                                    _buildInfoColumn('', ''),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  children: [
+                                    Container(
+                                        width: MediaQuery.of(context).size.width/2.65,
+                                        height: Dimensions.height40*2.5,
+                                        padding: EdgeInsets.all(Dimensions.height10),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                          border: Border.all(color: AppTheme.primary),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            BigText(text: 'Net Weight (ton)', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                            RichText(
+                                              text: TextSpan(
+                                                style: TextStyle(
+                                                  color: AppTheme.primary,
+                                                  fontSize: Dimensions.font18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text: delivery.netWeight!,
+                                                  ),
+                                                  TextSpan(
+                                                    text: ' ton',
+                                                    style: TextStyle(
+                                                      fontSize: Dimensions.font12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            BigText(text: 'Gross Weight ${yarnPurchaseData!.grossWeight!} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          ],
+                                        )
+                                    ),
+                                    SizedBox(width: Dimensions.width20),
+                                    Container(
+                                        width: MediaQuery.of(context).size.width/2.65,
+                                        height: Dimensions.height40*2.5,
+                                        padding: EdgeInsets.all(Dimensions.height10),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                          border: Border.all(color: AppTheme.primary),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                            BigText(text: '₹ ${yarnPurchaseData!.rate!}',color: AppTheme.primary, size: Dimensions.font18)
+                                          ],
+                                        )
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(AppRoutes.deliveryDetailView, arguments: {'purchaseID' : widget.purchaseId, 'deliveryID': delivery.purchaseDeliveryId.toString()});
+                                      },
+                                      icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(AppRoutes.deliveryDetailAdd, arguments: {'purchaseID': widget.purchaseId, 'deliveryID': delivery.purchaseDeliveryId.toString()});
+                                      },
+                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
+                                    ),
+                                    // GFCheckbox(
+                                    //   size: Dimensions.height20,
+                                    //   type: GFCheckboxType.custom,
+                                    //   inactiveBgColor: AppTheme.nearlyWhite,
+                                    //   inactiveBorderColor: AppTheme.primary,
+                                    //   customBgColor: AppTheme.primary,
+                                    //   activeBorderColor: AppTheme.primary,
+                                    //   onChanged: (value) {
+                                    //     setState(() {
+                                    //       deliveryDetailList[index]['status'] = value == true ? 'Completed' : 'On Going';
+                                    //     });
+                                    //   },
+                                    //   value: deliveryDetailList[index]['status'] == 'Completed' ? true : false,
+                                    //   inactiveIcon: null,
+                                    // ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
+                  ) : Center(child: Column(
+                    children: [
+                      SizedBox(height: Dimensions.height30),
+                      NoRecordFound(),
+                    ],
+                  )),
                 ],
               ),
             ),
@@ -484,33 +531,100 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
     setState(() {
       isLoading = true;
     });
-    YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(int.parse(widget.purchaseId));
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(int.parse(widget.purchaseId));
 
-    if (dealDetailModel?.message != null) {
-      if (dealDetailModel?.success == true) {
-        setState(() {
-          isLoading = false;
-          if (dealDetailModel!.data != null) {
-            yarnPurchaseData = dealDetailModel.data;
-          } else {
-            noRecordFound = true;
-          }
-        });
+      if (dealDetailModel?.message != null) {
+        if (dealDetailModel?.success == true) {
+          setState(() {
+            isLoading = false;
+            if (dealDetailModel!.data != null) {
+              yarnPurchaseData = dealDetailModel.data;
+            } else {
+              noRecordFound = true;
+            }
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            dealDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          dealDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
-      CustomApiSnackbar.show(
-        context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
-      );
+      setState(() {
+        isLoading = false;
+        isNetworkAvailable = false;
+      });
+    }
+  }
+
+  Future<void> _loadData(int pageNo) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        DeliveryListModel? deliveryListModel = await deliveryServices.deliveryList(
+            pageNo, widget.purchaseId, selectedPaymentPaid, selectedBillRecieved);
+
+        if (deliveryListModel != null) {
+          if (deliveryListModel.success == true) {
+            if (deliveryListModel.data != null) {
+              if (deliveryListModel.data!.isNotEmpty) {
+                if (pageNo == 1) {
+                  deliveries.clear();
+                }
+
+                setState(() {
+                  deliveries.addAll(deliveryListModel.data!);
+                  isLoading = false;
+                  noRecordFound = false;
+                  currentPage++;
+                });
+              } else {
+                _refreshController.loadNoData();
+              }
+            } else {
+              setState(() {
+                noRecordFound = true;
+              });
+            }
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              deliveryListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            'Something went wrong, please try again later.',
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        setState(() {
+          isNetworkAvailable = false;
+        });
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

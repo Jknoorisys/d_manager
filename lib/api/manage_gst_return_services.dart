@@ -5,12 +5,12 @@ import '../models/gst_return_models/gst_return_models.dart';
 import 'manage_sell_deals.dart';
 
 class GstReturnServices{
-  Future<GstReturnAmountModel?> showGstReturnAmount()async{
+  Future<GstReturnAmountModel?> showGstReturnAmount([String? month, String? year])async{
     try{
       Map<String, dynamic> body = {
         "user_id":HelperFunctions.getUserID(),
-        "month": HelperFunctions.getSelectedMonth(),
-        "year":HelperFunctions.getSelectedYear()
+        "month": month,
+        "year": year,
       };
       print("param === "+ body.toString() + "URL ==== "+ gstReturnApi);
       Response response = await dio.post(gstReturnApi, data: body,

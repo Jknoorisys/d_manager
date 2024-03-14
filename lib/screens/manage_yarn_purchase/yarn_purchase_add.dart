@@ -59,11 +59,11 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
 
   @override
   void initState() {
+    super.initState();
+    isLoading = true;
     if (widget.purchaseId != null) {
       _getDealDetails();
     }
-    super.initState();
-    isLoading = true;
     _getFirms();
     _getParties();
     _getYarns();
@@ -139,7 +139,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                               CustomApiDropdown(
                                   hintText: 'Select Firm',
                                   dropdownItems: firms.map((e) => DropdownMenuItem<dynamic>(value: e.firmId!, child: BigText(text: e.firmName!, size: Dimensions.font14,))).toList(),
-                                  selectedValue: selectedFirm,
+                                  selectedValue: firms.any((firm) => firm.firmId == selectedFirm) ? selectedFirm : null,
                                   errorText: errorFirm.toString() != 'null' ? errorFirm.toString() : null,
                                   onChanged: (newValue) {
                                     setState(() {
@@ -164,7 +164,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                               CustomApiDropdown(
                                   hintText: 'Select Party',
                                   dropdownItems: parties.map((e) => DropdownMenuItem<dynamic>(value: e.partyId!, child: BigText(text: e.partyName!, size: Dimensions.font14,))).toList(),
-                                  selectedValue: selectedParty,
+                                  selectedValue: parties.any((party) => party.partyId == selectedParty) ? selectedParty : null,
                                   errorText: errorParty.toString() != 'null' ? errorParty.toString() : null,
                                   onChanged: (newValue) {
                                     setState(() {
@@ -231,7 +231,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                               CustomApiDropdown(
                                 hintText: 'Select Yarn',
                                   dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
-                                  selectedValue: selectedYarn,
+                                  selectedValue: yarns.any((yarn) => yarn.yarnTypeId == selectedYarn) ? selectedYarn : null,
                                   errorText: errorYarn.toString() != 'null' ? errorYarn.toString() : null,
                                   onChanged: (newValue) {
                                     setState(() {
@@ -377,40 +377,31 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                             submitted = true;
                           });
                           if (_isFormValid()) {
-                            if (HelperFunctions.checkInternet() == false) {
-                              CustomApiSnackbar.show(
-                                context,
-                                'Warning',
-                                'No internet connection',
-                                mode: SnackbarMode.warning,
-                              );
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            Map<String, String> body = {
+                              'purchase_id': widget.purchaseId.toString() ?? '',
+                              'user_id': HelperFunctions.getUserID(),
+                              'lot_number': lotNumberController.text,
+                              'gross_weight': grossWeightController.text,
+                              'ordered_box_count': boxOrderedController.text,
+                              'denier': denyarController.text,
+                              'rate': rateController.text,
+                              'cops': copsController.text,
+                              'status': selectedStatus,
+                              'payment_type': paymentType == 'Current' ? 'current' : 'dhara',
+                              'purchase_date': DateFormat('yyyy-MM-dd').format(selectedDate),
+                              'firm_id': selectedFirm.toString(),
+                              'party_id': selectedParty.toString(),
+                              'yarn_type_id': selectedYarn.toString(),
+                              'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
+                              'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
+                            };
+                            if (widget.purchaseId == null) {
+                              _addPurchaseDeal(body);
                             } else {
-                              setState(() {
-                                isLoading = !isLoading;
-                              });
-                              Map<String, dynamic> body = {
-                                'purchase_id': widget.purchaseId ?? '',
-                                'user_id': HelperFunctions.getUserID(),
-                                'lot_number': lotNumberController.text,
-                                'gross_weight': grossWeightController.text,
-                                'ordered_box_count': boxOrderedController.text,
-                                'denier': denyarController.text,
-                                'rate': rateController.text,
-                                'cops': copsController.text,
-                                'status': selectedStatus,
-                                'payment_type': paymentType == 'Current' ? 'current' : 'dhara',
-                                'purchase_date': DateFormat('yyyy-MM-dd').format(selectedDate),
-                                'firm_id': selectedFirm.toString(),
-                                'party_id': selectedParty.toString(),
-                                'yarn_type_id': selectedYarn.toString(),
-                                'payment_due_date' : (paymentType == 'Current' || (paymentType == 'Dhara' && dharaOption == 'Other')) ? DateFormat('yyyy-MM-dd').format(selectedDueDate) : '',
-                                'dhara_days': paymentType != 'Current' ? (dharaOption == '15 days' ? '15' : dharaOption == '40 days' ? '40' : '') : '',
-                              };
-                              if (widget.purchaseId == null) {
-                                _addPurchaseDeal(body);
-                              } else {
-                                _updatePurchaseDeal(body);
-                              }
+                              _updatePurchaseDeal(body);
                             }
                           }
                         },
@@ -568,35 +559,47 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     }
   }
 
-  Future<void> _addPurchaseDeal(Map<String, dynamic> body) async {
-    AddYarnPurchaseModel? addPurchaseModel = await purchaseServices.addPurchase(body);
-    if (addPurchaseModel?.message != null) {
-      if (addPurchaseModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addPurchaseModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseList);
-      }  else {
+  Future<void> _addPurchaseDeal(Map<String, String> body) async {
+    if(await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddYarnPurchaseModel? addPurchaseModel = await purchaseServices.addPurchase(body);
+      if (addPurchaseModel?.message != null) {
+        if (addPurchaseModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addPurchaseModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addPurchaseModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addPurchaseModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -604,35 +607,47 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     }
   }
 
-  Future<void> _updatePurchaseDeal(Map<String, dynamic> body) async {
-    UpdateYarnPurchaseModel? updateDealModel = await purchaseServices.updatePurchase(body);
-    if (updateDealModel?.message != null) {
-      if (updateDealModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateDealModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).pushReplacementNamed(AppRoutes.firmList);
-      }  else {
+  Future<void> _updatePurchaseDeal(Map<String, String> body) async {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdateYarnPurchaseModel? updateDealModel = await purchaseServices.updatePurchase(body);
+      if (updateDealModel?.message != null) {
+        if (updateDealModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateDealModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).pushReplacementNamed(AppRoutes.yarnPurchaseList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateDealModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          updateDealModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -641,43 +656,62 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   }
 
   Future<void> _getDealDetails() async {
-    setState(() {
-      isLoading = true;
-    });
-    YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(widget.purchaseId!);
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      setState(() {
+        isLoading = true;
+      });
+      YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(widget.purchaseId!);
 
-    if (dealDetailModel?.message != null) {
-      if (dealDetailModel?.success == true) {
-        lotNumberController.text = dealDetailModel!.data!.lotNumber!;
-        grossWeightController.text = dealDetailModel.data!.grossWeight!;
-        boxOrderedController.text = dealDetailModel.data!.orderedBoxCount!;
-        denyarController.text = dealDetailModel.data!.denier!;
-        rateController.text = dealDetailModel.data!.rate!;
-        copsController.text = dealDetailModel.data!.cops!;
-        selectedDate = dealDetailModel.data!.purchaseDate != null ? DateTime.parse(dealDetailModel.data!.purchaseDate!) : DateTime.now();
-        selectedDueDate = dealDetailModel.data!.paymentDueDate != null ? DateTime.parse(dealDetailModel.data!.paymentDueDate!) : DateTime.now();
-        selectedFirm = int.parse(dealDetailModel.data!.firmId!);
-        selectedParty = int.parse(dealDetailModel.data!.partyId!);
-        selectedYarn = int.parse(dealDetailModel.data!.yarnTypeId!);
-        selectedStatus = dealDetailModel.data!.dealStatus! == 'ongoing' ? 'ongoing' : 'completed';
-        setState(() {
-          isLoading = false;
-        });
+      if (dealDetailModel?.message != null) {
+        if (dealDetailModel?.success == true) {
+          lotNumberController.text = dealDetailModel!.data!.lotNumber!;
+          grossWeightController.text = dealDetailModel.data!.grossWeight!;
+          boxOrderedController.text = dealDetailModel.data!.orderedBoxCount!;
+          denyarController.text = dealDetailModel.data!.denier!;
+          rateController.text = dealDetailModel.data!.rate!;
+          copsController.text = dealDetailModel.data!.cops!;
+          selectedDate = dealDetailModel.data!.purchaseDate != null ? DateTime.parse(dealDetailModel.data!.purchaseDate!) : DateTime.now();
+          selectedDueDate = dealDetailModel.data!.paymentDueDate != null ? DateTime.parse(dealDetailModel.data!.paymentDueDate!) : DateTime.now();
+          selectedFirm = int.parse(dealDetailModel.data!.firmId!);
+          selectedParty = int.parse(dealDetailModel.data!.partyId!);
+          selectedYarn = int.parse(dealDetailModel.data!.yarnTypeId!);
+          setState(() {
+            selectedStatus = dealDetailModel.data!.dealStatus! == 'ongoing' ? 'ongoing' : 'completed';
+          });
+
+          print("Selected Yarn: $selectedYarn");
+          paymentType = dealDetailModel.data!.paymentType! == 'current' ? 'Current' : 'Dhara';
+          dharaOption = dealDetailModel.data!.dharaDays! == '15' ? '15 days' : dealDetailModel.data!.dharaDays! == '40' ? '40 days' : 'Other';
+
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            dealDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          dealDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

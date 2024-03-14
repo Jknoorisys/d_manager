@@ -10,9 +10,8 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:getwidget/components/checkbox/gf_checkbox.dart';
-import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../api/manage_invoice_services.dart';
@@ -21,7 +20,6 @@ import '../../helpers/helper_functions.dart';
 import '../../models/invoice_models/invoice_list_model.dart';
 import '../../models/sell_models/get_sell_deal_model.dart';
 import '../widgets/snackbar.dart';
-import 'manage_invoice/invoice_view.dart';
 class ClothSellView extends StatefulWidget {
   final int sellID;
   const ClothSellView({Key? key,required this.sellID}) : super(key: key);
@@ -31,13 +29,14 @@ class ClothSellView extends StatefulWidget {
 
 class _ClothSellViewState extends State<ClothSellView> {
   final RefreshController _refreshController = RefreshController();
-  final searchController = TextEditingController();
   int currentPage = 1;
   bool _isLoading = true;
   List<Map<String, dynamic>> invoicesList = [];
   List<invoiceList> manageInvoiceList = [];
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
+  var selectedPaidStatus;
+  var selectedBillReceivedStatus;
   SellDealDetails sellDealDetails = SellDealDetails();
   ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
   GetSellDealModel? getSellDealModel;
@@ -48,7 +47,7 @@ class _ClothSellViewState extends State<ClothSellView> {
     super.initState();
     if (widget.sellID != 0) {
       getSellDealData();
-      getInvoiceList(currentPage, searchController.text.trim());
+      getInvoiceList(currentPage);
     } else {
       setState(() {
         _isLoading = false;
@@ -168,23 +167,28 @@ class _ClothSellViewState extends State<ClothSellView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BigText(text: 'Bill Received', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          CustomDropdown(
-                            dropdownItems: const ['Yes', 'No'],
-                            selectedValue: billReceived,
-                            onChanged: (newValue) {
-                              setState(() {
-                                billReceived = newValue!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                      // Column(
+                      //   mainAxisAlignment: MainAxisAlignment.start,
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     BigText(text: 'Bill Received', size: Dimensions.font12,),
+                      //     Gap(Dimensions.height10/2),
+                      //     CustomDropdown(
+                      //       dropdownItems: const ['Yes', 'No'],
+                      //       selectedValue: billReceived,
+                      //       onChanged: (newValue) {
+                      //         setState(() {
+                      //           billReceived = newValue!;
+                      //           selectedBillReceivedStatus = newValue == 'Yes' ? 'yes' : 'no';
+                      //           _isLoading = true;
+                      //           manageInvoiceList.clear();
+                      //           currentPage = 1;
+                      //           getInvoiceList(currentPage);
+                      //         });
+                      //       },
+                      //     ),
+                      //   ],
+                      // ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,16 +196,44 @@ class _ClothSellViewState extends State<ClothSellView> {
                           BigText(text: 'Payment Paid', size: Dimensions.font12,),
                           Gap(Dimensions.height10/2),
                           CustomDropdown(
+                            width: Dimensions.screenWidth * 0.8,
                             dropdownItems: const ['Yes', 'No'],
                             selectedValue: paymentPaid,
                             onChanged: (newValue) {
                               setState(() {
                                 paymentPaid = newValue!;
+                                selectedPaidStatus = newValue == 'Yes' ? 'yes' : 'no';
+                                _isLoading = true;
+                                manageInvoiceList.clear();
+                                currentPage = 1;
+                                getInvoiceList(currentPage);
                               });
                             },
                           ),
                         ],
                       ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: '', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          IconButton(
+                            tooltip: 'Clear Filter',
+                            onPressed: () {
+                              setState(() {
+                                _isLoading = true;
+                                manageInvoiceList.clear();
+                                currentPage = 1;
+                                // selectedBillReceivedStatus = null;
+                                selectedPaidStatus = null;
+                                getInvoiceList(currentPage);
+                              });
+                            },
+                            icon: const FaIcon(FontAwesomeIcons.filterCircleXmark, color: AppTheme.black),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                   SizedBox(height: Dimensions.height10),
@@ -220,15 +252,14 @@ class _ClothSellViewState extends State<ClothSellView> {
                         manageInvoiceList.clear();
                         currentPage = 1;
                       });
-                      getInvoiceList(currentPage, searchController.text.trim());
+                      getInvoiceList(currentPage);
                       _refreshController.refreshCompleted();
                     },
                     onLoading: () async {
-                      getInvoiceList(currentPage, searchController.text.trim());
+                      getInvoiceList(currentPage);
                       _refreshController.loadComplete();
                     },
-                    child:
-                    Expanded(
+                    child: Expanded(
                       child:ListView.builder(
                         itemCount: manageInvoiceList.length,
                         itemBuilder: (context, index) {
@@ -258,51 +289,48 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    // Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName ?? 'N/A')),
                                     SizedBox(width: Dimensions.width20),
                                     Expanded(flex:1,child: _buildInfoColumn('GST', manageInvoiceList[index].gst!)),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Invoice Amount', manageInvoiceList[index].invoiceAmount!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Invoice Amount', manageInvoiceList[index].invoiceAmount ?? 'N/A'),
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', manageInvoiceList[index].paymentType!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', manageInvoiceList[index].paymentType == 'current' ? 'Current' : 'Dhara')),
                                     SizedBox(width: Dimensions.width20),
                                     Expanded(flex:1,child: _buildInfoColumn('Additional Discount', manageInvoiceList[index].discount!)),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received', manageInvoiceList[index].receivedAmount!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received', manageInvoiceList[index].paidStatus == 'yes' ? 'Yes' : 'No')),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Amount Received', manageInvoiceList[index].receivedAmount!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Amount Received', manageInvoiceList[index].receivedAmount ?? 'N/A' ),
+                                    ),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Difference in Amount', manageInvoiceList[index].differenceAmount!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Difference in Amount', manageInvoiceList[index].differenceAmount ?? 'N/A'),
+                                    ),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Method', manageInvoiceList[index].differenceAmount!)),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Method', manageInvoiceList[index].paymentMethod != null ? manageInvoiceList[index].paymentMethod == 'rtgs' ? 'RTGS' : 'Cheque' : 'N/A'),
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
                                 Row(
                                   children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', manageInvoiceList[index].dueDate.toString())),
+                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', manageInvoiceList[index].dueDate.toString() ?? 'N/A' ),
+                                    ),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received Date', manageInvoiceList[index].dueDate.toString())),
+                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received Date', manageInvoiceList[index].dueDate.toString() ?? 'N/A'),
+                                    ),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Reason', manageInvoiceList[index].invoiceNumber!)),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Status', manageInvoiceList[index].status! == 'active' ? 'Active' : 'Inactive')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
+                                    Expanded(flex:1,child: _buildInfoColumn('Reason', manageInvoiceList[index].reason ?? 'N/A'),
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
@@ -345,7 +373,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                       ),
                     ),
                   ),
-                ),
+                 ),
                 ],
               ),
             ),
@@ -415,7 +443,7 @@ class _ClothSellViewState extends State<ClothSellView> {
       });
     }
   }
-  Future<InvoiceListModel?> getInvoiceList(int pageNo, String search) async {
+  Future<InvoiceListModel?> getInvoiceList(int pageNo) async {
     setState(() {
       _isLoading = true;
     });
@@ -424,7 +452,8 @@ class _ClothSellViewState extends State<ClothSellView> {
         InvoiceListModel? model = await manageInvoiceServices.showInvoiceList(
           widget.sellID.toString(),
           pageNo.toString(),
-          search,
+          selectedPaidStatus,
+          // selectedBillReceivedStatus,
         );
         if (model != null) {
           if (model.success == true) {

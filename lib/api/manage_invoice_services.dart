@@ -11,15 +11,22 @@ import '../helpers/helper_functions.dart';
 import 'manage_sell_deals.dart';
 
 class ManageInvoiceServices{
-  Future<InvoiceListModel?> showInvoiceList(String sellId, String pageNo, String search) async{
+  Future<InvoiceListModel?> showInvoiceList(String sellId, String pageNo, [String? isPaid, String? isBillReceived]) async{
     try{
 
       Map<String, dynamic> body = {
         "user_id": HelperFunctions.getUserID(),
         "sell_id":sellId,
         "page_no":pageNo,
-        "search":search,
       };
+
+      if(isPaid != null){
+        body["paid_status"] = isPaid;
+      }
+
+      if(isBillReceived != null){
+        body["is_bill_received"] = isBillReceived;
+      }
 
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),

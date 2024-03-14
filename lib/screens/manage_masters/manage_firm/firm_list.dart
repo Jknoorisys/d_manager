@@ -32,23 +32,15 @@ class _FirmListState extends State<FirmList> {
   int currentPage = 1;
 
   bool isLoading = false;
+  bool isNetworkAvailable = true;
   ManageFirmServices firmServices = ManageFirmServices();
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = !isLoading;
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = !isLoading;
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
   @override
   void dispose() {
@@ -61,6 +53,7 @@ class _FirmListState extends State<FirmList> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
+          internetNotAvailable: isNetworkAvailable,
           title: S.of(context).firmList,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
@@ -264,36 +257,42 @@ class _FirmListState extends State<FirmList> {
       isLoading = true;
     });
     try {
-      FirmListModel? firmListModel = await firmServices.firmList(pageNo, search);
-      if (firmListModel != null) {
-        if (firmListModel.success == true) {
-          if (firmListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              firms.clear();
-            }
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        FirmListModel? firmListModel = await firmServices.firmList(pageNo, search);
+        if (firmListModel != null) {
+          if (firmListModel.success == true) {
+            if (firmListModel.data!.isNotEmpty) {
+              if (pageNo == 1) {
+                firms.clear();
+              }
 
-            setState(() {
-              firms.addAll(firmListModel.data!);
-              currentPage++;
-            });
+              setState(() {
+                firms.addAll(firmListModel.data!);
+                currentPage++;
+              });
+            } else {
+              _refreshController.loadNoData();
+            }
           } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              firmListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            firmListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {
@@ -308,34 +307,43 @@ class _FirmListState extends State<FirmList> {
     });
 
     try {
-      UpdateFirmStatusModel? updateFirmStatusModel = await firmServices.updateFirmStatus(firmId, status);
-      if (updateFirmStatusModel != null) {
-        if (updateFirmStatusModel.success == true) {
-          setState(() {
-            firms.clear();
-            currentPage = 1;
-          });
-          await _loadData(currentPage, '');
-          CustomApiSnackbar.show(
-            context,
-            'Success',
-            updateFirmStatusModel.message.toString(),
-            mode: SnackbarMode.success,
-          );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        UpdateFirmStatusModel? updateFirmStatusModel = await firmServices.updateFirmStatus(firmId, status);
+        if (updateFirmStatusModel != null) {
+          if (updateFirmStatusModel.success == true) {
+            setState(() {
+              firms.clear();
+              currentPage = 1;
+            });
+            await _loadData(currentPage, '');
+            CustomApiSnackbar.show(
+              context,
+              'Success',
+              updateFirmStatusModel.message.toString(),
+              mode: SnackbarMode.success,
+            );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              updateFirmStatusModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            updateFirmStatusModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
     } finally {

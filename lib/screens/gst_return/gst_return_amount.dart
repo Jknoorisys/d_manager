@@ -48,12 +48,11 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                 initialDatePickerMode: DatePickerMode.day,
               );
               if (pickedDate != null && pickedDate != selectedDate) {
-                await HelperFunctions.setSelectedMonth(selectedDate.month.toString());
-                await HelperFunctions.setSelectedYear(selectedDate.year.toString());
-                await gstReturnAmount();
                 setState(() {
                   selectedDate = pickedDate;
                 });
+
+                await gstReturnAmount();
               }
             },
             icon: const Icon(Icons.calendar_month, color: AppTheme.black),
@@ -112,7 +111,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Till Date', style: AppTheme.title.copyWith(color: AppTheme.white)),
-                                  Text('${gstReturnAmountModel!.filter!.month}', style: AppTheme.title.copyWith(color: AppTheme.secondary)),
+                                  Text('${gstReturnAmountModel!.filter!.month!.toString()} - ${gstReturnAmountModel!.filter!.year!.toString()}' ,style: AppTheme.title.copyWith(color: AppTheme.secondary)),
                                 ],
                               )
                             ],
@@ -196,7 +195,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
     });
     try {
       if(await HelperFunctions.isPossiblyNetworkAvailable() ) {
-        GstReturnAmountModel? model = await gstReturnServices.showGstReturnAmount();
+        GstReturnAmountModel? model = await gstReturnServices.showGstReturnAmount(selectedDate.month.toString(), selectedDate.year.toString());
         if (model!.success == true) {
           setState(() {
             if (model.data != null) {

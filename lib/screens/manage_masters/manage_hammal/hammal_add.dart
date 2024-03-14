@@ -107,29 +107,20 @@ class _HammalAddState extends State<HammalAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                if (HelperFunctions.checkInternet() == false) {
-                  CustomApiSnackbar.show(
-                    context,
-                    'Warning',
-                    'No internet connection',
-                    mode: SnackbarMode.warning,
-                  );
+                setState(() {
+                  isLoading = !isLoading;
+                });
+                Map<String, dynamic> body = {
+                  "hammal_id": widget.hammalId != null ? widget.hammalId.toString() : "",
+                  "user_id" : HelperFunctions.getUserID(),
+                  "hammal_name": hammalNameController.text,
+                  "hammal_phone_no": phoneNumberController.text,
+                  // "hammal_address": addressController.text,
+                };
+                if (widget.hammalId == null) {
+                  _addHammal(body);
                 } else {
-                  setState(() {
-                    isLoading = !isLoading;
-                  });
-                  Map<String, dynamic> body = {
-                    "hammal_id": widget.hammalId != null ? widget.hammalId.toString() : "",
-                    "user_id" : HelperFunctions.getUserID(),
-                    "hammal_name": hammalNameController.text,
-                    "hammal_phone_no": phoneNumberController.text,
-                    // "hammal_address": addressController.text,
-                  };
-                  if (widget.hammalId == null) {
-                    _addHammal(body);
-                  } else {
-                    _updateHammal(body);
-                  }
+                  _updateHammal(body);
                 }
               }
             },
@@ -173,87 +164,26 @@ class _HammalAddState extends State<HammalAdd> {
   }
 
   Future<void> _addHammal(Map<String, dynamic> body) async {
-    AddHammalModel? addHammalModel = await hammalServices.addHammal(body);
-    if (addHammalModel?.message != null) {
-      if (addHammalModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addHammalModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.hammalList);
-      }  else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          addHammalModel!.message.toString(),
-          mode: SnackbarMode.error,
-        );
-      }
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddHammalModel? addHammalModel = await hammalServices.addHammal(body);
+      if (addHammalModel?.message != null) {
+        if (addHammalModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addHammalModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.hammalList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addHammalModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
 
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      CustomApiSnackbar.show(
-        context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
-      );
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _updateHammal(Map<String, dynamic> body) async {
-    UpdateHammalModel? updateHammalModel = await hammalServices.updateHammal(body);
-    if (updateHammalModel?.message != null) {
-      if (updateHammalModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateHammalModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.hammalList);
-      }  else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          updateHammalModel!.message.toString(),
-          mode: SnackbarMode.error,
-        );
-      }
-
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      CustomApiSnackbar.show(
-        context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
-      );
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _getHammalDetails() async {
-    setState(() {
-      isLoading = true;
-    });
-    HammalDetailModel? hammalDetailModel = await hammalServices.viewHammal(widget.hammalId!);
-    if (hammalDetailModel?.message != null) {
-      if (hammalDetailModel?.success == true) {
-        hammalNameController.text = hammalDetailModel!.data!.hammalName.toString();
-        phoneNumberController.text = hammalDetailModel.data!.hammalPhoneNo.toString();
-        // addressController.text = hammalDetailModel.data!.hammalAddress.toString();
         setState(() {
           isLoading = false;
         });
@@ -261,17 +191,117 @@ class _HammalAddState extends State<HammalAdd> {
         CustomApiSnackbar.show(
           context,
           'Error',
-          hammalDetailModel!.message.toString(),
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
+      );
+    }
+  }
+
+  Future<void> _updateHammal(Map<String, dynamic> body) async {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdateHammalModel? updateHammalModel = await hammalServices.updateHammal(body);
+      if (updateHammalModel?.message != null) {
+        if (updateHammalModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateHammalModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.hammalList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateHammalModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
+      );
+    }
+  }
+
+  Future<void> _getHammalDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      HammalDetailModel? hammalDetailModel = await hammalServices.viewHammal(widget.hammalId!);
+      if (hammalDetailModel?.message != null) {
+        if (hammalDetailModel?.success == true) {
+          hammalNameController.text = hammalDetailModel!.data!.hammalName.toString();
+          phoneNumberController.text = hammalDetailModel.data!.hammalPhoneNo.toString();
+          // addressController.text = hammalDetailModel.data!.hammalAddress.toString();
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            hammalDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
+      setState(() {
+        isLoading = false;
+      });
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

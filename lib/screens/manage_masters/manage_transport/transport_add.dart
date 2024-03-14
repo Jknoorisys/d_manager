@@ -107,29 +107,20 @@ class _TransportAddState extends State<TransportAdd> {
                 submitted = true;
               });
               if (_isFormValid()) {
-                if (HelperFunctions.checkInternet() == false) {
-                  CustomApiSnackbar.show(
-                    context,
-                    'Warning',
-                    'No internet connection',
-                    mode: SnackbarMode.warning,
-                  );
+                setState(() {
+                  isLoading = !isLoading;
+                });
+                Map<String, dynamic> body = {
+                  "transport_id": widget.transportId != null ? widget.transportId.toString() : "",
+                  "user_id" : HelperFunctions.getUserID(),
+                  "transport_name": transportNameController.text,
+                  "transport_phone_no": phoneNumberController.text,
+                  "transport_address": addressController.text,
+                };
+                if (widget.transportId == null) {
+                  _addTransport(body);
                 } else {
-                  setState(() {
-                    isLoading = !isLoading;
-                  });
-                  Map<String, dynamic> body = {
-                    "transport_id": widget.transportId != null ? widget.transportId.toString() : "",
-                    "user_id" : HelperFunctions.getUserID(),
-                    "transport_name": transportNameController.text,
-                    "transport_phone_no": phoneNumberController.text,
-                    "transport_address": addressController.text,
-                  };
-                  if (widget.transportId == null) {
-                    _addTransport(body);
-                  } else {
-                    _updateTransport(body);
-                  }
+                  _updateTransport(body);
                 }
               }
             },
@@ -173,34 +164,46 @@ class _TransportAddState extends State<TransportAdd> {
   }
 
   Future<void> _addTransport(Map<String, dynamic> body) async {
-    AddTransportModel? addTransportModel = await transportServices.addTransport(body);
-    if (addTransportModel?.message != null) {
-      if (addTransportModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          addTransportModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.transportList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      AddTransportModel? addTransportModel = await transportServices.addTransport(body);
+      if (addTransportModel?.message != null) {
+        if (addTransportModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            addTransportModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.transportList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            addTransportModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          addTransportModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -209,34 +212,46 @@ class _TransportAddState extends State<TransportAdd> {
   }
 
   Future<void> _updateTransport(Map<String, dynamic> body) async {
-    UpdateTransportModel? updateTransportModel = await transportServices.updateTransport(body);
-    if (updateTransportModel?.message != null) {
-      if (updateTransportModel?.success == true) {
-        CustomApiSnackbar.show(
-          context,
-          'Success',
-          updateTransportModel!.message.toString(),
-          mode: SnackbarMode.success,
-        );
-        Navigator.of(context).popAndPushNamed(AppRoutes.transportList);
-      }  else {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      UpdateTransportModel? updateTransportModel = await transportServices.updateTransport(body);
+      if (updateTransportModel?.message != null) {
+        if (updateTransportModel?.success == true) {
+          CustomApiSnackbar.show(
+            context,
+            'Success',
+            updateTransportModel!.message.toString(),
+            mode: SnackbarMode.success,
+          );
+          Navigator.of(context).popAndPushNamed(AppRoutes.transportList);
+        }  else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            updateTransportModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          updateTransportModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
+        setState(() {
+          isLoading = false;
+        });
       }
-
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
       setState(() {
         isLoading = false;
@@ -248,30 +263,42 @@ class _TransportAddState extends State<TransportAdd> {
     setState(() {
       isLoading = true;
     });
-    TransportDetailModel? transportDetailModel = await transportServices.viewTransport(widget.transportId!);
-    if (transportDetailModel?.message != null) {
-      if (transportDetailModel?.success == true) {
-        transportNameController.text = transportDetailModel!.data!.transportName.toString();
-        phoneNumberController.text = transportDetailModel.data!.transportPhoneNo.toString();
-        addressController.text = transportDetailModel.data!.transportAddress.toString();
-        setState(() {
-          isLoading = false;
-        });
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      TransportDetailModel? transportDetailModel = await transportServices.viewTransport(widget.transportId!);
+      if (transportDetailModel?.message != null) {
+        if (transportDetailModel?.success == true) {
+          transportNameController.text = transportDetailModel!.data!.transportName.toString();
+          phoneNumberController.text = transportDetailModel.data!.transportPhoneNo.toString();
+          addressController.text = transportDetailModel.data!.transportAddress.toString();
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            transportDetailModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
       } else {
         CustomApiSnackbar.show(
           context,
           'Error',
-          transportDetailModel!.message.toString(),
+          'Something went wrong, please try again',
           mode: SnackbarMode.error,
         );
       }
     } else {
       CustomApiSnackbar.show(
         context,
-        'Error',
-        'Something went wrong, please try again',
-        mode: SnackbarMode.error,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

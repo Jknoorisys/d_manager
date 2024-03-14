@@ -15,6 +15,7 @@ import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
@@ -38,6 +39,8 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
   List<PurchaseDetail> purchases = [];
   int currentPage = 1;
   bool isLoading = false;
+  bool noRecordFound = false;
+  bool isNetworkAvailable = true;
   bool isFilterApplied = false;
   ManagePurchaseServices purchaseServices = ManagePurchaseServices();
   var selectedFirm;
@@ -52,22 +55,13 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
   @override
   void initState() {
     super.initState();
-    if (HelperFunctions.checkInternet() == false) {
-      CustomApiSnackbar.show(
-        context,
-        'Warning',
-        'No internet connection',
-        mode: SnackbarMode.warning,
-      );
-    } else {
-      setState(() {
-        isLoading = true;
-        _getFirms();
-        _getParties();
-        _getYarns();
-      });
-      _loadData(currentPage, searchController.text.trim());
-    }
+    setState(() {
+      isLoading = true;
+      _getFirms();
+      _getParties();
+      _getYarns();
+    });
+    _loadData(currentPage, searchController.text.trim());
   }
   @override
   void dispose() {
@@ -82,6 +76,8 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
         content: CustomBody(
           title: S.of(context).yarnPurchasesList,
           isLoading: isLoading,
+          noRecordFound: noRecordFound,
+          internetNotAvailable: isNetworkAvailable,
           filterButton: GestureDetector(
             onTap: () {
               _showBottomSheet(context);
@@ -176,7 +172,9 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          BigText(text: purchase.partyName!, color: AppTheme.primary, size: Dimensions.font16),
+                                          SizedBox(
+                                            width: Dimensions.screenWidth * 0.5,
+                                              child: BigText(text: purchase.partyName!, color: AppTheme.primary, size: Dimensions.font16)),
                                           Row(
                                             children: [
                                               CircleAvatar(
@@ -185,7 +183,9 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                                 child: BigText(text: purchase.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                               ),
                                               SizedBox(width: Dimensions.width10),
-                                              SmallText(text: purchase.firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                              SizedBox(
+                                                  width: Dimensions.screenWidth * 0.3,
+                                                  child: SmallText(text: purchase.firmName!, color: AppTheme.black, size: Dimensions.font12)),
                                             ],
                                           ),
                                         ],
@@ -204,7 +204,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Yarn Name', purchase.yarnName!),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Type', 'N/A'),
+                                  _buildInfoColumn('Yarn Type', purchase.typeName!),
                                 ],
                               ),
                             ],
@@ -213,7 +213,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                             children: [
                               Row(
                                 children: [
-                                  _buildInfoColumn('Payment Type', purchase.paymentType!),
+                                  _buildInfoColumn('Payment Type', purchase.paymentType! == 'current' ? 'Current' : 'Dhara'),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Lot Number', purchase.lotNumber!),
                                   SizedBox(width: Dimensions.width20),
@@ -235,7 +235,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                 children: [
                                   _buildInfoColumn('Deiner', purchase.denier!),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Status', purchase.status! == 'active' ? 'On Going' : 'Completed'),
+                                  _buildInfoColumn('Status', purchase.dealStatus! == 'ongoing' ? 'On Going' : 'Completed'),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('', ''),
                                 ],
@@ -316,14 +316,6 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                       },
                                       icon: const Icon(Icons.edit_outlined, color: AppTheme.primary)
                                   ),
-                                  // IconButton(
-                                  //     onPressed: () {
-                                  //       setState(() {
-                                  //         purchases.removeAt(index);
-                                  //       });
-                                  //     },
-                                  //     icon: const Icon(Icons.delete_outline, color: AppTheme.primary)
-                                  // ),
                                   GFCheckbox(
                                     size: Dimensions.height20,
                                     type: GFCheckboxType.custom,
@@ -332,10 +324,18 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                     customBgColor: AppTheme.primary,
                                     activeBorderColor: AppTheme.primary,
                                     onChanged: (value) {
-                                      String newStatus = value ? 'active' : 'inactive';
-                                      _updateStatus(purchase.purchaseId!, newStatus);
+                                      if (purchase.dealStatus == 'ongoing') {
+                                        _updateStatus(purchase.purchaseId!, 'completed');
+                                      } else {
+                                        CustomApiSnackbar.show(
+                                          context,
+                                          'Warning',
+                                          'Deal is already completed',
+                                          mode: SnackbarMode.warning,
+                                        );
+                                      }
                                     },
-                                    value: purchase.status == 'active' ? true : false,
+                                    value: purchase.dealStatus == 'completed' ? true : false,
                                     inactiveIcon: null,
                                   ),
                                 ],
@@ -377,116 +377,144 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
       elevation: 10,
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.all(Dimensions.height20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        isLoading = true;
-                       _loadData(currentPage, '');
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.filter_alt, color: AppTheme.primary)
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.all(Dimensions.height20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        tooltip: 'Apply Filters',
+                        onPressed: () {
+                          isLoading = true;
+                          setState(() {
+                            searchController.clear();
+                            purchases.clear();
+                            currentPage = 1;
+                            isFilterApplied = true;
+                            _loadData(currentPage, '');
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        icon: const FaIcon(FontAwesomeIcons.filter, color: AppTheme.black),
+                      ),
+                      BigText(text: 'Apply Filters', size: Dimensions.font20, color: AppTheme.black),
+                      IconButton(
+                        tooltip: 'Clear Filters',
+                        onPressed: () {
+                          setState(() {
+                            selectedFirm = null;
+                            selectedParty = null;
+                            selectedYarn = null;
+                            selectedStatus = null;
+                            isFilterApplied = false;
+                            purchases.clear();
+                            currentPage = 1;
+                            _loadData(currentPage, '');
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        icon: const FaIcon(FontAwesomeIcons.filterCircleXmark, color: AppTheme.black),
+                      ),
+                    ],
                   ),
+                  Gap(Dimensions.height20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Select My Firm', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomApiDropdown(
+                              hintText: 'Select Firm',
+                              dropdownItems: firms.map((e) => DropdownMenuItem<dynamic>(value: e.firmId!, child: BigText(text: e.firmName!, size: Dimensions.font14,))).toList(),
+                              selectedValue: firms.any((firm) => firm.firmId == selectedFirm) ? selectedFirm : null,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedFirm = newValue!;
+                                });
+                              }
+                          )
+                        ],
+                      ),
+                      Gap(Dimensions.height10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Select Party Name', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomApiDropdown(
+                              hintText: 'Select Party',
+                              dropdownItems: parties.map((e) => DropdownMenuItem<dynamic>(value: e.partyId!, child: BigText(text: e.partyName!, size: Dimensions.font14,))).toList(),
+                              selectedValue: parties.any((party) => party.partyId == selectedParty) ? selectedParty : null,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedParty = newValue!;
+                                });
+                              }
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                  Gap(Dimensions.height20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomApiDropdown(
+                              hintText: 'Select Yarn',
+                              dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
+                              selectedValue: yarns.any((yarn) => yarn.yarnTypeId == selectedYarn) ? selectedYarn : null,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedYarn = newValue!;
+                                });
+                              }
+                          )
+                        ],
+                      ),
+                      Gap(Dimensions.height10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Status', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomApiDropdown(
+                              hintText: 'Select Status',
+                              dropdownItems: [
+                                DropdownMenuItem<dynamic>(value: 'ongoing', child: BigText(text: 'On Going', size: Dimensions.font14,)),
+                                DropdownMenuItem<dynamic>(value: 'completed', child: BigText(text: 'Completed', size: Dimensions.font14,)),
+                              ],
+                              selectedValue: selectedStatus,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedStatus = newValue!;
+                                });
+                              }
+                          )
+                        ],
+                      ),
+                    ],
+                  )
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Select My Firm', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomApiDropdown(
-                          hintText: 'Select Firm',
-                          dropdownItems: firms.map((e) => DropdownMenuItem<dynamic>(value: e.firmId!, child: BigText(text: e.firmName!, size: Dimensions.font14,))).toList(),
-                          selectedValue: selectedFirm,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedFirm = newValue!;
-                            });
-                          }
-                      )
-                    ],
-                  ),
-                  Gap(Dimensions.height10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Select Party Name', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomApiDropdown(
-                          hintText: 'Select Party',
-                          dropdownItems: parties.map((e) => DropdownMenuItem<dynamic>(value: e.partyId!, child: BigText(text: e.partyName!, size: Dimensions.font14,))).toList(),
-                          selectedValue: selectedParty,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedParty = newValue!;
-                            });
-                          }
-                      )
-                    ],
-                  ),
-                ],
-              ),
-              Gap(Dimensions.height20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomApiDropdown(
-                          hintText: 'Select Yarn',
-                          dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
-                          selectedValue: selectedYarn,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedYarn = newValue!;
-                              isFilterApplied = true;
-                            });
-                          }
-                      )
-                    ],
-                  ),
-                  Gap(Dimensions.height10),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BigText(text: 'Status', size: Dimensions.font12,),
-                      Gap(Dimensions.height10/2),
-                      CustomApiDropdown(
-                          hintText: 'Select Status',
-                          dropdownItems: [
-                            DropdownMenuItem<dynamic>(value: 'ongoing', child: BigText(text: 'On Going', size: Dimensions.font14,)),
-                            DropdownMenuItem<dynamic>(value: 'completed', child: BigText(text: 'Completed', size: Dimensions.font14,)),
-                          ],
-                          selectedValue: selectedStatus,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedStatus = newValue!;
-                              isFilterApplied = true;
-                            });
-                          }
-                      )
-                    ],
-                  ),
-                ],
-              )
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -528,39 +556,52 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     });
 
     try {
-      YarnPurchaseListModel? purchaseListModel = await purchaseServices.purchaseList(
-          pageNo, search, selectedFirm, selectedParty, selectedYarn, selectedStatus
-      );
-      if (purchaseListModel != null) {
-        if (purchaseListModel.success == true) {
-          if (purchaseListModel.data!.isNotEmpty) {
-            if (pageNo == 1) {
-              purchases.clear();
-            }
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        YarnPurchaseListModel? purchaseListModel = await purchaseServices.purchaseList(
+            pageNo, search, selectedFirm, selectedParty, selectedYarn, selectedStatus
+        );
+        if (purchaseListModel != null) {
+          if (purchaseListModel.success == true) {
+            if (purchaseListModel.data != null) {
+              if (purchaseListModel.data!.isNotEmpty) {
+                if (pageNo == 1) {
+                  purchases.clear();
+                }
 
-            setState(() {
-              purchases.addAll(purchaseListModel.data!);
-              isLoading = false;
-              currentPage++;
-            });
+                setState(() {
+                  purchases.addAll(purchaseListModel.data!);
+                  isLoading = false;
+                  noRecordFound = false;
+                  currentPage++;
+                });
+              } else {
+                _refreshController.loadNoData();
+              }
+            } else {
+              setState(() {
+                noRecordFound = true;
+              });
+            }
           } else {
-            _refreshController.loadNoData();
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              purchaseListModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
           }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            purchaseListModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {
