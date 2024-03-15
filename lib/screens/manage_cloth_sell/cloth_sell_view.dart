@@ -1,79 +1,86 @@
+import 'package:d_manager/api/manage_invoice_services.dart';
+import 'package:d_manager/api/manage_sell_deals.dart';
+import 'package:d_manager/constants/app_theme.dart';
+import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/invoice_models/invoice_list_model.dart';
+import 'package:d_manager/models/sell_models/get_sell_deal_model.dart';
+import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
+import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/no_record_found.dart';
-import 'package:flutter/material.dart';
-import 'package:d_manager/generated/l10n.dart';
-import 'package:d_manager/screens/widgets/body.dart';
-import 'package:d_manager/constants/app_theme.dart';
-import 'package:d_manager/constants/dimension.dart';
-import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
+import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import '../../api/manage_invoice_services.dart';
-import '../../api/manage_sell_deals.dart';
-import '../../helpers/helper_functions.dart';
-import '../../models/invoice_models/invoice_list_model.dart';
-import '../../models/sell_models/get_sell_deal_model.dart';
-import '../widgets/snackbar.dart';
+
 class ClothSellView extends StatefulWidget {
   final int sellID;
-  const ClothSellView({Key? key,required this.sellID}) : super(key: key);
+  const ClothSellView({Key? key, required this.sellID}) : super(key: key);
+
   @override
   _ClothSellViewState createState() => _ClothSellViewState();
 }
 
 class _ClothSellViewState extends State<ClothSellView> {
   final RefreshController _refreshController = RefreshController();
+  List<InvoiceDetail> invoices = [];
   int currentPage = 1;
-  bool _isLoading = true;
-  List<Map<String, dynamic>> invoicesList = [];
-  List<invoiceList> manageInvoiceList = [];
+  bool isFilterApplied = false;
+  SellDealDetails sellServices = SellDealDetails();
+  var selectedBillRecieved;
+  var selectedPaymentPaid;
+
   String billReceived = 'Yes';
   String paymentPaid = 'Yes';
-  var selectedPaidStatus;
-  var selectedBillReceivedStatus;
-  SellDealDetails sellDealDetails = SellDealDetails();
-  ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
-  GetSellDealModel? getSellDealModel;
-  bool noRecordFound = false;
+  bool isLoading = false;
   bool isNetworkAvailable = true;
+  Data? clothSellData;
+  bool noRecordFound = false;
+  ManageInvoiceServices manageInvoiceServices = ManageInvoiceServices();
   @override
   void initState() {
-    super.initState();
-    if (widget.sellID != 0) {
-      getSellDealData();
-      getInvoiceList(currentPage);
+    isLoading = true;
+    if (widget.sellID != null) {
+      _getSellDetails();
+      _loadData(currentPage);
     } else {
       setState(() {
-        _isLoading = false;
         noRecordFound = true;
+        isLoading = false;
       });
     }
+    super.initState();
   }
-
-  //await getSellDealData();
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
-          isLoading:_isLoading,
-          noRecordFound: noRecordFound,
-          internetNotAvailable: isNetworkAvailable,
-          title: S.of(context).clothSellDealDetails,
-          content: getSellDealModel?.data! == null ? Container() :  SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
-              child: Column(
-                 children: [
-                  CustomAccordionWithoutExpanded(
-                    titleChild: Column(
-                      children: [
-                        Row(
+            title: S.of(context).clothSellDealDetails,
+            isLoading: isLoading,
+            noRecordFound: noRecordFound,
+            content: SingleChildScrollView(
+              child: clothSellData == null ? Container() : Padding(
+                padding: EdgeInsets.only(left: Dimensions.height10, right: Dimensions.height10, bottom: Dimensions.height20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      elevation: 10,
+                      color: AppTheme.white,
+                      shadowColor: AppTheme.nearlyWhite,
+                      surfaceTintColor: AppTheme.nearlyWhite,
+                      child: Padding(
+                        padding: EdgeInsets.all(Dimensions.height15),
+                        child: Column(
                           children: [
                             Row(
                               children: [
@@ -81,7 +88,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 CircleAvatar(
                                   backgroundColor: AppTheme.secondary,
                                   radius: Dimensions.height20,
-                                  child: BigText(text: getSellDealModel!.data!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                  child: BigText(text: clothSellData!.partyName![0], color: AppTheme.primary, size: Dimensions.font18),
                                 ),
                                 SizedBox(width: Dimensions.height10),
                                 Column(
@@ -90,326 +97,299 @@ class _ClothSellViewState extends State<ClothSellView> {
                                   children: [
                                     SizedBox(
                                         width: Dimensions.screenWidth * 0.5,
-                                        child: BigText(text: getSellDealModel!.data!.partyName!, color: AppTheme.primary, size: Dimensions.font16)),
+                                        child: BigText(text: clothSellData!.partyName!, color: AppTheme.primary, size: Dimensions.font16)),
                                     Row(
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: AppTheme.black,
                                           radius: Dimensions.height10,
-                                          child: BigText(text: getSellDealModel!.data!.firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                          child: BigText(text: clothSellData!.firmName![0] ?? '', color: AppTheme.secondaryLight, size: Dimensions.font12),
                                         ),
                                         SizedBox(width: Dimensions.width10),
                                         SizedBox(
                                             width: Dimensions.screenWidth * 0.5,
-                                            child: SmallText(text: getSellDealModel!.data!.firmName!, color: AppTheme.black, size: Dimensions.font12)),
+                                            child: SmallText(text: clothSellData!.firmName!, color: AppTheme.black, size: Dimensions.font12)),
                                       ],
                                     ),
                                   ],
                                 ),
                               ],
                             ),
+                            SizedBox(height: Dimensions.height10),
+                            AppTheme.divider,
+                            SizedBox(height: Dimensions.height10),
+                            Row(
+                              children: [
+                                _buildInfoColumn('Deal Date', clothSellData!.sellDate!.toString()),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Cloth Quality', clothSellData!.qualityName!),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Rate', '₹${clothSellData!.rate!}'),
+                              ],
+                            ),
+                            SizedBox(height: Dimensions.height10),
+                            Row(
+                              children: [
+                                _buildInfoColumn('Total Than', clothSellData!.totalThan!),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Than Delivered', clothSellData!.thanDelivered!),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Than Remaining', clothSellData!.thanRemaining!),
+                              ],
+                            ),
+                            SizedBox(height: Dimensions.height10),
+                            Row(
+                              children: [
+                                _buildInfoColumn('Due Date', clothSellData!.sellDueDate!.toString()),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Status', clothSellData!.dealStatus! == 'ongoing' ? 'Ongoing' : 'Completed'),SizedBox(width: Dimensions.width20),
+                                SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('', ''),
+                              ],
+                            ),
                           ],
                         ),
-                        AppTheme.divider,
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Deal Date', getSellDealModel!.data!.sellDate!.toString()),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Cloth Quality', getSellDealModel!.data!.qualityName!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Rate', '₹ ${getSellDealModel!.data!.rate!}'),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
-                    contentChild: Column(
+                    SizedBox(height: Dimensions.height20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            _buildInfoColumn('Total Than', getSellDealModel!.data!.totalThan!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than Delivered', getSellDealModel!.data!.thanDelivered!),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Than Remaining', getSellDealModel!.data!.thanRemaining!),
-                          ],
-                        ),
-                        SizedBox(height: Dimensions.height10),
-                        Row(
-                          children: [
-                            _buildInfoColumn('Status', getSellDealModel!.data!.dealStatus! == 'ongoing' ? 'Ongoing' : 'Completed'),
-                            SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Due Date', getSellDealModel!.data!.sellDueDate!.toString()),
-                          ],
+                        Text('Invoice List', style: AppTheme.heading2),
+                        CustomIconButton(
+                            radius: Dimensions.radius10,
+                            backgroundColor: AppTheme.primary,
+                            iconColor: AppTheme.white,
+                            iconData: Icons.add,
+                            onPressed: () {
+                              Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID});                            }
                         ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Invoice List', style: AppTheme.heading2),
-                      CustomIconButton(
-                          radius: Dimensions.radius10,
-                          backgroundColor: AppTheme.primary,
-                          iconColor: AppTheme.white,
-                          iconData: Icons.add,
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID});
-                          }
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  AppTheme.divider,
-                  SizedBox(height: Dimensions.height10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Column(
-                      //   mainAxisAlignment: MainAxisAlignment.start,
-                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                      //   children: [
-                      //     BigText(text: 'Bill Received', size: Dimensions.font12,),
-                      //     Gap(Dimensions.height10/2),
-                      //     CustomDropdown(
-                      //       dropdownItems: const ['Yes', 'No'],
-                      //       selectedValue: billReceived,
-                      //       onChanged: (newValue) {
-                      //         setState(() {
-                      //           billReceived = newValue!;
-                      //           selectedBillReceivedStatus = newValue == 'Yes' ? 'yes' : 'no';
-                      //           _isLoading = true;
-                      //           manageInvoiceList.clear();
-                      //           currentPage = 1;
-                      //           getInvoiceList(currentPage);
-                      //         });
-                      //       },
-                      //     ),
-                      //   ],
-                      // ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BigText(text: 'Payment Paid', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          CustomDropdown(
-                            width: Dimensions.screenWidth * 0.8,
-                            dropdownItems: const ['Yes', 'No'],
-                            selectedValue: paymentPaid,
-                            onChanged: (newValue) {
-                              setState(() {
-                                paymentPaid = newValue!;
-                                selectedPaidStatus = newValue == 'Yes' ? 'yes' : 'no';
-                                _isLoading = true;
-                                manageInvoiceList.clear();
-                                currentPage = 1;
-                                getInvoiceList(currentPage);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BigText(text: '', size: Dimensions.font12,),
-                          Gap(Dimensions.height10/2),
-                          IconButton(
-                            tooltip: 'Clear Filter',
-                            onPressed: () {
-                              setState(() {
-                                _isLoading = true;
-                                manageInvoiceList.clear();
-                                currentPage = 1;
-                                // selectedBillReceivedStatus = null;
-                                selectedPaidStatus = null;
-                                getInvoiceList(currentPage);
-                              });
-                            },
-                            icon: const FaIcon(FontAwesomeIcons.filterCircleXmark, color: AppTheme.black),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                 manageInvoiceList.isEmpty ? Column(
-                   children: [
-                     SizedBox(height: Dimensions.height30),
-                     const NoRecordFound(),
-                   ],
-                 ) : SizedBox(
-                   height: MediaQuery.of(context).size.height / 1.5,
-                   child: SmartRefresher(
-                    enablePullUp: true,
-                    controller: _refreshController,
-                    onRefresh: () async {
-                      setState(() {
-                        manageInvoiceList.clear();
-                        currentPage = 1;
-                      });
-                      getInvoiceList(currentPage);
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      getInvoiceList(currentPage);
-                      _refreshController.loadComplete();
-                    },
-                    child: Expanded(
-                      child:ListView.builder(
-                        itemCount: manageInvoiceList.length,
-                        itemBuilder: (context, index) {
-                          return CustomAccordion(
-                            titleChild: Row(
-                              children: [
-                                Expanded(flex:1,child: _buildInfoColumn('Invoice Date', manageInvoiceList[index].invoiceDate.toString())),
-                                SizedBox(width: Dimensions.width20),
-                                Expanded(flex:1,child: _buildInfoColumn('Invoice No', manageInvoiceList[index].invoiceNumber!)),
-                                SizedBox(width: Dimensions.width20),
-                                Expanded(flex:1,child: _buildInfoColumn('Rate', '₹ ${manageInvoiceList[index].rate!}')),
-                              ],
+                    SizedBox(height: Dimensions.height10),
+                    AppTheme.divider,
+                    SizedBox(height: Dimensions.height10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            BigText(text: 'Payment Paid', size: Dimensions.font12,),
+                            Gap(Dimensions.height10/2),
+                            CustomDropdown(
+                              dropdownItems: const ['Yes', 'No'],
+                              selectedValue: paymentPaid,
+                              width: Dimensions.screenWidth * 0.8,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  paymentPaid = newValue!;
+                                  selectedPaymentPaid = newValue == 'Yes' ? 'yes' : 'no';
+                                  isLoading = true;
+                                  invoices.clear();
+                                  currentPage = 1;
+                                  isFilterApplied = true;
+                                  _loadData(currentPage);
+                                });
+                              },
                             ),
-                            contentChild: Column(
-                              children: [
-                                AppTheme.divider,
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Bale Number', '${manageInvoiceList[index].baleDetails!.first.baleNumber!} - ${manageInvoiceList[index].baleDetails!.last.baleNumber!}')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Than', '${manageInvoiceList[index].baleDetails!.first.than!} - ${manageInvoiceList[index].baleDetails!.last.than!}')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Meter', '${manageInvoiceList[index].baleDetails!.first.meter!} - ${manageInvoiceList[index].baleDetails!.last.meter!}')),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Transport Name', manageInvoiceList[index].transportName ?? 'N/A')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('GST', manageInvoiceList[index].gst!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Invoice Amount', manageInvoiceList[index].invoiceAmount ?? 'N/A'),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', manageInvoiceList[index].paymentType == 'current' ? 'Current' : 'Dhara')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Additional Discount', manageInvoiceList[index].discount!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received', manageInvoiceList[index].paidStatus == 'yes' ? 'Yes' : 'No')),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Amount Received', manageInvoiceList[index].receivedAmount ?? 'N/A' ),
-                                    ),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Difference in Amount', manageInvoiceList[index].differenceAmount ?? 'N/A'),
-                                    ),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Method', manageInvoiceList[index].paymentMethod != null ? manageInvoiceList[index].paymentMethod == 'rtgs' ? 'RTGS' : 'Cheque' : 'N/A'),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', manageInvoiceList[index].dueDate.toString() ?? 'N/A' ),
-                                    ),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Received Date', manageInvoiceList[index].dueDate.toString() ?? 'N/A'),
-                                    ),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Reason', manageInvoiceList[index].reason ?? 'N/A'),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'sellId': widget.sellID, 'invoiceId': manageInvoiceList[index].invoiceId});
-                                      },
-                                      icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID, 'invoiceID': manageInvoiceList[index].invoiceId});
-                                      },
-                                      icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
-                                    ),
-                                    // GFCheckbox(
-                                    //   size: Dimensions.height20,
-                                    //   type: GFCheckboxType.custom,
-                                    //   inactiveBgColor: AppTheme.nearlyWhite,
-                                    //   inactiveBorderColor: AppTheme.primary,
-                                    //   customBgColor: AppTheme.primary,
-                                    //   activeBorderColor: AppTheme.primary,
-                                    //   onChanged: (value) {
-                                    //     setState(() {
-                                    //       manageInvoiceList[index].status = value == true ? 'Active' : 'Inactive';
-                                    //     });
-                                    //   },
-                                    //   value: manageInvoiceList[index].status == 'active' ? true : false,
-                                    //   inactiveIcon: null,
-                                    // ),
-                                  ],
-                                ),
-                              ],
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            BigText(text: '', size: Dimensions.font12,),
+                            Gap(Dimensions.height10/2),
+                            IconButton(
+                              tooltip: 'Clear Filter',
+                              onPressed: () {
+                                setState(() {
+                                  isLoading = true;
+                                  invoices.clear();
+                                  currentPage = 1;
+                                  isFilterApplied = false;
+                                  selectedBillRecieved = null;
+                                  selectedPaymentPaid = null;
+                                  _loadData(currentPage);
+                                });
+                              },
+                              icon: const FaIcon(FontAwesomeIcons.filterCircleXmark, color: AppTheme.black),
                             ),
-                          );
-                        },
-                      ),
+                          ],
+                        )
+                      ],
                     ),
-                  ),
-                 ),
-                ],
+                    SizedBox(height: Dimensions.height10),
+                    invoices.isNotEmpty ? SizedBox(
+                      height: MediaQuery.of(context).size.height / 1.5,
+                      child: SmartRefresher(
+                        controller: _refreshController,
+                        enablePullUp: true,
+                        onRefresh: () async {
+                          setState(() {
+                            invoices.clear();
+                            currentPage = 1;
+                          });
+                          await _loadData(currentPage);
+                          _refreshController.refreshCompleted();
+                        },
+                        onLoading: () async {
+                          await _loadData(currentPage);
+                          _refreshController.loadComplete();
+                        },
+                        child: ListView.builder(
+                          itemCount: invoices.length,
+                          itemBuilder: (context, index) {
+                            var invoice = invoices[index];
+                            return CustomAccordion(
+                              titleChild: Row(
+                                children: [
+                                  _buildInfoColumn('Invoice Date', invoice.invoiceDate.toString()),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Invoice No', invoice.invoiceNumber!),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Rate', '₹${invoice.rate!}'),
+                                ],
+                              ),
+                              contentChild: Column(
+                                children: [
+                                  SizedBox(height: Dimensions.height10),
+                                  AppTheme.divider,
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Bale Number', '${invoice.baleDetails!.first.baleNumber!} - ${invoice.baleDetails!.last.baleNumber!}'),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Than', '${invoice.baleDetails!.first.than!} - ${invoice.baleDetails!.last.than!}'),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Meter', '${invoice.baleDetails!.first.meter!} - ${invoice.baleDetails!.last.meter!}'),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Transport Name', invoice.transportName ?? 'N/A'),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('GST', invoice.gst!),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Invoice Amount', invoice.invoiceAmount ?? 'N/A'),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Payment Type', invoice.paymentType == 'current' ? 'Current' : 'Dhara'),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Additional Discount', invoice.discount!),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Payment Received', invoice.paidStatus == 'yes' ? 'Yes' : 'No'),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Payment Amount Received', invoice.receivedAmount ?? 'N/A' ),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Difference in Amount', invoice.differenceAmount ?? 'N/A'),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Payment Method', invoice.paymentMethod != null ? invoice.paymentMethod == 'rtgs' ? 'RTGS' : 'Cheque' : 'N/A'),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    children: [
+                                      _buildInfoColumn('Due Date', invoice.dueDate.toString() ?? 'N/A' ),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Payment Received Date', invoice.dueDate.toString() ?? 'N/A'),
+                                      SizedBox(width: Dimensions.width20),
+                                      _buildInfoColumn('Reason', invoice.reason ?? 'N/A'),
+                                    ],
+                                  ),
+                                  SizedBox(height: Dimensions.height10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pushNamed(AppRoutes.invoiceView, arguments: {'sellId': widget.sellID, 'invoiceId': invoice.invoiceId});
+                                        },
+                                        icon: const Icon(Icons.visibility_outlined, color: AppTheme.primary),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pushNamed(AppRoutes.invoiceAdd, arguments: {'sellID': widget.sellID, 'invoiceID': invoice.invoiceId});
+                                        },
+                                        icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
+                                      ),
+                                      // GFCheckbox(
+                                      //   size: Dimensions.height20,
+                                      //   type: GFCheckboxType.custom,
+                                      //   inactiveBgColor: AppTheme.nearlyWhite,
+                                      //   inactiveBorderColor: AppTheme.primary,
+                                      //   customBgColor: AppTheme.primary,
+                                      //   activeBorderColor: AppTheme.primary,
+                                      //   onChanged: (value) {
+                                      //     setState(() {
+                                      //       invoice.status = value == true ? 'Active' : 'Inactive';
+                                      //     });
+                                      //   },
+                                      //   value: invoice.status == 'active' ? true : false,
+                                      //   inactiveIcon: null,
+                                      // ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ) : Center(child: Column(
+                      children: [
+                        SizedBox(height: Dimensions.height30),
+                        NoRecordFound(),
+                      ],
+                    )),
+                  ],
+                ),
               ),
-            ),
-          ),
+            )
         )
     );
   }
+
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
       formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
-    return Container(
-      width: MediaQuery.of(context).size.width / 3.9,
+    return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
+          BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
           BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );
   }
-  Future<GetSellDealModel?> getSellDealData() async {
+
+  Future<void> _getSellDetails() async {
     setState(() {
-      _isLoading = true;
+      isLoading = true;
     });
-    try {
-      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
-        GetSellDealModel? model = await sellDealDetails.getSellDealApi(
-            widget.sellID.toString());
-        if (model!.success == true) {
+    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+      GetSellDealModel? dealDetailModel = await sellServices.getSellDealApi(widget.sellID.toString());
+
+      if (dealDetailModel?.message != null) {
+        if (dealDetailModel?.success == true) {
           setState(() {
-            if (model.data != null) {
-              getSellDealModel = model;
+            isLoading = false;
+            if (dealDetailModel!.data != null) {
+              clothSellData = dealDetailModel.data;
             } else {
               noRecordFound = true;
             }
@@ -418,55 +398,73 @@ class _ClothSellViewState extends State<ClothSellView> {
           CustomApiSnackbar.show(
             context,
             'Error',
-            'Something went wrong, please try again later.',
+            dealDetailModel!.message.toString(),
             mode: SnackbarMode.error,
           );
         }
-      }else {
-        setState(() {
-          isNetworkAvailable = false;
-        });
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
       }
-    }
-    finally {
+    } else {
       setState(() {
-        _isLoading = false;
+        isLoading = false;
+        isNetworkAvailable = false;
       });
     }
   }
-  Future<InvoiceListModel?> getInvoiceList(int pageNo) async {
+
+  Future<void> _loadData(int pageNo) async {
     setState(() {
-      _isLoading = true;
+      isLoading = true;
     });
+
     try {
-      if(await HelperFunctions.isPossiblyNetworkAvailable()) {
-        InvoiceListModel? model = await manageInvoiceServices.showInvoiceList(
-          widget.sellID.toString(),
-          pageNo.toString(),
-          selectedPaidStatus,
-          // selectedBillReceivedStatus,
-        );
-        if (model != null) {
-          if (model.success == true) {
-            if (model.data!.isNotEmpty) {
-              if (pageNo == 1) {
-                manageInvoiceList.clear();
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        InvoiceListModel? deliveryListModel = await manageInvoiceServices.showInvoiceList(
+            widget.sellID.toString(), currentPage.toString(),  selectedPaymentPaid, selectedBillRecieved);
+
+        if (deliveryListModel != null) {
+          if (deliveryListModel.success == true) {
+            if (deliveryListModel.data != null) {
+              if (deliveryListModel.data!.isNotEmpty) {
+                if (pageNo == 1) {
+                  invoices.clear();
+                }
+
+                setState(() {
+                  invoices.addAll(deliveryListModel.data!);
+                  isLoading = false;
+                  noRecordFound = false;
+                  currentPage++;
+                });
+              } else {
+                _refreshController.loadNoData();
               }
-              setState(() {
-                manageInvoiceList.addAll(model.data!);
-                currentPage++;
-              });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                noRecordFound = true;
+              });
             }
           } else {
             CustomApiSnackbar.show(
               context,
               'Error',
-              model.message.toString(),
+              deliveryListModel.message.toString(),
               mode: SnackbarMode.error,
             );
           }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            'Something went wrong, please try again later.',
+            mode: SnackbarMode.error,
+          );
         }
       } else {
         setState(() {
@@ -475,9 +473,8 @@ class _ClothSellViewState extends State<ClothSellView> {
       }
     } finally {
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     }
   }
 }
-

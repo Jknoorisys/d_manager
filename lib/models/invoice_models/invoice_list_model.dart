@@ -1,18 +1,18 @@
 // To parse this JSON data, do
 //
-//     final invoiceListModel = invoiceListModelFromJson(jsonString);
+//     final InvoiceListModel = InvoiceListModelFromJson(jsonString);
 
 import 'dart:convert';
 
-InvoiceListModel invoiceListModelFromJson(String str) => InvoiceListModel.fromJson(json.decode(str));
+InvoiceListModel InvoiceListModelFromJson(String str) => InvoiceListModel.fromJson(json.decode(str));
 
-String invoiceListModelToJson(InvoiceListModel data) => json.encode(data.toJson());
+String InvoiceListModelToJson(InvoiceListModel data) => json.encode(data.toJson());
 
 class InvoiceListModel {
   bool? success;
   String? message;
   int? total;
-  List<invoiceList>? data;
+  List<InvoiceDetail>? data;
 
   InvoiceListModel({
     this.success,
@@ -25,7 +25,7 @@ class InvoiceListModel {
     success: json["success"],
     message: json["message"],
     total: json["total"],
-    data: json["data"] == null ? [] : List<invoiceList>.from(json["data"]!.map((x) => invoiceList.fromJson(x))),
+    data: json["data"] == null ? [] : List<InvoiceDetail>.from(json["data"]!.map((x) => InvoiceDetail.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -36,7 +36,7 @@ class InvoiceListModel {
   };
 }
 
-class invoiceList {
+class InvoiceDetail {
   int? invoiceId;
   DateTime? invoiceDate;
   String? invoiceNumber;
@@ -61,7 +61,7 @@ class invoiceList {
   String? hammalName;
   List<BaleDetail>? baleDetails;
 
-  invoiceList({
+  InvoiceDetail({
     this.invoiceId,
     this.invoiceDate,
     this.invoiceNumber,
@@ -87,7 +87,7 @@ class invoiceList {
     this.baleDetails,
   });
 
-  factory invoiceList.fromJson(Map<String, dynamic> json) => invoiceList(
+  factory InvoiceDetail.fromJson(Map<String, dynamic> json) => InvoiceDetail(
     invoiceId: json["invoice_id"],
     invoiceDate: json["invoice_date"] == null ? null : DateTime.parse(json["invoice_date"]),
     invoiceNumber: json["invoice_number"],

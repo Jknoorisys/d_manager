@@ -34,10 +34,10 @@ class ManageInvoiceServices{
 
       Response response = await post(Uri.parse(invoiceListApi), body: body, headers: headers);
       if (response.statusCode == 200) {
-        return invoiceListModelFromJson(response.body);
+        return InvoiceListModelFromJson(response.body);
       }
       else {
-        return invoiceListModelFromJson(response.body);
+        return InvoiceListModelFromJson(response.body);
       }
     }catch(e){
       print(e.toString());
