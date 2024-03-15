@@ -18,6 +18,7 @@ import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class YarnPurchaseView extends StatefulWidget {
@@ -516,12 +517,17 @@ class _YarnPurchaseViewState extends State<YarnPurchaseView> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
+    String formattedValue = value;
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
+    }
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

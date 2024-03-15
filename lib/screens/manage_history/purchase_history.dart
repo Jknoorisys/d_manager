@@ -86,6 +86,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
+          internetNotAvailable: isNetworkAvailable,
           title: S.of(context).purchaseHistory,
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -250,7 +251,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                     SizedBox(width: Dimensions.width20),
                                     Expanded(flex:1,child: _buildInfoColumn('Amount Paid', purchaseHistoryList[index].totalPaidAmount!.toString())),
                                     SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString())),
+                                    Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString() == 'completed' ? 'Completed' : 'On Going')),
                                   ],
                                 ),
                                 SizedBox(height: Dimensions.height10),
@@ -361,12 +362,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   }
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Deal Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    } else if (title == 'Payment Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
@@ -374,7 +372,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

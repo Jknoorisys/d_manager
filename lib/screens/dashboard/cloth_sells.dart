@@ -1,5 +1,6 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
+import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/no_record_found.dart';
@@ -43,7 +44,9 @@ class _ClothSellsState extends State<ClothSells> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            BigText(text: widget.sellDeal[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16),
+                            SizedBox(
+                                width: Dimensions.screenWidth * 0.5,
+                                child: BigText(text: widget.sellDeal[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16)),
                             Row(
                               children: [
                                 CircleAvatar(
@@ -52,7 +55,9 @@ class _ClothSellsState extends State<ClothSells> {
                                   child: BigText(text: widget.sellDeal[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                 ),
                                 SizedBox(width: Dimensions.width10),
-                                SmallText(text: widget.sellDeal[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                SizedBox(
+                                    width: Dimensions.screenWidth * 0.5,
+                                    child: SmallText(text: widget.sellDeal[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
                               ],
                             ),
                           ],
@@ -90,7 +95,7 @@ class _ClothSellsState extends State<ClothSells> {
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    Expanded(flex:1,child: _buildInfoColumn('Status', widget.sellDeal[index].dealStatus!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Status', widget.sellDeal[index].dealStatus! == 'completed' ? 'Completed' : 'On Going')),
                     SizedBox(width: Dimensions.width20),
                     Expanded(flex:1,child: _buildInfoColumn('', '')),
                     SizedBox(width: Dimensions.width20),
@@ -103,7 +108,7 @@ class _ClothSellsState extends State<ClothSells> {
                   children: [
                     CustomElevatedButton(
                       onPressed: (){
-                        //Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': clothSellList[index]});
+                        Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'sellID': widget.sellDeal[index].sellId});
                       },
                       buttonText: 'View Details',
                       isBackgroundGradient: false,
@@ -123,12 +128,9 @@ class _ClothSellsState extends State<ClothSells> {
 
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Deal Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
@@ -136,7 +138,7 @@ class _ClothSellsState extends State<ClothSells> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

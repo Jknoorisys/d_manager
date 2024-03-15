@@ -274,7 +274,7 @@ class _YarnTypeListState extends State<YarnTypeList> {
         }
       } else {
         setState(() {
-          isNetworkAvailable = true;
+          isNetworkAvailable = false;
         });
       }
     } finally {

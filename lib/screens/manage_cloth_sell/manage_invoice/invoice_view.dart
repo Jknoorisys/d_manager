@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:intl/intl.dart';
 import '../../../api/manage_invoice_services.dart';
 import '../../../models/invoice_models/invoice_detail_model.dart';
 import '../../widgets/buttons.dart';
@@ -198,13 +199,18 @@ class _InvoiceViewState extends State<InvoiceView> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
+    String formattedValue = value;
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
+    }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

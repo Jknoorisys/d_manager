@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:d_manager/constants/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -54,52 +53,6 @@ class HelperFunctions {
     int? getYarn = pref.getInt('unreadCount');
     return getYarn ?? 0;
   }
-// Firm ID
-  static Future<bool> setFirmID(String firmID) async {
-    return pref.setString("firmID", firmID);
-  }
-
-  static String getFirmID() {
-    String? getFirm = pref.getString('firmID');
-    return getFirm ?? '';
-  }
-  // Party ID
-
-  static Future<bool> setPartyID(String partyID) async {
-    return pref.setString("partyID", partyID);
-  }
-
-  static String getPartyID() {
-    String? getParty = pref.getString('partyID');
-    return getParty ?? '';
-  }
-  // Cloth Quality ID
-  static Future<bool> setClothID(String clothID) async {
-    return pref.setString("clothID", clothID);
-  }
-  static String getClothID() {
-    String? getCloth = pref.getString('clothID');
-    return getCloth ?? '';
-  }
-
-  // Yarn ID
-
-  static Future<bool> setYarnID(String yarnID) async {
-    return pref.setString("yarnID", yarnID);
-  }
-  static String getYarnID() {
-    String? getYarn = pref.getString('yarnID');
-    return getYarn ?? '';
-  }
-  // Deal Status
-  static Future<bool> setDealStatus(String status) async {
-    return pref.setString("status", status);
-  }
-
-  static String getDealStatus() {
-    String? getDealStatus = pref.getString('status');
-    return getDealStatus ?? '';
-  }
 
   static Future<bool> setUserImage(String userImage) async {
     return pref.setString("UserImage", userImage);
@@ -142,7 +95,6 @@ class HelperFunctions {
     return {'email': userEmail ?? '', 'password': password ?? ''};
   }
 
-
   // Dates for dashboard
   static Future<bool> setStartDate(String startDate) async {
     return pref.setString("startDate", startDate);
@@ -157,30 +109,6 @@ class HelperFunctions {
   static String getEndDate() {
     String? endDate = pref.getString('endDate');
     return endDate ?? '';
-  }
-  // Sell history filter date
-  static Future<bool> setStartDateForSellHistory(String startDate) async {
-    return pref.setString("start", startDate);
-  }
-  static String getStartDateForSellHistory() {
-    String? startDate = pref.getString('start');
-    return startDate ?? '';
-  }
-  static Future<bool> setEndDateForSellHistory(String endDate) async {
-    return pref.setString("end", endDate);
-  }
-  static String getEndDateForSellHistory() {
-    String? endDate = pref.getString('end');
-    return endDate ?? '';
-  }
-  // Purchase History filter date
-
-  static Future<bool> setStartDateForPurchaseHistory(String startDate) async {
-    return pref.setString("startPurchaseDate", startDate);
-  }
-
-  static Future<bool> setEndDateForPurchaseHistory(String endDate) async {
-    return pref.setString("endPurchaseDate", endDate);
   }
 
   static Future<bool> checkInternet() async {

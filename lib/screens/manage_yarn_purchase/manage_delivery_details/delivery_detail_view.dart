@@ -10,6 +10,7 @@ import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DeliveryDetailView extends StatefulWidget {
@@ -152,12 +153,18 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
   }
 
   Widget _buildInfoColumn(String title, String value) {
+    String formattedValue = value;
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
+      DateTime date = DateTime.parse(value);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
+    }
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-          BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

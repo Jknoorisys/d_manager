@@ -22,7 +22,7 @@ class GSTReturnAmount extends StatefulWidget {
 class _GSTReturnAmountState extends State<GSTReturnAmount> {
   DateTime selectedDate = DateTime.now();
   GstReturnServices gstReturnServices = GstReturnServices();
-  bool _isLoading = false;
+  bool _isLoading = true;
   GstReturnAmountModel? gstReturnAmountModel;
 
   @override
@@ -225,5 +225,6 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
         _isLoading = false;
       });
     }
+    return null;
   }
 }

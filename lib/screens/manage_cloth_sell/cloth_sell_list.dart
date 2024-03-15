@@ -260,8 +260,6 @@ class _ClothSellListState extends State<ClothSellList> {
                                         selectedFirm = ActiveFirmsList(firmName: clothSellList[index].firmName,firmId:int.tryParse(clothSellList[index]!.firmId!));
                                         selectedParty = ActivePartiesList(partyName: clothSellList[index].partyFirm,partyId:int.tryParse(clothSellList[index]!.partyId!));
                                         selectedClothQuality = ClothQuality(qualityName: clothSellList[index].qualityName,qualityId:int.tryParse(clothSellList[index]!.qualityId!));
-
-                                        // Navigator.of(context).pushNamed(AppRoutes.clothSellAdd, arguments: {'clothSellData': clothSellList[index]});
                                         Navigator.push(context, MaterialPageRoute(builder: (context) =>
                                             UpdateSellDeal(
                                                 sellID: clothSellList[index].sellId!,
@@ -315,12 +313,9 @@ class _ClothSellListState extends State<ClothSellList> {
 
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Deal Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
@@ -328,7 +323,7 @@ class _ClothSellListState extends State<ClothSellList> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );
@@ -620,21 +615,5 @@ class _ClothSellListState extends State<ClothSellList> {
         isLoading = false;
       });
     }
-  }
-
-  void clearFilters() async {
-    // Clear the preferences
-    await HelperFunctions.setFirmID('');
-    await HelperFunctions.setPartyID('');
-    await HelperFunctions.setClothID('');
-    await HelperFunctions.setDealStatus('');
-    setState(() {
-      selectedFirm = null;
-      selectedParty = null;
-      selectedClothQuality = null;
-      status = 'On Going'; // Assuming 'On Going' is the default status
-    });
-
-    getSellDealList(1, ''); // Assuming you're resetting to the first page and empty search query
   }
 }

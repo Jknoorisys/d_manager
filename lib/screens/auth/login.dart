@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:d_manager/api/auth_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
@@ -307,32 +305,44 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithGoogle() async {
-    firebaseService.signOut();
-    final SocialProcess isLoginSuccess = await firebaseService.signInWithGoogle();
-    if (isLoginSuccess == SocialProcess.loggedIn) {
-      User? user = firebaseService.auth.currentUser;
-      print('User: $user');
-      if (user != null && user.email != null && user.displayName != null) {
-        _callGoogleLoginApi(user.email!, user.uid);
-      } else {
+    if(await HelperFunctions.isPossiblyNetworkAvailable()) {
+      firebaseService.signOut();
+      final SocialProcess isLoginSuccess = await firebaseService.signInWithGoogle();
+      if (isLoginSuccess == SocialProcess.loggedIn) {
+        User? user = firebaseService.auth.currentUser;
+        print('User: $user');
+        if (user != null && user.email != null && user.displayName != null) {
+          _callGoogleLoginApi(user.email!, user.uid);
+        } else {
+          if (mounted) {
+            CustomApiSnackbar.show(
+              context,
+              'Warning',
+              'Google Sign-In Failed',
+              mode: SnackbarMode.warning,
+            );
+          }
+        }
+      } else if(isLoginSuccess == SocialProcess.error){
         if (mounted) {
           CustomApiSnackbar.show(
             context,
-            'Warning',
-            'Google Sign-In Failed',
-            mode: SnackbarMode.warning,
+            'Error',
+            'Google Sign-In Error',
+            mode: SnackbarMode.error,
           );
         }
       }
-    } else if(isLoginSuccess == SocialProcess.error){
-      if (mounted) {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Google Sign-In Error',
-          mode: SnackbarMode.error,
-        );
-      }
+    } else {
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'No Internet Connection',
+        mode: SnackbarMode.warning,
+      );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 

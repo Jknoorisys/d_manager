@@ -54,6 +54,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         dashboardModel = await GetDashboardData();
       } else{
         setState(() {
+          isNetworkAvailable = false;
           purchaseAmount = "0.00";
           saleAmount = "0.00";
         });
@@ -109,8 +110,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {

@@ -383,18 +383,9 @@ class _ClothSellViewState extends State<ClothSellView> {
   }
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Invoice Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Payment Received Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Deal Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
@@ -402,7 +393,7 @@ class _ClothSellViewState extends State<ClothSellView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

@@ -82,262 +82,259 @@ class _SellHistoryState extends State<SellHistory> {
     return CustomDrawer(
         content: CustomBody(
           isLoading:isLoading,
-            title: S.of(context).sellHistory,
-            filterButton: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+          internetNotAvailable: isNetworkAvailable,
+          title: S.of(context).sellHistory,
+          filterButton: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const Icon(Icons.print, color: AppTheme.black),
+              SizedBox(width: Dimensions.width20),
+              GestureDetector(
+                onTap: () {
+                  _showBottomSheet(context);
+                },
+                child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+              ),
+            ],
+          ),
+          content: Padding(
+            padding: EdgeInsets.all(Dimensions.height15),
+            child:
+            Column(
               children: [
-                const Icon(Icons.print, color: AppTheme.black),
-                SizedBox(width: Dimensions.width20),
-                GestureDetector(
-                  onTap: () {
-                    _showBottomSheet(context);
-                  },
-                  child: const FaIcon(FontAwesomeIcons.sliders, color: AppTheme.black),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                          isFilled: false,
+                          controller: searchController,
+                          hintText: 'Search here...',
+                          prefixIcon: Icons.search,
+                          suffixIcon: Icons.close,
+                          borderRadius: Dimensions.radius10,
+                          borderColor: AppTheme.primary,
+                          onSuffixTap: () {
+                            setState(() {
+                              searchController.clear();
+                              sellHistoryData.clear();
+                              currentPage = 1;
+                              getSellHistory(currentPage, searchController.text.trim());
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              sellHistoryData.clear();
+                              currentPage = 1;
+                              getSellHistory(currentPage, value);
+                            });
+                          }
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: Dimensions.height10),
+                AppTheme.divider,
+                Expanded(
+                  child:
+                  SmartRefresher(
+                    enablePullUp: true,
+                    controller: _refreshController,
+                    onRefresh: () async {
+                      setState(() {
+                        sellHistoryData.clear();
+                        currentPage = 1;
+                      });
+                      getSellHistory(currentPage, searchController.text.trim());
+                      _refreshController.refreshCompleted();
+                    },
+                    onLoading: () async {
+                      getSellHistory(currentPage, searchController.text.trim());
+                      _refreshController.loadComplete();
+                    },
+                    child:
+                    ListView.builder(
+                      itemCount: sellHistoryData.length,
+                      itemBuilder: (context, index) {
+                        return CustomAccordion(
+                          titleChild: Column(
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: Row(
+                                  children: [
+                                    SizedBox(height: Dimensions.height10),
+                                    Flexible(
+                                      child: Row(
+                                        children: [
+                                          SizedBox(width: Dimensions.width10),
+                                          CircleAvatar(
+                                            backgroundColor: AppTheme.secondary,
+                                            radius: Dimensions.height20,
+                                            child: BigText(text: sellHistoryData[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                          ),
+                                          SizedBox(width: Dimensions.height10),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width : Dimensions.screenWidth * 0.5,
+                                                  child: BigText(text: sellHistoryData[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
+                                              Row(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundColor: AppTheme.black,
+                                                    radius: Dimensions.height10,
+                                                    child: BigText(text: sellHistoryData[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                  ),
+                                                  SizedBox(width: Dimensions.width10),
+                                                  SizedBox(
+                                                      width : Dimensions.screenWidth * 0.5,
+                                                      child: SmallText(text: sellHistoryData[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: Dimensions.height10),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              SizedBox(height: Dimensions.height10),
+                              AppTheme.divider,
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Expanded(flex:1,child: _buildInfoColumn('Deal Date', sellHistoryData[index].sellDate!.toString())),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', sellHistoryData[index].qualityName!)),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Deal Rate','₹${sellHistoryData[index].rate!}')),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Thans', sellHistoryData[index].totalThan!)),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Delivered', sellHistoryData[index].thanDelivered!)),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Remaining', sellHistoryData[index].thanRemaining!)),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Meter', sellHistoryData[index].totalMeter!.toString())),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Difference Amount', '₹${sellHistoryData[index].totalDifferenceAmount!.toString()}')),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Due Date', sellHistoryData[index].sellDueDate!.toString())),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Invoice Amount', '₹${sellHistoryData[index].totalInvoiceAmount!.toString()}')),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Status', sellHistoryData[index].dealStatus! == 'completed' ? 'Completed' : 'On Going')),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('', '')),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Container(
+                                      width: MediaQuery.of(context).size.width/2.65,
+                                      height: Dimensions.height40*2,
+                                      padding: EdgeInsets.all(Dimensions.height10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        border: Border.all(color: AppTheme.primary),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          BigText(text: 'Total GST Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          RichText(
+                                            text: TextSpan(
+                                              style: TextStyle(
+                                                color: AppTheme.primary,
+                                                fontSize: Dimensions.font18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              children: [
+                                                TextSpan(text: '₹${sellHistoryData[index].totalGstAmount!.toString()}',),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                  ),
+                                  SizedBox(width: Dimensions.width20),
+                                  Container(
+                                      width: MediaQuery.of(context).size.width/2.65,
+                                      height: Dimensions.height40*2,
+                                      padding: EdgeInsets.all(Dimensions.height10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        border: Border.all(color: AppTheme.primary),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          BigText(text: 'Total Received Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          BigText(text: '₹${sellHistoryData[index].totalReceivedAmount!.toString()}',color: AppTheme.primary, size: Dimensions.font18)
+                                        ],
+                                      )
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  CustomElevatedButton(
+                                    onPressed: (){
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: sellHistoryData[index].sellId!,)));
+                                    },
+                                    buttonText: 'View Details',
+                                    isBackgroundGradient: false,
+                                    backgroundColor: AppTheme.primary,
+                                    textSize: Dimensions.font14,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
                 ),
               ],
             ),
-            content: Padding(
-              padding: EdgeInsets.all(Dimensions.height15),
-              child:
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                            isFilled: false,
-                            controller: searchController,
-                            hintText: 'Search here...',
-                            prefixIcon: Icons.search,
-                            suffixIcon: Icons.close,
-                            borderRadius: Dimensions.radius10,
-                            borderColor: AppTheme.primary,
-                            onSuffixTap: () {
-                              setState(() {
-                                searchController.clear();
-                                sellHistoryData.clear();
-                                currentPage = 1;
-                                getSellHistory(currentPage, searchController.text.trim());
-                              });
-                            },
-                            onChanged: (value) {
-                              setState(() {
-                                sellHistoryData.clear();
-                                currentPage = 1;
-                                getSellHistory(currentPage, value);
-                              });
-                            }
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: Dimensions.height10),
-                  AppTheme.divider,
-                  Expanded(
-                    child:
-                    SmartRefresher(
-                      enablePullUp: true,
-                      controller: _refreshController,
-                      onRefresh: () async {
-                        setState(() {
-                          sellHistoryData.clear();
-                          currentPage = 1;
-                        });
-                        getSellHistory(currentPage, searchController.text.trim());
-                        _refreshController.refreshCompleted();
-                      },
-                      onLoading: () async {
-                        getSellHistory(currentPage, searchController.text.trim());
-                        _refreshController.loadComplete();
-                      },
-                      child:
-                      ListView.builder(
-                        itemCount: sellHistoryData.length,
-                        itemBuilder: (context, index) {
-                          return CustomAccordion(
-                            titleChild: Column(
-                              children: [
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Row(
-                                    children: [
-                                      SizedBox(height: Dimensions.height10),
-                                      Flexible(
-                                        child: Row(
-                                          children: [
-                                            SizedBox(width: Dimensions.width10),
-                                            CircleAvatar(
-                                              backgroundColor: AppTheme.secondary,
-                                              radius: Dimensions.height20,
-                                              child: BigText(text: sellHistoryData[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
-                                            ),
-                                            SizedBox(width: Dimensions.height10),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  width : Dimensions.screenWidth * 0.5,
-                                                    child: BigText(text: sellHistoryData[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
-                                                Row(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      backgroundColor: AppTheme.black,
-                                                      radius: Dimensions.height10,
-                                                      child: BigText(text: sellHistoryData[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                                    ),
-                                                    SizedBox(width: Dimensions.width10),
-                                                    SizedBox(
-                                                        width : Dimensions.screenWidth * 0.5,
-                                                        child: SmallText(text: sellHistoryData[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: Dimensions.height10),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            contentChild: Column(
-                              children: [
-                                SizedBox(height: Dimensions.height10),
-                                AppTheme.divider,
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Deal Date', sellHistoryData[index].sellDate!.toString())),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', sellHistoryData[index].qualityName!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Deal Rate',' ₹ ${sellHistoryData[index].rate!}')),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Total Thans', sellHistoryData[index].totalThan!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Than Delivered', sellHistoryData[index].thanDelivered!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Than Remaining', sellHistoryData[index].thanRemaining!)),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Total Meter', sellHistoryData[index].totalMeter!.toString())),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Difference Amount', ' ₹ ${sellHistoryData[index].totalDifferenceAmount!.toString()}')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Due Date', sellHistoryData[index].sellDueDate!.toString())),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Total Invoice Amount', ' ₹ ${sellHistoryData[index].totalInvoiceAmount!.toString()}')),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Status', sellHistoryData[index].dealStatus!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('', '')),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Container(
-                                        width: MediaQuery.of(context).size.width/2.65,
-                                        height: Dimensions.height40*2,
-                                        padding: EdgeInsets.all(Dimensions.height10),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.white,
-                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                          border: Border.all(color: AppTheme.primary),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            BigText(text: 'Total GST Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                            RichText(
-                                              text: TextSpan(
-                                                style: TextStyle(
-                                                  color: AppTheme.primary,
-                                                  fontSize: Dimensions.font18,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                children: [
-                                                  TextSpan(text: ' ${sellHistoryData[index].totalGstAmount!.toString()}',),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                    ),
-                                    SizedBox(width: Dimensions.width20),
-                                    Container(
-                                        width: MediaQuery.of(context).size.width/2.65,
-                                        height: Dimensions.height40*2,
-                                        padding: EdgeInsets.all(Dimensions.height10),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.white,
-                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                          border: Border.all(color: AppTheme.primary),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            BigText(text: 'Total Received Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                            BigText(text: '${sellHistoryData[index].totalReceivedAmount!.toString()}',color: AppTheme.primary, size: Dimensions.font18)
-                                          ],
-                                        )
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height15),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    CustomElevatedButton(
-                                      onPressed: (){
-                                        // Navigator.pushNamed(context, AppRoutes.clothSellView, arguments: {'clothSellData': filteredSellHistoryList[index]});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: sellHistoryData[index].sellId!,)));
-                                      },
-                                      buttonText: 'View Details',
-                                      isBackgroundGradient: false,
-                                      backgroundColor: AppTheme.primary,
-                                      textSize: Dimensions.font14,
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                  ),
-                ],
-              ),
-            )
+          )
         )
     );
   }
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Deal Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
@@ -345,7 +342,7 @@ class _SellHistoryState extends State<SellHistory> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

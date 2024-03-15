@@ -7,10 +7,7 @@ import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import '../../api/dashboard_services.dart';
 import '../../models/dashboard_models/dashboard_models.dart';
-import '../widgets/snackbar.dart';
 
 class Purchases extends StatefulWidget {
   final List<PurchaseDeal> purchaseDeals;
@@ -46,7 +43,9 @@ class _PurchasesState extends State<Purchases> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            BigText(text: widget.purchaseDeals[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                            SizedBox(
+                                width: Dimensions.screenWidth * 0.5,
+                                child: BigText(text: widget.purchaseDeals[index].partyFirm!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
                             Row(
                               children: [
                                 CircleAvatar(
@@ -55,7 +54,9 @@ class _PurchasesState extends State<Purchases> {
                                   child: BigText(text: widget.purchaseDeals[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
                                 ),
                                 SizedBox(width: Dimensions.width10),
-                                SmallText(text: widget.purchaseDeals[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                SizedBox(
+                                    width: Dimensions.screenWidth * 0.5,
+                                    child: SmallText(text: widget.purchaseDeals[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
                               ],
                             ),
                           ],
@@ -105,7 +106,7 @@ class _PurchasesState extends State<Purchases> {
                   children: [
                     Expanded(flex:1,child: _buildInfoColumn('Deiner', widget.purchaseDeals[index].denier!)),
                     SizedBox(width: Dimensions.width20),
-                    Expanded(flex:1,child: _buildInfoColumn('Status', widget.purchaseDeals[index].status!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Status', widget.purchaseDeals[index].dealStatus! == 'completed' ? 'Completed' : 'On Going')),
                     SizedBox(width: Dimensions.width20),
                     Expanded(flex:1,child: _buildInfoColumn('', '')),
                   ],
@@ -115,7 +116,7 @@ class _PurchasesState extends State<Purchases> {
                   children: [
                     Container(
                       width: MediaQuery.of(context).size.width/2.65,
-                      height: Dimensions.height40*2,
+                      height: Dimensions.height40*2.5,
                       padding: EdgeInsets.all(Dimensions.height10),
                       decoration: BoxDecoration(
                         color: AppTheme.white,
@@ -153,7 +154,7 @@ class _PurchasesState extends State<Purchases> {
                     SizedBox(width: Dimensions.width20),
                     Container(
                         width: MediaQuery.of(context).size.width/2.65,
-                        height: Dimensions.height40*2,
+                        height: Dimensions.height40*2.5,
                         padding: EdgeInsets.all(Dimensions.height10),
                         decoration: BoxDecoration(
                           color: AppTheme.white,
@@ -164,7 +165,7 @@ class _PurchasesState extends State<Purchases> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             BigText(text: 'Yarn Name', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                            BigText(text: '${widget.purchaseDeals[index].yarnName!}',color: AppTheme.primary, size: Dimensions.font18)
+                            BigText(text: widget.purchaseDeals[index].yarnName!,color: AppTheme.primary, size: Dimensions.font18)
                           ],
                         )
                     ),
@@ -176,7 +177,7 @@ class _PurchasesState extends State<Purchases> {
                   children: [
                     CustomElevatedButton(
                       onPressed: (){
-                        //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': yarnPurchaseList[index]});
+                        Navigator.of(context).pushNamed(AppRoutes.yarnPurchaseView, arguments: {'purchaseId': widget.purchaseDeals[index].purchaseId.toString()});
                       },
                       buttonText: 'View Details',
                       isBackgroundGradient: false,
@@ -196,12 +197,9 @@ class _PurchasesState extends State<Purchases> {
 
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Deal Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-    }else if (title == 'Due Date') {
-      DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 3.9,
@@ -209,7 +207,7 @@ class _PurchasesState extends State<Purchases> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BigText(text: title, color: AppTheme.nearlyBlack, size: Dimensions.font12),
-          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font12),
+          BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
         ],
       ),
     );

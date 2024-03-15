@@ -27,6 +27,7 @@ class BoxToBeReceived extends StatefulWidget {
 
 class _BoxToBeReceivedState extends State<BoxToBeReceived> {
   bool _isLoading = false;
+  bool noRecordFound = false;
   bool isNetworkAvailable = true;
   int currentPage = 1;
   List<YarnToBeReceivedReminderList> reminderForYarnToBeReceived = [];
@@ -48,9 +49,9 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
         content: CustomBody(
             isLoading: _isLoading,
             internetNotAvailable: isNetworkAvailable,
+            noRecordFound: noRecordFound,
             title: S.of(context).yarnToBeReceived,
-            content:reminderForYarnToBeReceived.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
-            ) : Padding(
+            content: Padding(
               padding: EdgeInsets.all(Dimensions.height15),
               child:
               SmartRefresher(
@@ -215,9 +216,9 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
 
   Widget _buildInfoColumn(String title, String value,int index) {
     String formattedValue = value;
-    if (title == 'Due Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
 
     return Container(
@@ -232,38 +233,6 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
     );
   }
 
-
-  // Widget _buildInfoColumn(String title, String value) {
-  //   String formattedValue = value;
-  //   if (title == 'Due Date') {
-  //     DateTime date = DateTime.parse(value);
-  //     formattedValue = DateFormat('dd-MMM-yyyy').format(date);
-  //   }
-  //   return Container(
-  //     width: MediaQuery.of(context).size.width / 4.5,
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-  //         BigText(text: formattedValue, color: AppTheme.primary, size: Dimensions.font14),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildInfoColumn(String title, String value) {
-  //   String formattedValue = value;
-  //   return Expanded(
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         BigText(text: title, color: AppTheme.grey, size: Dimensions.font12),
-  //         BigText(text: value, color: AppTheme.primary, size: Dimensions.font14),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Future<YarnToBeReceivedModel?> yarnToBeReceivedData(
       String pageNo
       ) async {
@@ -275,10 +244,29 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
         YarnToBeReceivedModel? model = await manageYarnReminderServices.yarnToBeReceived(
             pageNo);
         if (model!.success == true) {
-          setState(() {
-            reminderForYarnToBeReceived.addAll(model.data!);
-            currentPage++;
-          });
+          if (model.data != null) {
+            if (model.data!.isEmpty) {
+              if (currentPage == 1) {
+                setState(() {
+                  noRecordFound = true;
+                });
+              } else {
+                _refreshController.loadNoData();
+              }
+            } else {
+              if (currentPage == 1) {
+                reminderForYarnToBeReceived.clear();
+              }
+              setState(() {
+                reminderForYarnToBeReceived.addAll(model.data!);
+                currentPage++;
+              });
+            }
+          } else {
+            setState(() {
+              noRecordFound = true;
+            });
+          }
         } else {
           CustomApiSnackbar.show(
             context,

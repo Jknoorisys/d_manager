@@ -24,6 +24,7 @@ class PaymentDueDate extends StatefulWidget {
 
 class _PaymentDueDateState extends State<PaymentDueDate> {
   bool _isLoading = false;
+  bool noRecordFound = false;
   bool isNetworkAvailable = true;
   int currentPage = 1;
   List<yarnPaymentDueDate> yarnPaymentTobePaid = [];
@@ -45,9 +46,9 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
         content: CustomBody(
           isLoading:_isLoading,
           internetNotAvailable: isNetworkAvailable,
+          noRecordFound: noRecordFound,
           title: S.of(context).paymentDueDate,
-          content:yarnPaymentTobePaid.isEmpty ? Center(child: Text('No Data Found', style: TextStyle(fontSize: Dimensions.font16),),
-          ) : Padding(
+          content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: SmartRefresher(
               enablePullUp: true,
@@ -213,9 +214,9 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
   }
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
-    if (title == 'Due Date') {
+    if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yyyy').format(date);
+      formattedValue = DateFormat('dd-MMM-yy').format(date);
     }
     return Container(
       width: MediaQuery.of(context).size.width / 4.5,
@@ -239,10 +240,30 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
         YarnPaymentDueDateModel? model = await manageYarnReminderServices.yarnPaymentToBePaid(
             pageNo);
         if (model!.success == true) {
-          setState(() {
-            yarnPaymentTobePaid.addAll(model.data!);
-            currentPage++;
-          });
+          if (model.data != null) {
+            if (model.data!.isEmpty) {
+              if (currentPage == 1) {
+                setState(() {
+                  noRecordFound = true;
+                });
+              } else {
+                _refreshController.loadNoData();
+              }
+            } else {
+              if (currentPage == 1) {
+                yarnPaymentTobePaid.clear();
+              }
+              setState(() {
+                noRecordFound = false;
+                yarnPaymentTobePaid.addAll(model.data!);
+                currentPage++;
+              });
+            }
+          } else {
+            setState(() {
+              noRecordFound = true;
+            });
+          }
         } else {
           CustomApiSnackbar.show(
             context,
