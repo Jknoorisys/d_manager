@@ -193,31 +193,37 @@ class _NotificationListState extends State<NotificationList> {
     });
 
     try {
-      ReadNotificationModel? readNotificationModel = await apiServices.readNotification();
-      if (readNotificationModel != null) {
-        if (readNotificationModel.success == true) {
-          HelperFunctions.setNotificationCount(0);
-          // CustomApiSnackbar.show(
-          //   context,
-          //   'Success',
-          //   readNotificationModel.message.toString(),
-          //   mode: SnackbarMode.success,
-          // );
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        ReadNotificationModel? readNotificationModel = await apiServices.readNotification();
+        if (readNotificationModel != null) {
+          if (readNotificationModel.success == true) {
+            HelperFunctions.setNotificationCount(0);
+            // CustomApiSnackbar.show(
+            //   context,
+            //   'Success',
+            //   readNotificationModel.message.toString(),
+            //   mode: SnackbarMode.success,
+            // );
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              readNotificationModel.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            readNotificationModel.message.toString(),
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Error',
-          'Something went wrong, please try again later.',
-          mode: SnackbarMode.error,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     } finally {
       setState(() {

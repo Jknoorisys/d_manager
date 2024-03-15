@@ -23,6 +23,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
   DateTime selectedDate = DateTime.now();
   GstReturnServices gstReturnServices = GstReturnServices();
   bool _isLoading = true;
+  bool isNetworkAvailable = true;
   GstReturnAmountModel? gstReturnAmountModel;
 
   @override
@@ -36,6 +37,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: _isLoading,
+          internetNotAvailable: isNetworkAvailable,
           title: S.of(context).returnGstAmount,
           filterButton: IconButton(
             onPressed: () async {
@@ -212,12 +214,9 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
           );
         }
       } else {
-        CustomApiSnackbar.show(
-          context,
-          'Warning',
-          'No Internet Connection',
-          mode: SnackbarMode.warning,
-        );
+        setState(() {
+          isNetworkAvailable = false;
+        });
       }
     }
     finally {

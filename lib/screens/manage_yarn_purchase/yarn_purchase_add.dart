@@ -656,62 +656,69 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
   }
 
   Future<void> _getDealDetails() async {
-    if (await HelperFunctions.isPossiblyNetworkAvailable()) {
-      setState(() {
-        isLoading = true;
-      });
-      YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(widget.purchaseId!);
+    try {
+      if (await HelperFunctions.isPossiblyNetworkAvailable()) {
+        setState(() {
+          isLoading = true;
+        });
+        YarnPurchaseDetailModel? dealDetailModel = await purchaseServices.viewPurchase(widget.purchaseId!);
 
-      if (dealDetailModel?.message != null) {
-        if (dealDetailModel?.success == true) {
-          lotNumberController.text = dealDetailModel!.data!.lotNumber!;
-          grossWeightController.text = dealDetailModel.data!.grossWeight!;
-          boxOrderedController.text = dealDetailModel.data!.orderedBoxCount!;
-          denyarController.text = dealDetailModel.data!.denier!;
-          rateController.text = dealDetailModel.data!.rate!;
-          copsController.text = dealDetailModel.data!.cops!;
-          selectedDate = dealDetailModel.data!.purchaseDate != null ? DateTime.parse(dealDetailModel.data!.purchaseDate!) : DateTime.now();
-          selectedDueDate = dealDetailModel.data!.paymentDueDate != null ? DateTime.parse(dealDetailModel.data!.paymentDueDate!) : DateTime.now();
-          selectedFirm = int.parse(dealDetailModel.data!.firmId!);
-          selectedParty = int.parse(dealDetailModel.data!.partyId!);
-          selectedYarn = int.parse(dealDetailModel.data!.yarnTypeId!);
-          setState(() {
-            selectedStatus = dealDetailModel.data!.dealStatus! == 'ongoing' ? 'ongoing' : 'completed';
-          });
+        if (dealDetailModel?.message != null) {
+          if (dealDetailModel?.success == true) {
+            lotNumberController.text = dealDetailModel!.data!.lotNumber!;
+            grossWeightController.text = dealDetailModel.data!.grossWeight!;
+            boxOrderedController.text = dealDetailModel.data!.orderedBoxCount!;
+            denyarController.text = dealDetailModel.data!.denier!;
+            rateController.text = dealDetailModel.data!.rate!;
+            copsController.text = dealDetailModel.data!.cops!;
+            selectedDate = dealDetailModel.data!.purchaseDate != null ? DateTime.parse(dealDetailModel.data!.purchaseDate!) : DateTime.now();
+            selectedDueDate = dealDetailModel.data!.paymentDueDate != null ? DateTime.parse(dealDetailModel.data!.paymentDueDate!) : DateTime.now();
+            selectedFirm = int.parse(dealDetailModel.data!.firmId!);
+            selectedParty = int.parse(dealDetailModel.data!.partyId!);
+            selectedYarn = int.parse(dealDetailModel.data!.yarnTypeId!);
+            setState(() {
+              selectedStatus = dealDetailModel.data!.dealStatus! == 'ongoing' ? 'ongoing' : 'completed';
+            });
 
-          print("Selected Yarn: $selectedYarn");
-          paymentType = dealDetailModel.data!.paymentType! == 'current' ? 'Current' : 'Dhara';
-          dharaOption = dealDetailModel.data!.dharaDays! == '15' ? '15 days' : dealDetailModel.data!.dharaDays! == '40' ? '40 days' : 'Other';
-
-          setState(() {
-            isLoading = false;
-          });
+            paymentType = dealDetailModel.data!.paymentType! == 'current' ? 'Current' : 'Dhara';
+            dharaOption = dealDetailModel.data!.dharaDays! == '15' ? '15 days' : dealDetailModel.data!.dharaDays! == '40' ? '40 days' : 'Other';
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              dealDetailModel!.message.toString(),
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
           CustomApiSnackbar.show(
             context,
             'Error',
-            dealDetailModel!.message.toString(),
+            'Something went wrong, please try again',
             mode: SnackbarMode.error,
           );
         }
       } else {
         CustomApiSnackbar.show(
           context,
-          'Error',
-          'Something went wrong, please try again',
-          mode: SnackbarMode.error,
+          'Warning',
+          'No Internet Connection',
+          mode: SnackbarMode.warning,
         );
       }
-    } else {
+    } catch (e) {
       CustomApiSnackbar.show(
         context,
-        'Warning',
-        'No Internet Connection',
-        mode: SnackbarMode.warning,
+        'Error',
+        'Something went wrong, please try again',
+        mode: SnackbarMode.error,
       );
+      print("Error occurred: $e");
+    } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
+
 }
