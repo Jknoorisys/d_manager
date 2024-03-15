@@ -1,3 +1,4 @@
+import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -192,7 +193,7 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
                             CustomElevatedButton(
                               onPressed: (){
                                 //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
-                                // Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView( purchaseId: reminderForYarnToBeReceived[index].purchaseId.toString())));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView(purchaseId:yarnPaymentTobePaid[index].yarnPurchaseId!.toString())));
                               },
                               buttonText: 'View Details',
                               isBackgroundGradient: false,

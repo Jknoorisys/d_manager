@@ -64,12 +64,14 @@ class ManagePurchaseServices {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
       Response response = await post(Uri.parse(getYarnPurchaseDealUrl), body: body, headers: headers);
+      print("View Purchase: " + response.body);
       if (response.statusCode == 200) {
         return yarnPurchaseDetailModelFromJson(response.body);
       } else {
         return yarnPurchaseDetailModelFromJson(response.body);
       }
     } catch (e) {
+      print("View Purchase: " + e.toString());
       return null;
     }
   }

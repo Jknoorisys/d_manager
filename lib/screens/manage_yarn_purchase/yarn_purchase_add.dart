@@ -681,7 +681,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
             });
 
             paymentType = dealDetailModel.data!.paymentType! == 'current' ? 'Current' : 'Dhara';
-            dharaOption = dealDetailModel.data!.dharaDays! == '15' ? '15 days' : dealDetailModel.data!.dharaDays! == '40' ? '40 days' : 'Other';
+            dharaOption = dealDetailModel.data!.paymentType! == 'dhara' ? dealDetailModel.data!.dharaDays! == '15' ? '15 days' : dealDetailModel.data!.dharaDays! == '40' ? '40 days' : 'Other' : '15 days';
           } else {
             CustomApiSnackbar.show(
               context,
