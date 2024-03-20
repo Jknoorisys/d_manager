@@ -86,6 +86,7 @@ const String getInvoiceUrl = '$baseUrl/api/get-invoice';
 const String updateInvoiceUrl = '$baseUrl/api/update-invoice';
 const String updateInvoiceStatusUrl = '$baseUrl/api/update-invoice-status';
 const String addTransportDetailUrl = '$baseUrl/api/add-transport-details';
+const String downloadInvoiceUrl = '$baseUrl/api/download-invoice';
 
 // Reminders
 const String yarnToBeReceivedForReminder = '$baseUrl/api/reminder-yarn-to-be-received';
@@ -96,6 +97,8 @@ const String paymentToBeReceivedApi = '$baseUrl/api/reminder-cloth-payment-to-be
 // History
 const String sellHistoryApi = '$baseUrl/api/sale-history';
 const String purchaseHistoryApi = '$baseUrl/api/purchase-history';
+const String exportSellHistoryApi = '$baseUrl/api/export-sell-history';
+const String exportPurchaseHistoryApi = '$baseUrl/api/export-purchase-history';
 
 // Invoice list
 const String invoiceListApi = '$baseUrl/api/sell-deal-details';

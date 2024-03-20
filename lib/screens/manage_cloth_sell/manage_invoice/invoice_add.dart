@@ -707,7 +707,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
           isPaymentReceived = invoiceModel.paidStatus == 'yes' ? true : false;
           paymentMethod = invoiceModel.paymentMethod.toString() == 'cheque' ? 'Cheque' : 'RTGS';
           paymentType = invoiceModel.paymentType.toString() == 'current' ? 'Current' : 'Dhara';
-          dharaOption = invoiceModel.dharaDays.toString() == '15' ? '15 days' : invoiceModel.dharaDays.toString() == '40' ? '40 days' : 'Other';
+          dharaOption = invoiceModel.paymentType.toString() == 'current' ? invoiceModel.dharaDays.toString() == '15' ? '15 days' : invoiceModel.dharaDays.toString() == '40' ? '40 days' : 'Other' : '15 days';
           for (var baleDetail in invoiceModel.baleDetails!) {
             baleNumberControllers.add(TextEditingController(text: baleDetail.baleNumber.toString()));
             thanControllers.add(TextEditingController(text: baleDetail.than.toString()));

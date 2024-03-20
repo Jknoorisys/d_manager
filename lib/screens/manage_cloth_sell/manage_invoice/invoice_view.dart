@@ -1,4 +1,6 @@
+import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/models/invoice_models/download_invoice_model.dart';
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/manage_transport_details/transport_detail_add.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -8,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
+import 'package:flutter_cached_pdfview/flutter_cached_pdfview.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../api/manage_invoice_services.dart';
 import '../../../models/invoice_models/invoice_detail_model.dart';
 import '../../widgets/buttons.dart';
@@ -52,9 +56,30 @@ class _InvoiceViewState extends State<InvoiceView> {
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Icon(Icons.remove_red_eye, color: AppTheme.black),
+              GestureDetector(
+                onTap: () {
+                  if(getInvoiceModel?.data != null){
+                    _viewInvoice({
+                      "user_id": HelperFunctions.getUserID(),
+                      "invoice_id": widget.invoiceId.toString(),
+                      "sell_id": widget.sellId,
+                    });
+                  }
+
+                },
+                  child: const Icon(Icons.remove_red_eye, color: AppTheme.black)),
               SizedBox(width: Dimensions.width25),
-              const Icon(Icons.print, color: AppTheme.black),
+              GestureDetector(
+                onTap : () {
+                  if(getInvoiceModel?.data != null){
+                    _downloadInvoice({
+                      "user_id": HelperFunctions.getUserID(),
+                      "invoice_id": widget.invoiceId.toString(),
+                      "sell_id": widget.sellId,
+                    });
+                  }
+                },
+                  child: const Icon(Icons.print, color: AppTheme.black)),
             ],
           ),
         content: getInvoiceModel?.data! == null ? Container() : SingleChildScrollView(
@@ -102,7 +127,7 @@ class _InvoiceViewState extends State<InvoiceView> {
                       SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
-                          _buildInfoColumn('Payment Amount Received',getInvoiceModel!.data!.invoiceAmount! ?? 'N/A'),
+                          _buildInfoColumn('Payment Amount Received',getInvoiceModel!.data!.invoiceAmount ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Difference in Amount', getInvoiceModel!.data!.differenceAmount ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
@@ -254,6 +279,119 @@ class _InvoiceViewState extends State<InvoiceView> {
     } else {
       setState(() {
         isNetworkAvailable = false;
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _launchUrl(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+
+  Future<void> _downloadInvoice(Map<String, String> body) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      DownloadInvoiceModel? invoiceModel = await invoiceServices.downloadInvoice((body));
+      print(invoiceModel);
+      if (invoiceModel?.message != null) {
+        if (invoiceModel?.success == true) {
+          if (invoiceModel?.path != null) {
+            _launchUrl(Uri.parse('$baseUrl/${invoiceModel?.path!}'));
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              'Unable to download invoice, please try again...',
+              mode: SnackbarMode.error,
+            );
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            invoiceModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (error) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'An error occurred: $error',
+        mode: SnackbarMode.error,
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _viewInvoice(Map<String, String> body) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      DownloadInvoiceModel? invoiceModel = await invoiceServices.downloadInvoice((body));
+      print(invoiceModel);
+      if (invoiceModel?.message != null) {
+        if (invoiceModel?.success == true) {
+          if (invoiceModel?.path != null) {
+            print('$baseUrl/${invoiceModel?.path!}');
+            // _launchUrl(Uri.parse('$baseUrl/${invoiceModel?.path!}'));
+            PDF(
+              defaultPage: 0,
+              swipeHorizontal: true,
+            ).cachedFromUrl('$baseUrl/${invoiceModel?.path!}');
+
+    } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              'Unable to download invoice, please try again...',
+              mode: SnackbarMode.error,
+            );
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            invoiceModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (error) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'An error occurred: $error',
+        mode: SnackbarMode.error,
+      );
+    } finally {
+      setState(() {
         isLoading = false;
       });
     }

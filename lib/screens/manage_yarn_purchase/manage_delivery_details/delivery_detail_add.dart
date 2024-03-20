@@ -851,7 +851,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                 selectedDueDate = deliveryDetailData!.paymentDueDate != null ? DateTime.parse(deliveryDetailData!.paymentDueDate!) : DateTime.now();
                 selectedPaidDate = deliveryDetailData!.paymentDate != null ? DateTime.parse(deliveryDetailData!.paymentDate!) : DateTime.now();
                 paymentType = deliveryDetailData!.paymentType != null ? (deliveryDetailData!.paymentType! == 'current' ? 'Current' : 'Dhara') : 'Current';
-                dharaOption = deliveryDetailData!.dharaDays.toString() == '15' ? '15 days' : deliveryDetailData!.dharaDays.toString() == '40' ? '40 days' : 'Other';
+                dharaOption = deliveryDetailData!.paymentType! == 'dhara' ? deliveryDetailData!.dharaDays.toString() == '15' ? '15 days' : deliveryDetailData!.dharaDays.toString() == '40' ? '40 days' : 'Other' : '15 days';
                 isPaid = deliveryDetailData!.paidStatus == 'yes' ? true : false;
                 paymentMethod = deliveryDetailData!.paymentMethod != null ? deliveryDetailData!.paymentMethod! : 'RTGS';
                 amountPaid = deliveryDetailData!.paidAmount != null ? double.parse(deliveryDetailData!.paidAmount!) : 0.0;

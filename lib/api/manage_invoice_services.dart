@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:d_manager/models/history_models/export_history_model.dart';
 import 'package:d_manager/models/invoice_models/add_invoice_model.dart';
 import 'package:d_manager/models/invoice_models/add_transport_detail_model.dart';
+import 'package:d_manager/models/invoice_models/download_invoice_model.dart';
 import 'package:d_manager/models/invoice_models/invoice_detail_model.dart';
 import 'package:d_manager/models/invoice_models/invoice_list_model.dart';
 import 'package:d_manager/models/invoice_models/update_invoice_model.dart';
@@ -127,4 +129,66 @@ class ManageInvoiceServices{
     }
   }
 
+  Future<DownloadInvoiceModel?> downloadInvoice([Map<String, dynamic>? body]) async {
+    try {
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json"
+      };
+
+      Response response = await post(Uri.parse(downloadInvoiceUrl), body: jsonEncode(body), headers: headers);
+      print("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return downloadInvoiceModelFromJson(response.body);
+      } else {
+        return downloadInvoiceModelFromJson(response.body);
+      }
+    } catch (e) {
+      print("Error: $e");
+      return null;
+    }
+  }
+
+  Future<ExportHistoryModel?> exportPurchaseHistory([Map<String, dynamic>? body]) async {
+    try {
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json"
+      };
+
+      Response response = await post(Uri.parse(exportPurchaseHistoryApi), body: jsonEncode(body), headers: headers);
+      print("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return exportHistoryModelFromJson(response.body);
+      } else {
+        return exportHistoryModelFromJson(response.body);
+      }
+    } catch (e) {
+      print("Error: $e");
+      return null;
+    }
+  }
+
+  Future<ExportHistoryModel?> exportSellHistory([Map<String, dynamic>? body]) async {
+    try {
+      Map<String, String> headers = {
+        "X-API-Key": HelperFunctions.getApiKey(),
+        "Content-Type": "application/json"
+      };
+
+      Response response = await post(Uri.parse(exportSellHistoryApi), body: jsonEncode(body), headers: headers);
+      print("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return exportHistoryModelFromJson(response.body);
+      } else {
+        return exportHistoryModelFromJson(response.body);
+      }
+    } catch (e) {
+      print("Error: $e");
+      return null;
+    }
+  }
 }

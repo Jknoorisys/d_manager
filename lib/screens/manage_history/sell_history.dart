@@ -1,6 +1,9 @@
+import 'package:d_manager/api/manage_invoice_services.dart';
+import 'package:d_manager/constants/constants.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
+import 'package:d_manager/models/history_models/export_history_model.dart';
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/custom_dropdown.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
@@ -15,6 +18,7 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../api/manage_history_services.dart';
 import '../../helpers/helper_functions.dart';
 import '../../models/history_models/sell_history_model.dart';
@@ -87,7 +91,22 @@ class _SellHistoryState extends State<SellHistory> {
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Icon(Icons.print, color: AppTheme.black),
+              GestureDetector(
+                onTap: () {
+                  Map<String, dynamic> body = {
+                    'user_id': HelperFunctions.getUserID(),
+                    // 'page_no': currentPage.toString(),
+                    'search' : searchController.text.trim() == '' ? '' : searchController.text.trim(),
+                    "firm_id" : selectedFirm != null ? selectedFirm.toString() : "",
+                    'party_id' : selectedParty != null ? selectedParty.toString() : "",
+                    'quality_id' : selectedClothQuality != null ? selectedClothQuality.toString() : "",
+                    'start_date' : selectedStartDate != null ? selectedStartDate.toString() : "",
+                    'end_date' : selectedEndDate != null ? selectedEndDate.toString() : "",
+                  };
+                  _exportSellHistory(body);
+                },
+                  child: const Icon(Icons.print, color: AppTheme.black)
+              ),
               SizedBox(width: Dimensions.width20),
               GestureDetector(
                 onTap: () {
@@ -203,10 +222,6 @@ class _SellHistoryState extends State<SellHistory> {
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                          contentChild: Column(
-                            children: [
                               SizedBox(height: Dimensions.height10),
                               AppTheme.divider,
                               SizedBox(height: Dimensions.height10),
@@ -216,13 +231,17 @@ class _SellHistoryState extends State<SellHistory> {
                                   SizedBox(width: Dimensions.width20),
                                   Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', sellHistoryData[index].qualityName!)),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Deal Rate','₹${sellHistoryData[index].rate!}')),
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Thans', sellHistoryData[index].totalThan!)),
                                 ],
                               ),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Total Thans', sellHistoryData[index].totalThan!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Deal Rate','₹${sellHistoryData[index].rate!}')),
                                   SizedBox(width: Dimensions.width20),
                                   Expanded(flex:1,child: _buildInfoColumn('Than Delivered', sellHistoryData[index].thanDelivered!)),
                                   SizedBox(width: Dimensions.width20),
@@ -628,4 +647,60 @@ class _SellHistoryState extends State<SellHistory> {
       });
     }
   }
+  Future<void> _launchUrl(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  Future<void> _exportSellHistory(Map<String, dynamic> body) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      ExportHistoryModel? historyModel = await ManageInvoiceServices().exportSellHistory(body);
+      print(historyModel);
+      if (historyModel?.message != null) {
+        if (historyModel?.success == true) {
+          if (historyModel?.filePath != null) {
+            _launchUrl(Uri.parse('$baseUrl/${historyModel?.filePath!}'));
+          } else {
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              'Unable to download invoice, please try again...',
+              mode: SnackbarMode.error,
+            );
+          }
+        } else {
+          CustomApiSnackbar.show(
+            context,
+            'Error',
+            historyModel!.message.toString(),
+            mode: SnackbarMode.error,
+          );
+        }
+      } else {
+        CustomApiSnackbar.show(
+          context,
+          'Error',
+          'Something went wrong, please try again',
+          mode: SnackbarMode.error,
+        );
+      }
+    } catch (error) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'An error occurred: $error',
+        mode: SnackbarMode.error,
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
 }
