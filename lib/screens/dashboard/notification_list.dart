@@ -6,7 +6,6 @@ import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../constants/dimension.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
@@ -20,15 +19,9 @@ class NotificationList extends StatefulWidget {
 }
 
 class _NotificationListState extends State<NotificationList> {
-  final List<Map<String, String>> notificationList = [
-    {'partyName': 'Kalantri Yarn Agency','title': 'Yarn to be Received', 'body': 'Body 1','date':'20/03/2024'},
-    {'partyName': 'Laxmi Yarns','title': 'Payment Due Date', 'body': 'Body 1','date':'22/03/2024'},
-    {'partyName': 'Tulsi Textiles','title': 'Thans to be Delivered', 'body': 'Body 1','date':'25/03/2024'},
-    {'partyName': 'Jakhotya Textiles','title': 'Payment to be Received', 'body': 'Body 1','date':'29/03/2024'},
-
-  ];
-
-  final RefreshController _refreshController = RefreshController();
+  bool isLoadingMore = false;
+  int totalItems = 0;
+  final _controller = ScrollController();
   List<NotificationDetail> notifications = [];
   int currentPage = 1;
   bool isLoading = false;
@@ -40,13 +33,22 @@ class _NotificationListState extends State<NotificationList> {
   @override
   void initState() {
     _loadData(currentPage);
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > notifications.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage);
+        }
+      }
+    });
     _markAsRead();
     super.initState();
   }
 
   @override
   void dispose() {
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -60,25 +62,11 @@ class _NotificationListState extends State<NotificationList> {
           noRecordFound: noRecordFound,
           content: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: SmartRefresher(
-              controller: _refreshController,
-              enablePullDown: true,
-              enablePullUp: true,
-              onRefresh: () async {
-                setState(() {
-                  notifications.clear();
-                  currentPage = 1;
-                });
-                await _loadData(currentPage);
-                _refreshController.refreshCompleted();
-              },
-              onLoading: () async {
-                await _loadData(currentPage);
-                _refreshController.loadComplete();
-              },
-              child: ListView.builder(
-                itemCount: notifications.length,
-                itemBuilder: (context, index) {
+            child: ListView.builder(
+              controller: _controller,
+              itemCount: notifications.length + 1,
+              itemBuilder: (context, index) {
+                if (index < notifications.length) {
                   var notification = notifications[index];
                   return CustomAccordionWithoutExpanded(
                       titleChild:
@@ -113,17 +101,19 @@ class _NotificationListState extends State<NotificationList> {
                           ),
                         ],
                       ),
-                  contentChild: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppTheme.divider,
-                      SizedBox(height: Dimensions.height10),
-                      SmallText(text: notification.message!, color: AppTheme.black, size: Dimensions.font14),
-                    ],
-                  )
+                      contentChild: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppTheme.divider,
+                          SizedBox(height: Dimensions.height10),
+                          SmallText(text: notification.message!, color: AppTheme.black, size: Dimensions.font14),
+                        ],
+                      )
                   );
-                },
-              ),
+                } else {
+                  return const SizedBox();
+                }
+              },
             ),
           ),
         )
@@ -149,10 +139,12 @@ class _NotificationListState extends State<NotificationList> {
                 setState(() {
                   notifications.addAll(notificationListModel.notification!);
                   HelperFunctions.setNotificationCount(notificationListModel.totalUnseen!.toInt());
-                  currentPage++;
+                  totalItems = notificationListModel.total ?? 0;
                 });
               } else {
-                _refreshController.loadNoData();
+                setState(() {
+                  isLoading = false;
+                });
               }
             } else {
               setState(() {
@@ -183,6 +175,7 @@ class _NotificationListState extends State<NotificationList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }
@@ -198,12 +191,6 @@ class _NotificationListState extends State<NotificationList> {
         if (readNotificationModel != null) {
           if (readNotificationModel.success == true) {
             HelperFunctions.setNotificationCount(0);
-            // CustomApiSnackbar.show(
-            //   context,
-            //   'Success',
-            //   readNotificationModel.message.toString(),
-            //   mode: SnackbarMode.success,
-            // );
           } else {
             CustomApiSnackbar.show(
               context,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -173,6 +174,23 @@ class HelperFunctions {
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  static String formatPrice(String priceStr) {
+    if (priceStr.isEmpty) {
+      return '0.00';
+    }
+    double? price = double.tryParse(priceStr);
+
+    if (price != null) {
+      if (price != 0.0) {
+        return NumberFormat('#,##,###.00', 'en_US').format(price);
+      } else {
+        return '0.00';
+      }
+    } else {
+      return 'Invalid Price Format';
     }
   }
 }

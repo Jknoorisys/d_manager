@@ -110,6 +110,9 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     copsController.dispose();
     paymentRemarkController.dispose();
     _selectedFile = null;
+    selectedDeliveryDate = DateTime.now();
+    selectedDueDate = DateTime.now();
+    selectedPaidDate = DateTime.now();
     super.dispose();
   }
 
@@ -220,7 +223,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorCops.toString() != 'null' ? errorCops.toString() : '',
+                                // errorText: errorCops.toString() != 'null' ? errorCops.toString() : '',
                               )
                             ],
                           ),
@@ -242,7 +245,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                                 keyboardType: TextInputType.number,
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorDenier.toString() != 'null' ? errorDenier.toString() : '',
+                                // errorText: errorDenier.toString() != 'null' ? errorDenier.toString() : '',
                               )
                             ],
                           ),
@@ -533,7 +536,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
                                 'payment_method': isPaid ? paymentMethod : '',
                                 'paid_amount': isPaid ? amountPaidController.text : '',
                                 'payment_notes': isPaid ? paymentRemarkController.text : '',
-                                'next_delivery_date': isPaid ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
+                                'payment_date': isPaid ? DateFormat('yyyy-MM-dd').format(selectedPaidDate) : '',
                                 'bill_received': isBillReceived ? 'yes' : 'no',
                               };
 
@@ -728,7 +731,7 @@ class _DeliveryDetailAddState extends State<DeliveryDetailAdd> {
     String amountPaidError = isPaid ? (_validateAmountPaid(amountPaidController.text) ?? '') : '';
     String paymentRemarkError = isPaid ? (_validatePaymentRemark(paymentRemarkController.text) ?? '') : '';
 
-    return netWeightError.isEmpty && grossReceivedError.isEmpty && denierError.isEmpty && rateError.isEmpty && copsError.isEmpty && amountPaidError.isEmpty && paymentRemarkError.isEmpty ? true : false;
+    return netWeightError.isEmpty && grossReceivedError.isEmpty && rateError.isEmpty && amountPaidError.isEmpty && paymentRemarkError.isEmpty ? true : false;
   }
 
   Future<void> _addDeliveryDetail(Map<String, String> body, File? billUrl) async {

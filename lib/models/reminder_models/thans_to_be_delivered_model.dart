@@ -11,23 +11,27 @@ String thansToBeDeliveredModelToJson(ThansToBeDeliveredModel data) => json.encod
 class ThansToBeDeliveredModel {
   bool? success;
   String? message;
+  int? total;
   List<ThansPending>? data;
 
   ThansToBeDeliveredModel({
     this.success,
     this.message,
+    this.total,
     this.data,
   });
 
   factory ThansToBeDeliveredModel.fromJson(Map<String, dynamic> json) => ThansToBeDeliveredModel(
     success: json["success"],
     message: json["message"],
+    total: json["total"],
     data: json["data"] == null ? [] : List<ThansPending>.from(json["data"]!.map((x) => ThansPending.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "success": success,
     "message": message,
+    "total": total,
     "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
   };
 }

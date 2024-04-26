@@ -25,7 +25,6 @@ import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class YarnPurchaseList extends StatefulWidget {
   const YarnPurchaseList({Key? key}) : super(key: key);
@@ -36,11 +35,12 @@ class YarnPurchaseList extends StatefulWidget {
 
 class _YarnPurchaseListState extends State<YarnPurchaseList> {
   final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
   List<PurchaseDetail> purchases = [];
   int currentPage = 1;
   bool isLoading = false;
-  bool noRecordFound = false;
   bool isNetworkAvailable = true;
   bool isFilterApplied = false;
   ManagePurchaseServices purchaseServices = ManagePurchaseServices();
@@ -57,17 +57,26 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
   void initState() {
     super.initState();
     setState(() {
-      isLoading = true;
+      isLoading = !isLoading;
       _getFirms();
       _getParties();
       _getYarns();
     });
     _loadData(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > purchases.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage, searchController.text.trim());
+        }
+      }
+    });
   }
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -77,7 +86,6 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
         content: CustomBody(
           title: S.of(context).yarnPurchasesList,
           isLoading: isLoading,
-          noRecordFound: noRecordFound,
           internetNotAvailable: isNetworkAvailable,
           filterButton: GestureDetector(
             onTap: () {
@@ -135,24 +143,11 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    controller: _refreshController,
-                    enablePullUp: true,
-                    onRefresh: () async {
-                      setState(() {
-                        purchases.clear();
-                        currentPage = 1;
-                      });
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child: ListView.builder(
-                      itemCount: purchases.length,
-                      itemBuilder: (context, index) {
+                  child: (purchases.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: purchases.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < purchases.length) {
                         var purchase = purchases[index];
                         return CustomAccordion(
                           titleChild: Column(
@@ -174,7 +169,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           SizedBox(
-                                            width: Dimensions.screenWidth * 0.5,
+                                              width: Dimensions.screenWidth * 0.5,
                                               child: BigText(text: purchase.partyName!, color: AppTheme.primary, size: Dimensions.font16)),
                                           Row(
                                             children: [
@@ -203,9 +198,9 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                 children: [
                                   _buildInfoColumn('Deal Date', purchase.purchaseDate!.toString().split(' ')[0]),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Name', purchase.yarnName!),
+                                  _buildInfoColumn('Yarn Name', purchase.yarnName ?? 'N/A'),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Yarn Type', purchase.typeName!),
+                                  _buildInfoColumn('Yarn Type', purchase.typeName ?? 'N/A'),
                                 ],
                               ),
                             ],
@@ -216,17 +211,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                 children: [
                                   _buildInfoColumn('Payment Type', purchase.paymentType! == 'current' ? 'Current' : 'Dhara'),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Lot Number', purchase.lotNumber!),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Box Ordered', purchase.orderedBoxCount!),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  _buildInfoColumn('Gross Received', purchase.grossReceivedWeight!),
-                                  SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Gross Remaining', (double.parse(purchase.grossWeight!) - double.parse(purchase.grossReceivedWeight!)).toString()),
+                                  _buildInfoColumn('Lot Number', purchase.lotNumber ?? 'N/A'),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Cops', purchase.cops!),
                                 ],
@@ -234,7 +219,17 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  _buildInfoColumn('Deiner', purchase.denier!),
+                                  _buildInfoColumn('Gross Ordered', purchase.grossWeight ?? 'N/A'),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Gross Received', purchase.grossReceivedWeight ?? 'N/A'),
+                                  SizedBox(width: Dimensions.width20),
+                                  _buildInfoColumn('Gross Remaining', (double.parse(purchase.grossWeight!) - double.parse(purchase.grossReceivedWeight!)).toString()),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  _buildInfoColumn('Deiner', purchase.denier ?? 'N/A'),
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Status', purchase.dealStatus! == 'ongoing' ? 'On Going' : 'Completed'),
                                   SizedBox(width: Dimensions.width20),
@@ -269,7 +264,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                                   text: purchase.netWeight!,
                                                 ),
                                                 TextSpan(
-                                                  text: ' ton',
+                                                  text: ' Kg',
                                                   style: TextStyle(
                                                     fontSize: Dimensions.font12,
                                                   ),
@@ -295,7 +290,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           BigText(text: 'Rate', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '₹ ${purchase.rate}',color: AppTheme.primary, size: Dimensions.font18)
+                                          BigText(text: '₹ ${HelperFunctions.formatPrice(purchase.rate.toString())}',color: AppTheme.primary, size: Dimensions.font18)
                                         ],
                                       )
                                   ),
@@ -325,16 +320,17 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                                     customBgColor: AppTheme.primary,
                                     activeBorderColor: AppTheme.primary,
                                     onChanged: (value) {
-                                      if (purchase.dealStatus == 'ongoing') {
-                                        _updateStatus(purchase.purchaseId!, 'completed');
-                                      } else {
-                                        CustomApiSnackbar.show(
-                                          context,
-                                          'Warning',
-                                          'Deal is already completed',
-                                          mode: SnackbarMode.warning,
-                                        );
-                                      }
+                                      _updateStatus(purchase.purchaseId!, value ? 'completed' : 'ongoing');
+                                      // if (purchase.dealStatus == 'ongoing') {
+                                      //   _updateStatus(purchase.purchaseId!, 'completed');
+                                      // } else {
+                                      //   CustomApiSnackbar.show(
+                                      //     context,
+                                      //     'Warning',
+                                      //     'Deal is already completed',
+                                      //     mode: SnackbarMode.warning,
+                                      //   );
+                                      // }
                                     },
                                     value: purchase.dealStatus == 'completed' ? true : false,
                                     inactiveIcon: null,
@@ -344,8 +340,10 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -359,7 +357,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
     return Expanded(
       child: Column(
@@ -531,7 +529,6 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     if (response != null) {
       setState(() {
         firms.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -541,7 +538,6 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     if (response != null) {
       setState(() {
         parties.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -551,7 +547,6 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     if (response != null) {
       setState(() {
         yarns.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -575,17 +570,17 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
                 }
 
                 setState(() {
+                  totalItems = purchaseListModel.total ?? 0;
                   purchases.addAll(purchaseListModel.data!);
-                  isLoading = false;
-                  noRecordFound = false;
-                  currentPage++;
                 });
               } else {
-                _refreshController.loadNoData();
+                setState(() {
+                  isLoading = false;
+                });
               }
             } else {
               setState(() {
-                noRecordFound = true;
+                isLoading = false;
               });
             }
           } else {
@@ -612,6 +607,7 @@ class _YarnPurchaseListState extends State<YarnPurchaseList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

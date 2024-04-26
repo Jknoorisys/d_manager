@@ -26,6 +26,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add Cloth Quality"),
         "addFirm": MessageLookupByLibrary.simpleMessage("Add Firm"),
         "addHammal": MessageLookupByLibrary.simpleMessage("Add Hammal"),
+        "addInventory": MessageLookupByLibrary.simpleMessage("Add Inventory"),
         "addParty": MessageLookupByLibrary.simpleMessage("Add Party"),
         "addTransport": MessageLookupByLibrary.simpleMessage("Add Transport"),
         "addTransportDetail":
@@ -38,6 +39,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Change Password"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
+        "clothInventory":
+            MessageLookupByLibrary.simpleMessage("Cloth Inventory"),
         "clothQuality": MessageLookupByLibrary.simpleMessage("Cloth Quality"),
         "clothQualityList":
             MessageLookupByLibrary.simpleMessage("Cloth Quality List"),
@@ -87,6 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "history": MessageLookupByLibrary.simpleMessage("History"),
         "invalidEmail": MessageLookupByLibrary.simpleMessage("Invalid Email"),
         "invalidOtp": MessageLookupByLibrary.simpleMessage("Invalid OTP"),
+        "inventories": MessageLookupByLibrary.simpleMessage("Inventories"),
         "lastMonthAmount":
             MessageLookupByLibrary.simpleMessage("Last Month Amount"),
         "login": MessageLookupByLibrary.simpleMessage("Login"),
@@ -140,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Search Delivery Details"),
         "searchFirm": MessageLookupByLibrary.simpleMessage("Search Firm"),
         "searchHammal": MessageLookupByLibrary.simpleMessage("Search Hammal"),
+        "searchHere": MessageLookupByLibrary.simpleMessage("Search here..."),
         "searchParty": MessageLookupByLibrary.simpleMessage("Search Party"),
         "searchTransport":
             MessageLookupByLibrary.simpleMessage("Search Transport"),
@@ -156,11 +161,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Thans to be Delivered"),
         "totalPurchaseAmount":
             MessageLookupByLibrary.simpleMessage("Total Purchase Amount"),
+        "totalUnpaidAmount":
+            MessageLookupByLibrary.simpleMessage("Total Unpaid Amount"),
         "transport": MessageLookupByLibrary.simpleMessage("Transport"),
         "transportList": MessageLookupByLibrary.simpleMessage("Transport List"),
+        "unpaidHistory": MessageLookupByLibrary.simpleMessage("Unpaid History"),
         "updateClothQuality":
             MessageLookupByLibrary.simpleMessage("Update Cloth Quality"),
         "updateHammal": MessageLookupByLibrary.simpleMessage("Update Hammal"),
+        "updateInventory":
+            MessageLookupByLibrary.simpleMessage("Update Inventory"),
         "updateSellDeal":
             MessageLookupByLibrary.simpleMessage("Update Sell Deal"),
         "updateTransport":
@@ -168,6 +178,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "updateYarnType":
             MessageLookupByLibrary.simpleMessage("Update Yarn Type"),
         "verify": MessageLookupByLibrary.simpleMessage("VERIFY"),
+        "yarnInventory": MessageLookupByLibrary.simpleMessage("Yarn Inventory"),
         "yarnPurchase": MessageLookupByLibrary.simpleMessage("Yarn Purchase"),
         "yarnPurchaseDeal":
             MessageLookupByLibrary.simpleMessage("Yarn Purchase Deal"),

@@ -127,6 +127,7 @@ class CustomTextField extends StatelessWidget {
   final Function? onSuffixTap;
   final double? height;
   final double? width;
+  final bool? autoFocus;
 
   const CustomTextField({
     super.key,
@@ -146,7 +147,10 @@ class CustomTextField extends StatelessWidget {
     this.onSuffixTap,
     this.borderRadius,
     this.maxLines,
-    this.borderColor, this.height, this.width,
+    this.borderColor,
+    this.height,
+    this.width,
+    this.autoFocus = false,
   });
 
   @override
@@ -157,6 +161,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller ?? TextEditingController(),
       onChanged: onChanged,
       obscureText: isObscure,
+      autofocus: autoFocus ?? false,
       maxLines: maxLines ?? 1,
       decoration: InputDecoration(
         constraints: BoxConstraints(

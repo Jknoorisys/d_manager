@@ -174,6 +174,25 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                               )
                             ],
                           ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
+                              Gap(Dimensions.height10/2),
+                              CustomApiDropdown(
+                                  hintText: 'Select Yarn',
+                                  dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
+                                  selectedValue: yarns.any((yarn) => yarn.yarnTypeId == selectedYarn) ? selectedYarn : null,
+                                  errorText: errorYarn.toString() != 'null' ? errorYarn.toString() : null,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedYarn = newValue!;
+                                    });
+                                  }
+                              )
+                            ],
+                          ),
                         ],
                       ),
                       Gap(Dimensions.height30),
@@ -213,47 +232,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                                 borderRadius: Dimensions.radius10,
                                 width: MediaQuery.of(context).size.width/2.65,
                                 errorText: errorGrossWeight.toString() != 'null' ? errorGrossWeight.toString() : '',
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      Gap(Dimensions.height20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select Yarn Name', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomApiDropdown(
-                                hintText: 'Select Yarn',
-                                  dropdownItems: yarns.map((e) => DropdownMenuItem<dynamic>(value: e.yarnTypeId!, child: BigText(text: e.yarnName!, size: Dimensions.font14,))).toList(),
-                                  selectedValue: yarns.any((yarn) => yarn.yarnTypeId == selectedYarn) ? selectedYarn : null,
-                                  errorText: errorYarn.toString() != 'null' ? errorYarn.toString() : null,
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedYarn = newValue!;
-                                    });
-                                  }
-                              )
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Box Ordered', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomTextField(
-                                controller: boxOrderedController,
-                                hintText: "Enter Box Ordered",
-                                keyboardType: TextInputType.number,
-                                borderRadius: Dimensions.radius10,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                // errorText: errorBoxOrdered.toString() != 'null' ? errorBoxOrdered.toString() : '',
                               )
                             ],
                           ),
@@ -385,7 +363,7 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
                               'user_id': HelperFunctions.getUserID(),
                               'lot_number': lotNumberController.text,
                               'gross_weight': grossWeightController.text,
-                              'ordered_box_count': boxOrderedController.text,
+                              // 'ordered_box_count': boxOrderedController.text,
                               'denier': denyarController.text,
                               'rate': rateController.text,
                               'cops': copsController.text,
@@ -534,7 +512,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     if (response != null) {
       setState(() {
         firms.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -544,7 +521,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     if (response != null) {
       setState(() {
         parties.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -554,7 +530,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
     if (response != null) {
       setState(() {
         yarns.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -667,7 +642,6 @@ class _YarnPurchaseAddState extends State<YarnPurchaseAdd> {
           if (dealDetailModel?.success == true) {
             lotNumberController.text = dealDetailModel!.data!.lotNumber!;
             grossWeightController.text = dealDetailModel.data!.grossWeight!;
-            boxOrderedController.text = dealDetailModel.data!.orderedBoxCount!;
             denyarController.text = dealDetailModel.data!.denier!;
             rateController.text = dealDetailModel.data!.rate!;
             copsController.text = dealDetailModel.data!.cops!;

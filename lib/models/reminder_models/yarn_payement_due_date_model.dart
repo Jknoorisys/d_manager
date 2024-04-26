@@ -11,23 +11,27 @@ String yarnPaymentDueDateModelToJson(YarnPaymentDueDateModel data) => json.encod
 class YarnPaymentDueDateModel {
   bool? success;
   String? message;
+  int? total;
   List<yarnPaymentDueDate>? data;
 
   YarnPaymentDueDateModel({
     this.success,
     this.message,
+    this.total,
     this.data,
   });
 
   factory YarnPaymentDueDateModel.fromJson(Map<String, dynamic> json) => YarnPaymentDueDateModel(
     success: json["success"],
     message: json["message"],
+    total: json["total"],
     data: json["data"] == null ? [] : List<yarnPaymentDueDate>.from(json["data"]!.map((x) => yarnPaymentDueDate.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "success": success,
     "message": message,
+    "total": total,
     "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
   };
 }

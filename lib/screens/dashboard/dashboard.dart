@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
@@ -10,7 +12,6 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:intl/intl.dart';
 import '../../api/dashboard_services.dart';
 import '../../models/dashboard_models/dashboard_models.dart';
 import '../widgets/snackbar.dart';
@@ -33,14 +34,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isNetworkAvailable = true;
   bool noRecordFound = false;
   DashboardServices dashboardServices = DashboardServices();
-  late Widget dynamicDashboardCard = Container();
+  late Widget dynamicDashboardCard = const DashboardCard(
+    title: 'Total Yarn Purchases',
+    type: 'purchase',
+    image: AppImages.purchaseIcon,
+  );
+
   DashboardModel? dashboardModel;
 
   String purchaseAmount = "0.00";
   String saleAmount = "0.00";
+  DateTime? currentBackPressTime;
 
   @override
   void initState() {
+    setState(() {
+      isLoading = !isLoading;
+    });
     super.initState();
     fetchData();
   }
@@ -51,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     try {
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
-        dashboardModel = await GetDashboardData();
+        dashboardModel = await getDashboardData();
       } else{
         setState(() {
           isNetworkAvailable = false;
@@ -84,28 +94,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void updateDashboardCard() {
     if (_currentIndex == 0) {
       setState(() {
-        dynamicDashboardCard = DashboardCard(
+        dynamicDashboardCard = const DashboardCard(
           title: 'Total Yarn Purchases',
-          value:(purchaseAmount),
-          date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+          type: 'purchase',
           image: AppImages.purchaseIcon,
-          fetchDataCallback: () {
-            fetchData();
-          },
-
         );
       });
     } else if (_currentIndex == 1) {
       // Update DashboardCard for cloth sells
       setState(() {
-        dynamicDashboardCard = DashboardCard(
+        dynamicDashboardCard = const DashboardCard(
           title: 'Total Cloth Sells Deals',
-          value: saleAmount,
-          date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+          type: 'sell',
           image: AppImages.salesIcon,
-          fetchDataCallback: () {
-            fetchData();
-          },
         );
       });
     }
@@ -113,109 +114,154 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomDrawer(
-      content: CustomBody(
-        dashboardCard: dynamicDashboardCard,
-        content: _pages.isNotEmpty ? _pages[_currentIndex] : SizedBox(),
-        isLoading: isLoading,
-        internetNotAvailable: isNetworkAvailable,
-        noRecordFound: noRecordFound,
-        bottomNavigationBar: Container(
-          padding: EdgeInsets.all(Dimensions.width20),
-          height: Dimensions.height60 + Dimensions.height10,
-          decoration: BoxDecoration(
-            color: AppTheme.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(Dimensions.radius20),
-              topRight: Radius.circular(Dimensions.radius20),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.grey.withOpacity(0.4),
-                spreadRadius: 5,
-                blurRadius: 7,
-                offset: const Offset(0, 3),
+    return PopScope(
+      // onWillPop: () async {
+      //   bool backStatus = onWillPop();
+      //   if (backStatus) {
+      //     exit(0);
+      //   }
+      //   return false;
+      // },
+      canPop: false,
+      onPopInvoked: (bool didPop) {
+        if (didPop) {
+          return;
+        }
+        bool backStatus = onWillPop();
+        if (backStatus) {
+              exit(0);
+            }
+      },
+      child: CustomDrawer(
+        content: CustomBody(
+          dashboardCard: dynamicDashboardCard,
+          content: _pages.isNotEmpty ? _pages[_currentIndex] : const SizedBox(),
+          isLoading: isLoading,
+          internetNotAvailable: isNetworkAvailable,
+          noRecordFound: noRecordFound,
+          bottomNavigationBar: Container(
+            padding: EdgeInsets.all(Dimensions.width20),
+            height: Dimensions.height60 + Dimensions.height10,
+            decoration: BoxDecoration(
+              color: AppTheme.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(Dimensions.radius20),
+                topRight: Radius.circular(Dimensions.radius20),
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              CustomElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentIndex = 0;
-                    updateDashboardCard();
-                  });
-                },
-                buttonText: S.of(context).purchases,
-                image: SvgPicture.asset(
-                  AppImages.purchaseFillIcon,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.grey.withOpacity(0.4),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                CustomElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentIndex = 0;
+                      updateDashboardCard();
+                    });
+                  },
+                  buttonText: S.of(context).purchases,
+                  image: SvgPicture.asset(
+                    AppImages.purchaseFillIcon,
+                    color: _currentIndex == 0
+                        ? AppTheme.white
+                        : AppTheme.primary,
+                    width: Dimensions.iconSize24,
+                    height: Dimensions.iconSize24,
+                  ),
+                  isBackgroundGradient: _currentIndex == 0,
                   color: _currentIndex == 0
                       ? AppTheme.white
                       : AppTheme.primary,
-                  width: Dimensions.iconSize24,
-                  height: Dimensions.iconSize24,
                 ),
-                isBackgroundGradient: _currentIndex == 0,
-                color: _currentIndex == 0
-                    ? AppTheme.white
-                    : AppTheme.primary,
-              ),
-              CustomElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentIndex = 1;
-                    updateDashboardCard();
-                  });
-                },
-                buttonText: S.of(context).clothSells,
-                image: SvgPicture.asset(
-                  AppImages.salesFillIcon,
+                CustomElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentIndex = 1;
+                      updateDashboardCard();
+                    });
+                  },
+                  buttonText: S.of(context).clothSells,
+                  image: SvgPicture.asset(
+                    AppImages.salesFillIcon,
+                    color: _currentIndex == 1
+                        ? AppTheme.white
+                        : AppTheme.primary,
+                    width: Dimensions.iconSize24,
+                    height: Dimensions.iconSize24,
+                  ),
+                  isBackgroundGradient: _currentIndex == 1,
                   color: _currentIndex == 1
                       ? AppTheme.white
                       : AppTheme.primary,
-                  width: Dimensions.iconSize24,
-                  height: Dimensions.iconSize24,
                 ),
-                isBackgroundGradient: _currentIndex == 1,
-                color: _currentIndex == 1
-                    ? AppTheme.white
-                    : AppTheme.primary,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-  Future<DashboardModel?> GetDashboardData() async {
+
+  onWillPop() {
+    DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime!) > const Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      CustomApiSnackbar.show(
+        context,
+        'Warning',
+        'Press back again to exit the app.',
+        mode: SnackbarMode.warning,
+      );
+      return false;
+    } else {
+      return true;
+    }
+  }
+  Future<DashboardModel?> getDashboardData() async {
     setState(() {
       isLoading = true;
     });
     try {
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
         DashboardModel? model = await dashboardServices.showDashboardData();
-        if (model?.success == true) {
-         if (model?.data != null) {
-           setState(() {
-             dashboardModel = model;
-             purchaseAmount = "${dashboardModel?.purchaseAmount}";
-             saleAmount = "${dashboardModel?.sellAmount}";
-             purchaseDeals.addAll(model!.data!.purchaseDeals!);
-             sellDeal.addAll(model.data!.sellDeal!);
-           });
-           updateDashboardCard();
-           updatePages();
-         } else {
-           noRecordFound = true;
-         }
+        if (model != null) {
+          if (model.success == true) {
+            if (model.data != null) {
+              setState(() {
+                dashboardModel = model;
+                purchaseAmount = "${dashboardModel?.purchaseAmount}";
+                saleAmount = "${dashboardModel?.sellAmount}";
+                purchaseDeals.addAll(model!.data!.purchaseDeals!);
+                sellDeal.addAll(model.data!.sellDeal!);
+              });
+              // updateDashboardCard();
+              updatePages();
+            } else {
+              noRecordFound = true;
+            }
+          } else {
+            Navigator.of(context).pop(); // Close the loading dialog
+            CustomApiSnackbar.show(
+              context,
+              'Error',
+              model!.message!,
+              mode: SnackbarMode.error,
+            );
+          }
         } else {
-          Navigator.of(context).pop(); // Close the loading dialog
           CustomApiSnackbar.show(
             context,
             'Error',
-            model!.message!,
+            'Something went wrong, please try again later.',
             mode: SnackbarMode.error,
           );
         }
@@ -232,7 +278,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         mode: SnackbarMode.error,
       );
     }finally {
-      // Update isLoading state regardless of success or failure
       setState(() {
         isLoading = false;
       });

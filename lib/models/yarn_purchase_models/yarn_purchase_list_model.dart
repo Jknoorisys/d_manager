@@ -51,8 +51,6 @@ class PurchaseDetail {
   String? yarnName;
   String? typeName;
   String? lotNumber;
-  String? orderedBoxCount;
-  String? deliveredBoxCount;
   String? netWeight;
   String? grossReceivedWeight;
   String? grossWeight;
@@ -76,8 +74,6 @@ class PurchaseDetail {
     this.yarnName,
     this.typeName,
     this.lotNumber,
-    this.orderedBoxCount,
-    this.deliveredBoxCount,
     this.netWeight,
     this.grossReceivedWeight,
     this.grossWeight,
@@ -102,8 +98,6 @@ class PurchaseDetail {
     yarnName: json["yarn_name"],
     typeName: json["type_name"],
     lotNumber: json["lot_number"],
-    orderedBoxCount: json["ordered_box_count"],
-    deliveredBoxCount: json["delivered_box_count"],
     netWeight: json["net_weight"],
     grossReceivedWeight: json["gross_received_weight"],
     grossWeight: json["gross_weight"],
@@ -128,8 +122,6 @@ class PurchaseDetail {
     "yarn_name": yarnName,
     "type_name": typeName,
     "lot_number": lotNumber,
-    "ordered_box_count": orderedBoxCount,
-    "delivered_box_count": deliveredBoxCount,
     "net_weight": netWeight,
     "gross_received_weight": grossReceivedWeight,
     "gross_weight": grossWeight,

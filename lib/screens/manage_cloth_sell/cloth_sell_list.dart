@@ -21,13 +21,10 @@ import 'package:gap/gap.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../models/sell_models/active_parties_model.dart';
 import '../../models/sell_models/sell_deal_list_model.dart';
 import '../../models/sell_models/status_sell_deal_model.dart';
-import '../widgets/new_custom_dropdown.dart';
 import '../widgets/snackbar.dart';
-import 'cloth_sell_view.dart';
 import '../../api/dropdown_services.dart';
 import '../../api/manage_firm_services.dart';
 import '../../api/manage_party_services.dart';
@@ -44,10 +41,11 @@ class ClothSellList extends StatefulWidget {
 class _ClothSellListState extends State<ClothSellList> {
   SellDealDetails sellDealDetails = SellDealDetails();
   final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
   SellDealListModel? sellDealListModel;
   List<SellDeal> clothSellList = [];
-
   var selectedFirm;
   var selectedParty;
   var selectedClothQuality;
@@ -62,18 +60,28 @@ class _ClothSellListState extends State<ClothSellList> {
   ManageFirmServices firmServices = ManageFirmServices();
   ManagePartyServices partyServices = ManagePartyServices();
   DropdownServices dropdownServices = DropdownServices();
-  List<ClothQuality> activeClothQuality = [];
   String? firmID;
   String? partyID;
   String? clothID;
   bool isLoading = false;
   bool isNetworkAvailable = true;
-  bool noRecordFound = false;
   bool isFilterApplied = false;
   @override
   void initState() {
     super.initState();
+    setState(() {
+      isLoading = !isLoading;
+    });
     getSellDealList(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > clothSellList.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          getSellDealList(currentPage, searchController.text.trim());
+        }
+      }
+    });
     _getFirms();
     _getParties();
     _getClothTypes();
@@ -81,7 +89,7 @@ class _ClothSellListState extends State<ClothSellList> {
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
   @override
@@ -89,7 +97,6 @@ class _ClothSellListState extends State<ClothSellList> {
     return CustomDrawer(
         content: CustomBody(
           isLoading: isLoading,
-          noRecordFound: noRecordFound,
           internetNotAvailable: isNetworkAvailable,
           title: S.of(context).clothSellList,
           filterButton: GestureDetector(
@@ -147,25 +154,11 @@ class _ClothSellListState extends State<ClothSellList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    enablePullUp: true,
-                    controller: _refreshController,
-                    onRefresh:() async {
-                      setState(() {
-                        clothSellList.clear();
-                        currentPage = 1;
-                      });
-                      getSellDealList(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      getSellDealList(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child:
-                    ListView.builder(
-                      itemCount: clothSellList.length,
-                      itemBuilder: (context, index) {
+                  child: (clothSellList.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: clothSellList.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < clothSellList.length) {
                         return CustomAccordion(
                           titleChild: Column(
                             children: [
@@ -228,11 +221,11 @@ class _ClothSellListState extends State<ClothSellList> {
                             children:[
                               Row(
                                 children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Delivered', clothSellList[index].thanDelivered ?? 'N/A')),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Than Remaining', clothSellList[index].thanRemaining ?? 'N/A')),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Rate', '₹ ${clothSellList[index].rate!}')),
+                                  Expanded(flex:1,child: _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(clothSellList[index].rate.toString())}')),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
@@ -240,7 +233,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                 children: [
                                   Expanded(flex:1,child: _buildInfoColumn('Status', clothSellList[index].dealStatus! == 'ongoing' ? 'On Going' : 'Completed')),
                                   SizedBox(width: Dimensions.width20),
-                                   Expanded(flex:1,child: _buildInfoColumn('Due Date', clothSellList[index].sellDueDate!.toString())),
+                                  Expanded(flex:1,child: _buildInfoColumn('Due Date', clothSellList[index].sellDueDate!.toString())),
                                   SizedBox(width: Dimensions.width20),
                                   Expanded(flex:1,child: _buildInfoColumn('', '')),
                                 ],
@@ -262,7 +255,7 @@ class _ClothSellListState extends State<ClothSellList> {
                                         selectedClothQuality = ClothQuality(qualityName: clothSellList[index].qualityName,qualityId:int.tryParse(clothSellList[index]!.qualityId!));
                                         Navigator.push(context, MaterialPageRoute(builder: (context) =>
                                             UpdateSellDeal(
-                                                sellID: clothSellList[index].sellId!,
+                                              sellID: clothSellList[index].sellId!,
                                               sellListData:clothSellList[index],
                                               selectedFirm: selectedFirm, // Pass the selected firm
                                               selectedParty: selectedParty, // Pass the selected party
@@ -300,8 +293,10 @@ class _ClothSellListState extends State<ClothSellList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -315,9 +310,9 @@ class _ClothSellListState extends State<ClothSellList> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,7 +477,7 @@ class _ClothSellListState extends State<ClothSellList> {
       },
     );
   }
-  Future<SellDealListModel?> getSellDealList(int pageNo, String search,) async {
+  Future<void> getSellDealList(int pageNo, String search,) async {
       setState(() {
         isLoading = true;
       });
@@ -500,17 +495,19 @@ class _ClothSellListState extends State<ClothSellList> {
                   if (pageNo == 1) {
                     clothSellList.clear();
                   }
-                  print("sellDealList===");
+
                   setState(() {
+                    totalItems = model.total ?? 0;
                     clothSellList.addAll(model.data!);
-                    currentPage++;
                   });
                 } else {
-                  _refreshController.loadNoData();
+                  setState(() {
+                    isLoading = false;
+                  });
                 }
               } else{
                 setState(() {
-                  noRecordFound = true;
+                  isLoading = false;
                 });
               }
             } else {
@@ -537,10 +534,11 @@ class _ClothSellListState extends State<ClothSellList> {
       } finally {
         setState(() {
           isLoading = false;
+          isLoadingMore = false;
         });
       }
     }
-  Future<UpdateSellDealStatusModel?> updateStatusOfSellDeal(String sellID, String dealStatus, int index) async {
+  Future<void> updateStatusOfSellDeal(String sellID, String dealStatus, int index) async {
     setState(() {
       isLoading = true;
     });
@@ -594,7 +592,6 @@ class _ClothSellListState extends State<ClothSellList> {
     if (response != null) {
       setState(() {
         firms.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -603,7 +600,6 @@ class _ClothSellListState extends State<ClothSellList> {
     if (response != null) {
       setState(() {
         parties.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -612,7 +608,6 @@ class _ClothSellListState extends State<ClothSellList> {
     if (response != null) {
       setState(() {
         cloths.addAll(response.data!);
-        isLoading = false;
       });
     }
   }

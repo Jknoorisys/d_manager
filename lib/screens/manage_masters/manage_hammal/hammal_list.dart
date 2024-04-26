@@ -10,13 +10,13 @@ import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HammalList extends StatefulWidget {
   const HammalList({Key? key}) : super(key: key);
@@ -27,7 +27,9 @@ class HammalList extends StatefulWidget {
 
 class _HammalListState extends State<HammalList> {
   final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
+  bool isLoadingMore = false;
+  int totalItems = 0;
+  final _controller = ScrollController();
   List<HammalDetail> hammals = [];
   int currentPage = 1;
   bool isLoading = false;
@@ -41,12 +43,21 @@ class _HammalListState extends State<HammalList> {
       isLoading = !isLoading;
     });
     _loadData(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > hammals.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage, searchController.text.trim());
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
   @override
@@ -111,25 +122,11 @@ class _HammalListState extends State<HammalList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    controller: _refreshController,
-                    enablePullDown: true,
-                    enablePullUp: true,
-                    onRefresh: () async {
-                      setState(() {
-                        hammals.clear();
-                        currentPage = 1;
-                      });
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child: ListView.builder(
-                      itemCount: hammals.length,
-                      itemBuilder: (context, index) {
+                  child: (hammals.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: hammals.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < hammals.length) {
                         var hammal = hammals[index];
                         return CustomAccordion(
                           titleChild: Column(
@@ -210,8 +207,15 @@ class _HammalListState extends State<HammalList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        // if (totalItems > hammals.length) {
+                        //   return const CustomLoader();
+                        // } else {
+                        //   return const SizedBox(height: 0);
+                        // }
+                        return const SizedBox();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -248,10 +252,12 @@ class _HammalListState extends State<HammalList> {
 
               setState(() {
                 hammals.addAll(hammalListModel.data!);
-                currentPage++;
+                totalItems = hammalListModel.total ?? 0;
               });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                isLoading = false;
+              });
             }
           } else {
             CustomApiSnackbar.show(
@@ -277,6 +283,7 @@ class _HammalListState extends State<HammalList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

@@ -1,13 +1,11 @@
 import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
-import 'package:intl/intl.dart';
 import '../../api/manage_gst_return_services.dart';
 import '../../constants/images.dart';
 import '../../generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
-
 import '../../helpers/helper_functions.dart';
 import '../../models/gst_return_models/gst_return_models.dart';
 import '../widgets/snackbar.dart';
@@ -24,6 +22,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
   GstReturnServices gstReturnServices = GstReturnServices();
   bool _isLoading = true;
   bool isNetworkAvailable = true;
+  bool isFilterApplied = false;
   GstReturnAmountModel? gstReturnAmountModel;
 
   @override
@@ -39,25 +38,49 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
           isLoading: _isLoading,
           internetNotAvailable: isNetworkAvailable,
           title: S.of(context).returnGstAmount,
-          filterButton: IconButton(
-            onPressed: () async {
-              DateTime? pickedDate = await showDatePicker(
-                context: context,
-                helpText: S.of(context).selectDate,
-                initialDate: selectedDate,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2050),
-                initialDatePickerMode: DatePickerMode.day,
-              );
-              if (pickedDate != null && pickedDate != selectedDate) {
-                setState(() {
-                  selectedDate = pickedDate;
-                });
+          filterButton: Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                onPressed: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    helpText: S.of(context).selectDate,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2050),
+                    initialDatePickerMode: DatePickerMode.day,
+                  );
+                  if (pickedDate != null && pickedDate != selectedDate) {
+                    setState(() {
+                      selectedDate = pickedDate;
+                      isFilterApplied = true;
+                    });
 
-                await gstReturnAmount();
-              }
-            },
-            icon: const Icon(Icons.calendar_month, color: AppTheme.black),
+                    await gstReturnAmount();
+                  }
+                },
+                icon: const Icon(Icons.calendar_month, color: AppTheme.black),
+              ),
+              isFilterApplied == false ? Container() : GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isFilterApplied = false;
+                    selectedDate = DateTime.now();
+                  });
+                  gstReturnAmount();
+                },
+                child: Container(
+                  width: Dimensions.height20,
+                  height: Dimensions.height20,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.clear, color: AppTheme.primary, size: 12),
+                ),
+              ),
+            ],
           ),
           content: gstReturnAmountModel != null ? Padding(
             padding: EdgeInsets.all(Dimensions.height15),
@@ -98,7 +121,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                     children: [
                                       const Icon(Icons.currency_rupee,
                                         color: AppTheme.secondary,),
-                                      Text((gstReturnAmountModel?.data?.currentMonthReturn ?? "0").toString(),style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                      Text(HelperFunctions.formatPrice(gstReturnAmountModel!.data!.currentMonthReturn.toString()), style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                     ],
                                   )
                                 ],
@@ -157,7 +180,7 @@ class _GSTReturnAmountState extends State<GSTReturnAmount> {
                                     children: [
                                       const Icon(Icons.currency_rupee,
                                         color: AppTheme.secondary,),
-                                      Text('${gstReturnAmountModel!.data!.lastMonthReturn!}' ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
+                                      Text(HelperFunctions.formatPrice(gstReturnAmountModel!.data!.lastMonthReturn.toString()) ,style: AppTheme.title.copyWith(color: AppTheme.secondary))
                                     ],
                                   )
                                 ],

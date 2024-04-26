@@ -33,6 +33,10 @@ class _InvoiceViewState extends State<InvoiceView> {
   DateTime selectedDate = DateTime.now();
   bool noRecordFound = false;
   bool isNetworkAvailable = true;
+  List<int> thanList = [];
+  List<int> meterList = [];
+  int totalThan = 0;
+  int totalMeter = 0;
 
   ManageInvoiceServices invoiceServices = ManageInvoiceServices();
 
@@ -56,19 +60,19 @@ class _InvoiceViewState extends State<InvoiceView> {
           filterButton: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              GestureDetector(
-                onTap: () {
-                  if(getInvoiceModel?.data != null){
-                    _viewInvoice({
-                      "user_id": HelperFunctions.getUserID(),
-                      "invoice_id": widget.invoiceId.toString(),
-                      "sell_id": widget.sellId,
-                    });
-                  }
-
-                },
-                  child: const Icon(Icons.remove_red_eye, color: AppTheme.black)),
-              SizedBox(width: Dimensions.width25),
+              // GestureDetector(
+              //   onTap: () {
+              //     if(getInvoiceModel?.data != null){
+              //       _viewInvoice({
+              //         "user_id": HelperFunctions.getUserID(),
+              //         "invoice_id": widget.invoiceId.toString(),
+              //         "sell_id": widget.sellId,
+              //       });
+              //     }
+              //
+              //   },
+              //     child: const Icon(Icons.remove_red_eye, color: AppTheme.black)),
+              // SizedBox(width: Dimensions.width25),
               GestureDetector(
                 onTap : () {
                   if(getInvoiceModel?.data != null){
@@ -96,7 +100,7 @@ class _InvoiceViewState extends State<InvoiceView> {
                       _buildInfoColumn(
                           'Invoice No', getInvoiceModel!.data!.invoiceNumber!),
                       SizedBox(width: Dimensions.width20),
-                      _buildInfoColumn('Rate', getInvoiceModel!.data!.rate!),
+                      _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(getInvoiceModel!.data!.rate.toString())}'),
                     ],
                   ),
                   contentChild: Column(
@@ -106,11 +110,11 @@ class _InvoiceViewState extends State<InvoiceView> {
                       Row(
                         children: [
                           _buildInfoColumn(
-                              'Bale Number', '${getInvoiceModel!.data!.baleDetails!.first.baleNumber!} - ${getInvoiceModel!.data!.baleDetails!.last.baleNumber!}'),
+                              'Bale Number', '${getInvoiceModel!.data!.baleDetails!.first.baleNumber!} to ${getInvoiceModel!.data!.baleDetails!.last.baleNumber!}'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Than', '${getInvoiceModel!.data!.baleDetails!.first.than!} - ${getInvoiceModel!.data!.baleDetails!.last.than!}'),
+                          _buildInfoColumn('Total Than', '$totalThan'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Meter', '${getInvoiceModel!.data!.baleDetails!.first.meter!} - ${getInvoiceModel!.data!.baleDetails!.last.meter!}'),
+                          _buildInfoColumn('Total Meter', '$totalMeter'),
                         ],
                       ),
                       SizedBox(height: Dimensions.height10),
@@ -119,7 +123,7 @@ class _InvoiceViewState extends State<InvoiceView> {
                           _buildInfoColumn(
                               'Payment Type', (getInvoiceModel!.data!.paymentType! == 'current') ? 'Current' : 'Dhara'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Additional Discount',getInvoiceModel!.data!.discount!),
+                          _buildInfoColumn('Additional Discount','${getInvoiceModel!.data!.discount!}%'),
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Payment Received', getInvoiceModel!.data!.paidStatus! == 'yes' ? 'Yes' : 'No'),
                         ],
@@ -127,9 +131,9 @@ class _InvoiceViewState extends State<InvoiceView> {
                       SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
-                          _buildInfoColumn('Payment Amount Received',getInvoiceModel!.data!.invoiceAmount ?? 'N/A'),
+                          _buildInfoColumn('Payment Amount Received','₹${HelperFunctions.formatPrice(getInvoiceModel!.data!.invoiceAmount.toString())}' ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
-                          _buildInfoColumn('Difference in Amount', getInvoiceModel!.data!.differenceAmount ?? 'N/A'),
+                          _buildInfoColumn('Difference in Amount', '₹${HelperFunctions.formatPrice(getInvoiceModel!.data!.differenceAmount.toString())}' ?? 'N/A'),
                           SizedBox(width: Dimensions.width20),
                           _buildInfoColumn('Payment Method', getInvoiceModel!.data!.paymentMethod ?? 'N/A'),
                         ],
@@ -144,17 +148,6 @@ class _InvoiceViewState extends State<InvoiceView> {
                           _buildInfoColumn('Reason', getInvoiceModel!.data!.reason ?? 'N/A'),
                         ],
                       ),
-                      // link to GST portal part here ...
-                      // SizedBox(height: Dimensions.height10),
-                      // Row(
-                      //   children: [
-                      //     _buildInfoColumn('Status', getInvoiceModel!.data!.status! == 'active' ? 'Active' : 'Inactive'),
-                      //     SizedBox(width: Dimensions.width20),
-                      //     _buildInfoColumn('', ''),
-                      //     SizedBox(width: Dimensions.width20),
-                      //     _buildInfoColumn('', ''),
-                      //   ],
-                      // ),
                     ],
                   ),
                 ),
@@ -215,6 +208,58 @@ class _InvoiceViewState extends State<InvoiceView> {
                     ),
                   ),
                 ),
+                SizedBox(height: Dimensions.height10),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Dimensions.width10,
+                      vertical: Dimensions.height10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(getInvoiceModel!.data!.transportDetails == null ? 'Link Invoice with GST Portal' : 'E-Invoice Details', style: AppTheme.heading2),
+                      getInvoiceModel!.data!.transportDetails == null ? CustomIconButton(
+                          radius: Dimensions.radius10,
+                          backgroundColor: AppTheme.primary,
+                          iconColor: AppTheme.white,
+                          iconData: Icons.link,
+                          onPressed: () {
+                            showDialog(context: context,
+                                builder: (BuildContext context) {
+                                  return TransportDetailAdd(invoiceId: widget.invoiceId.toString(), sellId: widget.sellId);
+                                }
+                            );
+                          }) : Row(
+                            children: [
+                              CustomIconButton(
+                                  radius: Dimensions.radius10,
+                                  backgroundColor: AppTheme.primary,
+                                  iconColor: AppTheme.white,
+                                  iconData: Icons.download,
+                                  onPressed: () {
+                                    showDialog(context: context,
+                                        builder: (BuildContext context) {
+                                          return TransportDetailAdd(invoiceId: widget.invoiceId.toString(), sellId: widget.sellId);
+                                        }
+                                    );
+                                  }),
+                              SizedBox(width: Dimensions.width20),
+                              CustomIconButton(
+                              radius: Dimensions.radius10,
+                              backgroundColor: AppTheme.primary,
+                              iconColor: AppTheme.white,
+                              iconData: Icons.link_off,
+                              onPressed: () {
+                                showDialog(context: context,
+                                    builder: (BuildContext context) {
+                                      return TransportDetailAdd(invoiceId: widget.invoiceId.toString(), sellId: widget.sellId);
+                                    }
+                                );
+                              }),
+                            ],
+                          ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -227,9 +272,9 @@ class _InvoiceViewState extends State<InvoiceView> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,6 +297,13 @@ class _InvoiceViewState extends State<InvoiceView> {
           if (invoiceDetailModel?.data != null) {
             setState(() {
               getInvoiceModel = invoiceDetailModel;
+              for(var detail in getInvoiceModel!.data!.baleDetails!) {
+                thanList.add(int.parse(detail.than!));
+                meterList.add(int.parse(detail.meter!));
+
+                totalThan = thanList.reduce((sum, element) => sum + element);
+                totalMeter = meterList.reduce((sum, element) => sum + element);
+              }
               isLoading = false;
             });
           } else {
@@ -283,14 +335,11 @@ class _InvoiceViewState extends State<InvoiceView> {
       });
     }
   }
-
   Future<void> _launchUrl(Uri url) async {
     if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
       throw Exception('Could not launch $url');
     }
   }
-
-
   Future<void> _downloadInvoice(Map<String, String> body) async {
     try {
       setState(() {
@@ -340,7 +389,6 @@ class _InvoiceViewState extends State<InvoiceView> {
       });
     }
   }
-
   Future<void> _viewInvoice(Map<String, String> body) async {
     try {
       setState(() {

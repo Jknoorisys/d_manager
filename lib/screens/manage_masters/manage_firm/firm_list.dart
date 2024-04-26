@@ -10,13 +10,13 @@ import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class FirmList extends StatefulWidget {
   const FirmList({Key? key}) : super(key: key);
@@ -26,11 +26,12 @@ class FirmList extends StatefulWidget {
 }
 
 class _FirmListState extends State<FirmList> {
-  final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
   List<FirmDetails> firms = [];
   int currentPage = 1;
-
+  final searchController = TextEditingController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
   bool isLoading = false;
   bool isNetworkAvailable = true;
   ManageFirmServices firmServices = ManageFirmServices();
@@ -41,20 +42,29 @@ class _FirmListState extends State<FirmList> {
       isLoading = !isLoading;
     });
     _loadData(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > firms.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage, searchController.text.trim());
+        }
+      }
+    });
   }
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
         content: CustomBody(
+          title: S.of(context).firmList,
           isLoading: isLoading,
           internetNotAvailable: isNetworkAvailable,
-          title: S.of(context).firmList,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
             child: Column(
@@ -105,24 +115,11 @@ class _FirmListState extends State<FirmList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    enablePullUp: true,
-                    controller: _refreshController,
-                    onRefresh: () async {
-                      setState(() {
-                        firms.clear();
-                        currentPage = 1;
-                      });
-                      _loadData(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      _loadData(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child: ListView.builder(
-                      itemCount: firms.length,
-                      itemBuilder: (context, index) {
+                  child: (firms.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: firms.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < firms.length) {
                         var firm = firms[index];
                         return CustomAccordion(
                           titleChild: Column(
@@ -144,7 +141,7 @@ class _FirmListState extends State<FirmList> {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           SizedBox(
-                                            width: Dimensions.screenWidth * 0.5,
+                                              width: Dimensions.screenWidth * 0.5,
                                               child: BigText(text: firm.firmName!, color: AppTheme.primary, size: Dimensions.font16)
                                           ),
                                           Row(
@@ -229,8 +226,15 @@ class _FirmListState extends State<FirmList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        // if (totalItems > firms.length) {
+                        //   return const CustomLoader();
+                        // } else {
+                        //   return const SizedBox(height: 0);
+                        // }
+                        return const SizedBox(height: 0);
+                      }
+                    },
                   ),
                 ),
               ],
@@ -253,10 +257,10 @@ class _FirmListState extends State<FirmList> {
   }
 
   Future<void> _loadData(int pageNo, String search) async {
-    setState(() {
-      isLoading = true;
-    });
     try {
+      setState(() {
+        isLoading = true;
+      });
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
         FirmListModel? firmListModel = await firmServices.firmList(pageNo, search);
         if (firmListModel != null) {
@@ -267,11 +271,13 @@ class _FirmListState extends State<FirmList> {
               }
 
               setState(() {
+                totalItems = firmListModel.total ?? 0;
                 firms.addAll(firmListModel.data!);
-                currentPage++;
               });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                isLoading = false;
+              });
             }
           } else {
             CustomApiSnackbar.show(
@@ -297,6 +303,7 @@ class _FirmListState extends State<FirmList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }
@@ -352,5 +359,4 @@ class _FirmListState extends State<FirmList> {
       });
     }
   }
-
 }

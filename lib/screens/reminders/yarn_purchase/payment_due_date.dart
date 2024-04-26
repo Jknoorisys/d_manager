@@ -1,7 +1,6 @@
 import 'package:d_manager/screens/manage_yarn_purchase/yarn_purchase_view.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../api/manage_yarn_reminder_services.dart';
 import '../../../generated/l10n.dart';
 import '../../../helpers/helper_functions.dart';
@@ -30,7 +29,9 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
   int currentPage = 1;
   List<yarnPaymentDueDate> yarnPaymentTobePaid = [];
   ManageYarnReminderServices manageYarnReminderServices = ManageYarnReminderServices();
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
 
   @override
   void initState() {
@@ -39,6 +40,21 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
       _isLoading = !_isLoading;
     });
     yarnPaymentToBePaidApi(currentPage.toString());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > yarnPaymentTobePaid.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          yarnPaymentToBePaidApi(currentPage.toString());
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -51,80 +67,67 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
           title: S.of(context).paymentDueDate,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
-            child: SmartRefresher(
-              enablePullUp: true,
-              controller: _refreshController,
-              onRefresh: () async {
-                setState(() {
-                  yarnPaymentTobePaid.clear();
-                  currentPage = 1;
-                });
-                yarnPaymentToBePaidApi(currentPage.toString());
-                _refreshController.refreshCompleted();
-              },
-              onLoading: () async {
-                yarnPaymentToBePaidApi(currentPage.toString());
-                _refreshController.loadComplete();
-              },
-              child: ListView.builder(
-                itemCount: yarnPaymentTobePaid.length,
-                itemBuilder: (context, index) {
+            child: ListView.builder(
+              itemCount: yarnPaymentTobePaid.length + 1,
+              controller: _controller,
+              itemBuilder: (context, index) {
+                if (index < yarnPaymentTobePaid.length) {
                   return CustomAccordionWithoutExpanded(
-                      titleChild: Column(
-                        children: [
-                          Row(
-                            children: [
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  SizedBox(width: Dimensions.width10),
-                                  CircleAvatar(
-                                    backgroundColor: AppTheme.secondary,
-                                    radius: Dimensions.height20,
-                                    child: BigText(text: yarnPaymentTobePaid[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
-                                  ),
-                                  SizedBox(width: Dimensions.height10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      BigText(text: yarnPaymentTobePaid[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
-                                      Row(
-                                        children: [
-                                          CircleAvatar(
-                                            backgroundColor: AppTheme.black,
-                                            radius: Dimensions.height10,
-                                            child: BigText(text: yarnPaymentTobePaid[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                          ),
-                                          SizedBox(width: Dimensions.width10),
-                                          SmallText(text: yarnPaymentTobePaid[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
-                            ],
-                          ),
-                          SizedBox(height: Dimensions.height10),
-                          AppTheme.divider,
-                          SizedBox(height: Dimensions.height10),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: Dimensions.width15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    titleChild: Column(
+                      children: [
+                        Row(
+                          children: [
+                            SizedBox(height: Dimensions.height10),
+                            Row(
                               children: [
-                                _buildInfoColumn('Due Date', yarnPaymentTobePaid[index].dueDate!.toString()),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Yarn Name', yarnPaymentTobePaid[index].yarnName!),
-                                SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Rate', '₹ ${yarnPaymentTobePaid[index].rate!}'),
+                                SizedBox(width: Dimensions.width10),
+                                CircleAvatar(
+                                  backgroundColor: AppTheme.secondary,
+                                  radius: Dimensions.height20,
+                                  child: BigText(text: yarnPaymentTobePaid[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                ),
+                                SizedBox(width: Dimensions.height10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    BigText(text: yarnPaymentTobePaid[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,),
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: AppTheme.black,
+                                          radius: Dimensions.height10,
+                                          child: BigText(text: yarnPaymentTobePaid[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                        ),
+                                        SizedBox(width: Dimensions.width10),
+                                        SmallText(text: yarnPaymentTobePaid[index].firmName!, color: AppTheme.black, size: Dimensions.font12),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
+                            SizedBox(height: Dimensions.height10),
+                          ],
+                        ),
+                        SizedBox(height: Dimensions.height10),
+                        AppTheme.divider,
+                        SizedBox(height: Dimensions.height10),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Dimensions.width15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildInfoColumn('Due Date', yarnPaymentTobePaid[index].dueDate!.toString()),
+                              SizedBox(width: Dimensions.width20),
+                              _buildInfoColumn('Yarn Name', yarnPaymentTobePaid[index].yarnName!),
+                              SizedBox(width: Dimensions.width20),
+                              _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(yarnPaymentTobePaid[index].rate.toString())}'),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                     contentChild: Column(
                       children: [
                         SizedBox(height: Dimensions.height10),
@@ -156,7 +159,7 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
                                             text: yarnPaymentTobePaid[index].grossWeight,
                                           ),
                                           TextSpan(
-                                            text: ' Ton',
+                                            text: ' ton',
                                             style: TextStyle(
                                               fontSize: Dimensions.font12,
                                             ),
@@ -179,8 +182,8 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    BigText(text: 'Amount to be Paid', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                    BigText(text:' ${yarnPaymentTobePaid[index].gstBillAmount.toString()}',color: AppTheme.primary, size: Dimensions.font18)
+                                    BigText(text: 'Gst Bill Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                    BigText(text:'₹ ${HelperFunctions.formatPrice(yarnPaymentTobePaid[index].gstBillAmount.toString())}',color: AppTheme.primary, size: Dimensions.font18)
                                   ],
                                 )
                             ),
@@ -206,8 +209,10 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
                       ],
                     ),
                   );
-                },
-              ),
+                } else {
+                  const SizedBox();
+                }
+              },
             ),
           )
         )
@@ -217,9 +222,9 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 4.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,9 +235,8 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
       ),
     );
   }
-  Future<YarnPaymentDueDateModel?> yarnPaymentToBePaidApi(
-      String pageNo
-      ) async {
+
+  Future<void> yarnPaymentToBePaidApi(String pageNo) async {
     setState(() {
       _isLoading = true; // Show loader before making API call
     });
@@ -243,21 +247,16 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
         if (model!.success == true) {
           if (model.data != null) {
             if (model.data!.isEmpty) {
-              if (currentPage == 1) {
-                setState(() {
-                  noRecordFound = true;
-                });
-              } else {
-                _refreshController.loadNoData();
-              }
+              setState(() {
+                _isLoading = false;
+              });
             } else {
               if (currentPage == 1) {
                 yarnPaymentTobePaid.clear();
               }
               setState(() {
-                noRecordFound = false;
                 yarnPaymentTobePaid.addAll(model.data!);
-                currentPage++;
+                totalItems = model.total ?? 0;
               });
             }
           } else {
@@ -278,9 +277,17 @@ class _PaymentDueDateState extends State<PaymentDueDate> {
           isNetworkAvailable = false;
         });
       }
+    } catch (e) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again later.',
+        mode: SnackbarMode.error,
+      );
     } finally {
       setState(() {
         _isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

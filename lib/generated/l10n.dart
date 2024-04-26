@@ -1079,6 +1079,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Inventories`
+  String get inventories {
+    return Intl.message(
+      'Inventories',
+      name: 'inventories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yarn Inventory`
+  String get yarnInventory {
+    return Intl.message(
+      'Yarn Inventory',
+      name: 'yarnInventory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cloth Inventory`
+  String get clothInventory {
+    return Intl.message(
+      'Cloth Inventory',
+      name: 'clothInventory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search here...`
+  String get searchHere {
+    return Intl.message(
+      'Search here...',
+      name: 'searchHere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Inventory`
+  String get addInventory {
+    return Intl.message(
+      'Add Inventory',
+      name: 'addInventory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Inventory`
+  String get updateInventory {
+    return Intl.message(
+      'Update Inventory',
+      name: 'updateInventory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpaid History`
+  String get unpaidHistory {
+    return Intl.message(
+      'Unpaid History',
+      name: 'unpaidHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total Unpaid Amount`
+  String get totalUnpaidAmount {
+    return Intl.message(
+      'Total Unpaid Amount',
+      name: 'totalUnpaidAmount',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

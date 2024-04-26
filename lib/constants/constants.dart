@@ -99,6 +99,8 @@ const String sellHistoryApi = '$baseUrl/api/sale-history';
 const String purchaseHistoryApi = '$baseUrl/api/purchase-history';
 const String exportSellHistoryApi = '$baseUrl/api/export-sell-history';
 const String exportPurchaseHistoryApi = '$baseUrl/api/export-purchase-history';
+const String unpaidPurchaseListUrl = '$baseUrl/api/purchase-unpaid';
+const String unpaidSellListUrl = '$baseUrl/api/sell-unpaid';
 
 // Invoice list
 const String invoiceListApi = '$baseUrl/api/sell-deal-details';
@@ -114,6 +116,13 @@ const String gstReturnApi = '$baseUrl/api/gst-difference';
 const String notificationListApi = '$baseUrl/api/notification-list';
 const String readNotificationApi = '$baseUrl/api/notification-read';
 
+// Manage Inventory
+const String inventoryDashboardUrl = '$baseUrl/api/inventory';
+const String purchaseInventoryListUrl = '$baseUrl/api/yarn-inventory';
+const String sellInventoryListUrl = '$baseUrl/api/cloth-inventory';
+const String addInventoryUrl = '$baseUrl/api/add-inventory';
+const String getInventoryUrl = '$baseUrl/api/get-inventory';
+const String updateInventoryUrl = '$baseUrl/api/update-inventory';
 
 
 

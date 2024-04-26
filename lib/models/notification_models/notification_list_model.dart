@@ -8,12 +8,14 @@ class NotificationListModel {
   bool? success;
   String? message;
   int? totalUnseen;
+  int? total;
   List<NotificationDetail>? notification;
 
   NotificationListModel({
     this.success,
     this.message,
     this.totalUnseen,
+    this.total,
     this.notification,
   });
 
@@ -21,6 +23,7 @@ class NotificationListModel {
     success: json["success"],
     message: json["message"],
     totalUnseen: json["total_unseen"],
+    total: json["total"],
     notification: json["notification"] == null ? [] : List<NotificationDetail>.from(json["notification"]!.map((x) => NotificationDetail.fromJson(x))),
   );
 
@@ -28,6 +31,7 @@ class NotificationListModel {
     "success": success,
     "message": message,
     "total_unseen": totalUnseen,
+    "total": total,
     "notification": notification == null ? [] : List<dynamic>.from(notification!.map((x) => x.toJson())),
   };
 }

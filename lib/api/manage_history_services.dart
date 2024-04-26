@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:d_manager/models/history_models/export_history_model.dart';
-
 import '../constants/constants.dart';
 import '../helpers/helper_functions.dart';
 import '../models/history_models/purchase_history_model.dart';
@@ -32,18 +30,20 @@ class ManageHistoryServices{
       Response response = await dio.post(sellHistoryApi, data: body,
         options: Options(
           headers: {
-            "X-API-Key":"NYS03223"
+            "X-API-Key": HelperFunctions.getApiKey(),
           },
         ),
       );
+
+      print("response: ${response.data}");
       if (response.statusCode == 200) {
-        return SellHistoryModel.fromJson(response.data);
+        return sellHistoryModelFromJson(jsonEncode(response.data));
       }
       else {
-        return SellHistoryModel.fromJson(response.data);
+        return sellHistoryModelFromJson(jsonEncode(response.data));
       }
     }catch(e){
-      print(e.toString());
+      print("error: ${e.toString()}");
       return null;
     }
   }

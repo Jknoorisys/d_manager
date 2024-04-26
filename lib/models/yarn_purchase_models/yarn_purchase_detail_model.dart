@@ -34,14 +34,11 @@ class Data {
   String? firmId;
   String? firmName;
   String? partyId;
-  String? partyFirm;
   String? partyName;
   String? yarnTypeId;
   String? yarnName;
   String? typeName;
   String? lotNumber;
-  String? orderedBoxCount;
-  String? deliveredBoxCount;
   String? netWeight;
   String? grossReceivedWeight;
   String? grossWeight;
@@ -60,14 +57,11 @@ class Data {
     this.firmId,
     this.firmName,
     this.partyId,
-    this.partyFirm,
     this.partyName,
     this.yarnTypeId,
     this.yarnName,
     this.typeName,
     this.lotNumber,
-    this.orderedBoxCount,
-    this.deliveredBoxCount,
     this.netWeight,
     this.grossReceivedWeight,
     this.grossWeight,
@@ -83,18 +77,15 @@ class Data {
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     purchaseId: json["purchase_id"],
-    purchaseDate: json["purchase_date"] == null ? null : json["purchase_date"],
+    purchaseDate: json["purchase_date"],
     firmId: json["firm_id"],
     firmName: json["firm_name"],
     partyId: json["party_id"],
-    partyFirm: json["party_firm"],
     partyName: json["party_name"],
     yarnTypeId: json["yarn_type_id"],
     yarnName: json["yarn_name"],
     typeName: json["type_name"],
     lotNumber: json["lot_number"],
-    orderedBoxCount: json["ordered_box_count"],
-    deliveredBoxCount: json["delivered_box_count"],
     netWeight: json["net_weight"],
     grossReceivedWeight: json["gross_received_weight"],
     grossWeight: json["gross_weight"],
@@ -102,7 +93,7 @@ class Data {
     denier: json["denier"],
     cops: json["cops"],
     paymentType: json["payment_type"],
-    paymentDueDate: json["payment_due_date"] == null ? null : json["payment_due_date"],
+    paymentDueDate: json["payment_due_date"],
     dharaDays: json["dhara_days"],
     status: json["status"],
     dealStatus: json["deal_status"],
@@ -110,18 +101,15 @@ class Data {
 
   Map<String, dynamic> toJson() => {
     "purchase_id": purchaseId,
-    "purchase_date": purchaseDate == null ? null : purchaseDate,
+    "purchase_date": purchaseDate,
     "firm_id": firmId,
     "firm_name": firmName,
     "party_id": partyId,
-    "party_firm": partyFirm,
     "party_name": partyName,
     "yarn_type_id": yarnTypeId,
     "yarn_name": yarnName,
     "type_name": typeName,
     "lot_number": lotNumber,
-    "ordered_box_count": orderedBoxCount,
-    "delivered_box_count": deliveredBoxCount,
     "net_weight": netWeight,
     "gross_received_weight": grossReceivedWeight,
     "gross_weight": grossWeight,
@@ -129,7 +117,7 @@ class Data {
     "denier": denier,
     "cops": cops,
     "payment_type": paymentType,
-    "payment_due_date": paymentDueDate == null ? null : paymentDueDate,
+    "payment_due_date": paymentDueDate,
     "dhara_days": dharaDays,
     "status": status,
     "deal_status": dealStatus,

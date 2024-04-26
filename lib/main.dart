@@ -1,10 +1,12 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/screens/manage_history/unpaid_history/unpaid_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'generated/l10n.dart';
 import 'helpers/helper_functions.dart';
 
@@ -13,7 +15,10 @@ void main() async {
   await Firebase.initializeApp();
   await HelperFunctions.init();
   initializeDateFormatting('en');
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (context) => UnpaidProvider(),
+      child: const MyApp()
+  ));
 }
 
 class MyApp extends StatelessWidget {

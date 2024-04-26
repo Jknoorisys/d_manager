@@ -1,6 +1,7 @@
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/routes.dart';
+import 'package:d_manager/helpers/helper_functions.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/no_record_found.dart';
@@ -20,7 +21,7 @@ class ClothSells extends StatefulWidget {
 class _ClothSellsState extends State<ClothSells> {
   @override
   Widget build(BuildContext context) {
-    return widget.sellDeal != null ? Padding(
+    return (widget.sellDeal.isEmpty) ? const NoRecordFound() : Padding(
       padding: EdgeInsets.all(Dimensions.height15),
       child: ListView.builder(
         itemCount: widget.sellDeal.length,
@@ -89,7 +90,7 @@ class _ClothSellsState extends State<ClothSells> {
                     SizedBox(width: Dimensions.width20),
                     Expanded(flex:1,child: _buildInfoColumn('Than Remaining', widget.sellDeal[index].thanRemaining!)),
                     SizedBox(width: Dimensions.width20),
-                    Expanded(flex:1,child: _buildInfoColumn('Rate', widget.sellDeal[index].rate!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Rate',  '₹${HelperFunctions.formatPrice(widget.sellDeal[index].rate.toString())}')),
                   ],
                 ),
                 SizedBox(height: Dimensions.height10),
@@ -123,16 +124,16 @@ class _ClothSellsState extends State<ClothSells> {
           );
         },
       ),
-    ) : const NoRecordFound();
+    );
   }
 
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

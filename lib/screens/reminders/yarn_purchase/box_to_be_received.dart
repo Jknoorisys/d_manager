@@ -1,9 +1,6 @@
-import 'package:d_manager/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../api/manage_yarn_reminder_services.dart';
-import '../../../constants/routes.dart';
 import '../../../generated/l10n.dart';
 import '../../../helpers/helper_functions.dart';
 import '../../../models/reminder_models/yarn_to_be_received_model.dart';
@@ -32,7 +29,9 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
   int currentPage = 1;
   List<YarnToBeReceivedReminderList> reminderForYarnToBeReceived = [];
   ManageYarnReminderServices manageYarnReminderServices = ManageYarnReminderServices();
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
 
   @override
   void initState() {
@@ -41,7 +40,23 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
       _isLoading = !_isLoading;
     });
     yarnToBeReceivedData(currentPage.toString());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > reminderForYarnToBeReceived.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          yarnToBeReceivedData(currentPage.toString());
+        }
+      }
+    });
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return
@@ -53,25 +68,11 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
             title: S.of(context).yarnToBeReceived,
             content: Padding(
               padding: EdgeInsets.all(Dimensions.height15),
-              child:
-              SmartRefresher(
-                enablePullUp: true,
-                controller: _refreshController,
-                onRefresh: () async {
-                  setState(() {
-                    reminderForYarnToBeReceived.clear();
-                    currentPage = 1;
-                  });
-                  yarnToBeReceivedData(currentPage.toString());
-                  _refreshController.refreshCompleted();
-                },
-                onLoading: () async {
-                  yarnToBeReceivedData(currentPage.toString());
-                  _refreshController.loadComplete();
-                },
-                child:ListView.builder(
-                  itemCount: reminderForYarnToBeReceived.length,
-                  itemBuilder: (context, index) {
+              child: ListView.builder(
+                itemCount: reminderForYarnToBeReceived.length + 1,
+                controller: _controller,
+                itemBuilder: (context, index) {
+                  if (index < reminderForYarnToBeReceived.length) {
                     return CustomAccordionWithoutExpanded(
                       titleChild: Column(
                         children: [
@@ -119,7 +120,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                               SizedBox(width: Dimensions.width20),
                               Expanded(flex:1,child: _buildInfoColumn('Yarn Name', reminderForYarnToBeReceived[index].yarnName!,index)),
                               SizedBox(width: Dimensions.width20),
-                              Expanded(flex:1,child: _buildInfoColumn('Rate', '₹ ${reminderForYarnToBeReceived[index].rate!}', index)),
+                              Expanded(flex:1,child: _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(reminderForYarnToBeReceived[index].rate.toString())}', index)),
                             ],
                           ),
                         ],
@@ -132,7 +133,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                             children: [
                               Container(
                                   width: MediaQuery.of(context).size.width/2.65,
-                                  height: Dimensions.height40*2,
+                                  height: Dimensions.height40*2.5,
                                   padding: EdgeInsets.all(Dimensions.height10),
                                   decoration: BoxDecoration(
                                     color: AppTheme.white,
@@ -155,7 +156,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                                               text: reminderForYarnToBeReceived[index].grossWeight,
                                             ),
                                             TextSpan(
-                                              text: ' Ton',
+                                              text: ' ton',
                                               style: TextStyle(
                                                 fontSize: Dimensions.font12,
                                               ),
@@ -163,13 +164,13 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                                           ],
                                         ),
                                       ),
-                                      BigText(text: 'Net Weight ${reminderForYarnToBeReceived[index].netWeight} Ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                      BigText(text: 'Gross Received ${reminderForYarnToBeReceived[index].grossReceivedWeight ?? 'N/A'} ton', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                     ],
                                   )
                               ),
                               Container(
                                   width: MediaQuery.of(context).size.width/2.65,
-                                  height: Dimensions.height40*2,
+                                  height: Dimensions.height40*2.5,
                                   padding: EdgeInsets.all(Dimensions.height10),
                                   decoration: BoxDecoration(
                                     color: AppTheme.white,
@@ -179,8 +180,8 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      BigText(text: 'Weight to be received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                      BigText(text: '${double.parse(reminderForYarnToBeReceived[index].grossWeight.toString()) - double.parse(reminderForYarnToBeReceived[index].netWeight.toString())} Ton',color: AppTheme.primary, size: Dimensions.font18)
+                                      BigText(text: 'Gross Remaining', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                      BigText(text: '${double.parse(reminderForYarnToBeReceived[index].grossWeight.toString()) - double.parse(reminderForYarnToBeReceived[index].grossReceivedWeight.toString())} ton',color: AppTheme.primary, size: Dimensions.font18)
                                     ],
                                   )
                               ),
@@ -193,7 +194,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                               CustomElevatedButton(
                                 onPressed: (){
                                   //Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': reminderForYarnToBeReceived[index]});
-                                   Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView(purchaseId:reminderForYarnToBeReceived[index].purchaseId!.toString())));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView(purchaseId:reminderForYarnToBeReceived[index].purchaseId!.toString())));
                                 },
                                 buttonText: 'View Details',
                                 isBackgroundGradient: false,
@@ -206,8 +207,10 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
                         ],
                       ),
                     );
-                  },
-                ),
+                  } else {
+                    const SizedBox();
+                  }
+                },
               ),
             )
         )
@@ -218,10 +221,10 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
 
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,9 +236,7 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
     );
   }
 
-  Future<YarnToBeReceivedModel?> yarnToBeReceivedData(
-      String pageNo
-      ) async {
+  Future<void> yarnToBeReceivedData(String pageNo) async {
     setState(() {
       _isLoading = true; // Show loader before making API call
     });
@@ -246,20 +247,16 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
         if (model!.success == true) {
           if (model.data != null) {
             if (model.data!.isEmpty) {
-              if (currentPage == 1) {
-                setState(() {
-                  noRecordFound = true;
-                });
-              } else {
-                _refreshController.loadNoData();
-              }
+              setState(() {
+                _isLoading = false;
+              });
             } else {
               if (currentPage == 1) {
                 reminderForYarnToBeReceived.clear();
               }
               setState(() {
                 reminderForYarnToBeReceived.addAll(model.data!);
-                currentPage++;
+                totalItems = model.total ?? 0;
               });
             }
           } else {
@@ -280,10 +277,17 @@ class _BoxToBeReceivedState extends State<BoxToBeReceived> {
           isNetworkAvailable = false;
         });
       }
-    }
-    finally {
+    } catch (e) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again later.',
+        mode: SnackbarMode.error,
+      );
+    } finally {
       setState(() {
         _isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

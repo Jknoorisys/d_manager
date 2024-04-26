@@ -19,6 +19,7 @@ class BigText extends StatelessWidget {
         fontSize: size == 0 ? 24 : size,
         fontWeight: weight,
         fontFamily: 'Oswald',
+        overflow: overflow,
       ),
     );
   }

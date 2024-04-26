@@ -45,118 +45,124 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              height: Dimensions.screenHeight,
-              decoration: const BoxDecoration(
-                gradient: AppTheme.appGradientLight,
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(Dimensions.width25),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo or Header
-                    const AnimatedLogo(),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                height: Dimensions.screenHeight,
+                decoration: const BoxDecoration(
+                  gradient: AppTheme.appGradientLight,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(Dimensions.width25),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Logo or Header
+                      const AnimatedLogo(),
 
-                    SizedBox(height: Dimensions.height20),
+                      SizedBox(height: Dimensions.height20),
 
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: Dimensions.width10),
-                      child: Text(
-                        S.of(context).resetPassword,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: Dimensions.font20),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                    Padding(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: Dimensions.width30, vertical: Dimensions.width10),
-                      child: RichText(
-                        text: TextSpan(
-                          text: S.of(context).setNewPasswordForYourAccount,
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: Dimensions.font14,
-                          ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: Dimensions.width10),
+                        child: Text(
+                          S.of(context).resetPassword,
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: Dimensions.font20),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
 
-                    SizedBox(
-                      height: Dimensions.height30,
-                    ),
+                      Padding(
+                        padding:
+                        EdgeInsets.symmetric(horizontal: Dimensions.width30, vertical: Dimensions.width10),
+                        child: RichText(
+                          text: TextSpan(
+                            text: S.of(context).setNewPasswordForYourAccount,
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: Dimensions.font14,
+                            ),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
 
-                    CustomTextField(
-                      controller: passwordController,
-                      isObscure: _obscurePassword,
-                      labelText: S.of(context).newPassword,
-                      errorText: errorPassword.toString() != 'null' ? errorPassword.toString() : '',
-                      keyboardType: TextInputType.visiblePassword,
-                      prefixIcon: _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                      borderColor: AppTheme.primary,
-                      onTap: (){
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    SizedBox(height: Dimensions.height20),
+                      SizedBox(
+                        height: Dimensions.height30,
+                      ),
 
-                    CustomTextField(
-                      controller: confirmPasswordController,
-                      isObscure: _obscureConfirmPassword,
-                      labelText: S.of(context).confirmPassword,
-                      errorText: confirmPasswordError.toString() != 'null' ? confirmPasswordError.toString() : '',
-                      keyboardType: TextInputType.visiblePassword,
-                      prefixIcon: _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                      borderColor: AppTheme.primary,
-                      onTap: (){
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                    ),
-                    SizedBox(height: Dimensions.height20),
-
-                    // Button
-                    CustomElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          submitted = true;
-                        });
-                        if (_isFormValid()) {
+                      CustomTextField(
+                        controller: passwordController,
+                        isObscure: _obscurePassword,
+                        labelText: S.of(context).newPassword,
+                        errorText: errorPassword.toString() != 'null' ? errorPassword.toString() : '',
+                        keyboardType: TextInputType.visiblePassword,
+                        prefixIcon: _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        borderColor: AppTheme.primary,
+                        autoFocus: true,
+                        onTap: (){
                           setState(() {
-                            isLoading = !isLoading;
+                            _obscurePassword = !_obscurePassword;
                           });
-                          _resetPassword(widget.email, passwordController.text, confirmPasswordController.text);
-                        }
-                      },
-                      buttonText: S.of(context).resetPassword,
-                    ),
-                  ],
+                        },
+                      ),
+                      SizedBox(height: Dimensions.height20),
+
+                      CustomTextField(
+                        controller: confirmPasswordController,
+                        isObscure: _obscureConfirmPassword,
+                        labelText: S.of(context).confirmPassword,
+                        errorText: confirmPasswordError.toString() != 'null' ? confirmPasswordError.toString() : '',
+                        keyboardType: TextInputType.visiblePassword,
+                        prefixIcon: _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                        borderColor: AppTheme.primary,
+                        onTap: (){
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                      SizedBox(height: Dimensions.height20),
+
+                      // Button
+                      CustomElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            submitted = true;
+                          });
+                          if (_isFormValid()) {
+                            setState(() {
+                              isLoading = !isLoading;
+                            });
+                            _resetPassword(widget.email, passwordController.text, confirmPasswordController.text);
+                          }
+                        },
+                        buttonText: S.of(context).resetPassword,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          if (isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: GFLoader(
-                  type: GFLoaderType.circle,
-                  loaderColorOne: AppTheme.primary,
-                  loaderColorTwo: AppTheme.secondary,
-                  loaderColorThree: AppTheme.secondaryLight,
+            if (isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: GFLoader(
+                    type: GFLoaderType.circle,
+                    loaderColorOne: AppTheme.primary,
+                    loaderColorTwo: AppTheme.secondary,
+                    loaderColorThree: AppTheme.secondaryLight,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

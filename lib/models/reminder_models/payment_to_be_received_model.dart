@@ -11,23 +11,27 @@ String paymentToBeReceivedModelToJson(PaymentToBeReceivedModel data) => json.enc
 class PaymentToBeReceivedModel {
   bool? success;
   String? message;
+  int? total;
   List<PaymentReceived>? data;
 
   PaymentToBeReceivedModel({
     this.success,
     this.message,
+    this.total,
     this.data,
   });
 
   factory PaymentToBeReceivedModel.fromJson(Map<String, dynamic> json) => PaymentToBeReceivedModel(
     success: json["success"],
     message: json["message"],
+    total: json["total"],
     data: json["data"] == null ? [] : List<PaymentReceived>.from(json["data"]!.map((x) => PaymentReceived.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "success": success,
     "message": message,
+    "total": total,
     "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
   };
 }

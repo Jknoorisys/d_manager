@@ -30,9 +30,8 @@ class ManageDeliveryServices {
       Map<String, String> headers = {
         "X-API-Key": HelperFunctions.getApiKey(),
       };
-      print("Delivery List Body: $body");
+
       Response response = await post(Uri.parse(deliveryDetailListUrl), body: body, headers: headers);
-      print("Delivery List Response: ${response.body}");
       if (response.statusCode == 200) {
         return deliveryListModelFromJson(response.body);
       } else {
@@ -59,7 +58,6 @@ class ManageDeliveryServices {
       }
       var response = await request.send();
       var data = json.decode(await response.stream.bytesToString());
-      print("Add Delivery Response: $data");
 
       if (response.statusCode == 200) {
         return AddDeliveryModel.fromJson(data);

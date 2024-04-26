@@ -18,27 +18,32 @@ class NoRecordFound extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container( // Icon Container
-          padding: EdgeInsets.all(Dimensions.height20),
-          decoration: BoxDecoration(
-            color: AppTheme.secondary.withOpacity(0.1), // Light background
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.info_rounded, color: AppTheme.primary, size: Dimensions.height60),
+    return  Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container( // Icon Container
+              padding: EdgeInsets.all(Dimensions.height20),
+              decoration: BoxDecoration(
+                color: AppTheme.secondary.withOpacity(0.1), // Light background
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.info_rounded, color: AppTheme.primary, size: Dimensions.height60),
+            ),
+            const SizedBox(height: 15), // Spacing between icon and text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Text(
+                'No Record Found',
+                style: AppTheme.body2.copyWith(fontWeight: FontWeight.w700, fontSize: Dimensions.font18, color: AppTheme.primary),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 15), // Spacing between icon and text
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          child: Text(
-            'No Record Found',
-            style: AppTheme.body2.copyWith(fontWeight: FontWeight.w700, fontSize: Dimensions.font18, color: AppTheme.primary),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

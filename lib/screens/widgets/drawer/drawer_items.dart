@@ -4,14 +4,12 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/constants/images.dart';
 import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
+import 'package:d_manager/helpers/firebase_services.dart';
 import 'package:d_manager/helpers/helper_functions.dart';
+import 'package:d_manager/screens/gst_return/gst_return_amount.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
-
-import '../../../helpers/firebase_services.dart';
-import '../../gst_return/gst_return_amount.dart';
-
 class DrawerItems extends StatelessWidget {
   const DrawerItems({Key? key}) : super(key: key);
 
@@ -73,6 +71,11 @@ class DrawerItems extends StatelessWidget {
                 Navigator.of(context).pushNamed(AppRoutes.clothSellList);
               }),
 
+              // Manage Inventory
+              buildTitle(S.of(context).inventories, Icons.store_rounded, () {
+                Navigator.of(context).pushNamed(AppRoutes.inventoryDashboard);
+              }),
+
               // Manage Reminders
               ExpansionTile(
                 shape: InputBorder.none,
@@ -83,7 +86,7 @@ class DrawerItems extends StatelessWidget {
                 children: [
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.boxToBeReceived);
-                  }, 'Box to be Received'),
+                  }, S.of(context).yarnToBeReceived),
                   buildTitle(S.of(context).yarnPurchase, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.paymentDueDate);
                   }, S.of(context).paymentDueDate),
@@ -109,6 +112,9 @@ class DrawerItems extends StatelessWidget {
                   }),
                   buildTitle(S.of(context).sellHistory, Icons.arrow_right, () {
                     Navigator.of(context).pushNamed(AppRoutes.sellHistory);
+                  }),
+                  buildTitle(S.of(context).unpaidHistory, Icons.arrow_right, () {
+                    Navigator.of(context).pushNamed(AppRoutes.unpaidHistory);
                   }),
                 ],
               ),

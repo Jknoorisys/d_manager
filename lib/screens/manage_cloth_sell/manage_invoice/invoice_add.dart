@@ -122,25 +122,64 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                     children: [
                       Text("Invoice Details", style: AppTheme.heading2,),
                       Gap(Dimensions.height10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BigText(text: 'Select Invoice Date', size: Dimensions.font12,),
+                          Gap(Dimensions.height10/2),
+                          CustomDatePicker(
+                            selectedDate: invoiceDate,
+                            width: MediaQuery.of(context).size.width,
+                            onDateSelected: (date) {
+                              setState(() {
+                                invoiceDate = date;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     Column(
+                      //       mainAxisAlignment: MainAxisAlignment.start,
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         BigText(text: 'Select Invoice Date', size: Dimensions.font12,),
+                      //         Gap(Dimensions.height10/2),
+                      //         CustomDatePicker(
+                      //           selectedDate: invoiceDate,
+                      //           onDateSelected: (date) {
+                      //             setState(() {
+                      //               invoiceDate = date;
+                      //             });
+                      //           },
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     Column(
+                      //       mainAxisAlignment: MainAxisAlignment.start,
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         BigText(text: 'Invoice Number', size: Dimensions.font12,),
+                      //         Gap(Dimensions.height10/2),
+                      //         CustomTextField(
+                      //           hintText: "Enter Invoice Number",
+                      //           controller: invoiceNumberController,
+                      //           keyboardType: TextInputType.number,
+                      //           borderRadius: Dimensions.radius10,
+                      //           width: MediaQuery.of(context).size.width/2.65,
+                      //           errorText: errorInvoiceNumber.toString() != 'null' ? errorInvoiceNumber.toString() : '',
+                      //         )
+                      //       ],
+                      //     ),
+                      //   ],
+                      // ),
+                      Gap(Dimensions.height20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Select Invoice Date', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomDatePicker(
-                                selectedDate: invoiceDate,
-                                onDateSelected: (date) {
-                                  setState(() {
-                                    invoiceDate = date;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,28 +194,6 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                                 width: MediaQuery.of(context).size.width/2.65,
                                 errorText: errorRate.toString() != 'null' ? errorRate.toString() : '',
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Gap(Dimensions.height20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: 'Invoice Number', size: Dimensions.font12,),
-                              Gap(Dimensions.height10/2),
-                              CustomTextField(
-                                hintText: "Enter Invoice Number",
-                                controller: invoiceNumberController,
-                                keyboardType: TextInputType.number,
-                                borderRadius: Dimensions.radius10,
-                                width: MediaQuery.of(context).size.width/2.65,
-                                errorText: errorInvoiceNumber.toString() != 'null' ? errorInvoiceNumber.toString() : '',
-                              )
                             ],
                           ),
                           Column(
@@ -201,7 +218,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                       // Multiple Rows
                       ListView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         itemCount: rowsData.length,
                         itemBuilder: (context, index) {
                           return _buildDynamicRow(index);
@@ -398,7 +415,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                               "sell_id":  '${widget.sellID}',
                               "invoice_date": DateFormat('yyyy-MM-dd').format(invoiceDate),
                               "rate": rateController.text,
-                              "invoice_number": invoiceNumberController.text,
+                              // "invoice_number": invoiceNumberController.text,
                               "bale_number": baleNumbersList,
                               "than": thanList,
                               "meter": meterList,
@@ -455,7 +472,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
                 CustomTextField(
                   controller: baleNumberControllers[index],
                   hintText: "Bale Number",
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.text,
                   borderRadius: Dimensions.radius10,
                   width: MediaQuery.of(context).size.width/2.65,
                   errorText: index == 0 ? errorBaleNumber.toString() != 'null' ? errorBaleNumber.toString() : '' : '',
@@ -619,7 +636,7 @@ class _InvoiceAddState extends State<InvoiceAdd> {
 
   bool _isFormValid() {
     String rateError = _validateRate(rateController.text) ?? '';
-    String invoiceNumberError = _validateInvoiceNumber(invoiceNumberController.text) ?? '';
+    // String invoiceNumberError = _validateInvoiceNumber(invoiceNumberController.text) ?? '';
     String baleNumberError = _validateBaleNumber(baleNumberControllers[0].text) ?? '';
     String thanError = _validateThan(thanControllers[0].text) ?? '';
     String meterError = _validateMeter(meterControllers[0].text) ?? '';
@@ -627,9 +644,9 @@ class _InvoiceAddState extends State<InvoiceAdd> {
     // String differenceAmountError = _validateDifferenceAmount(differenceAmountController.text) ?? '';
     String paymentRemarkError = _validatePaymentRemark(paymentRemarkController.text) ?? '';
     if (isPaymentReceived == true) {
-      return rateError.isEmpty && invoiceNumberError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty && amountReceivedError.isEmpty && paymentRemarkError.isEmpty ? true : false;
+      return rateError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty && amountReceivedError.isEmpty && paymentRemarkError.isEmpty ? true : false;
     } else {
-      return rateError.isEmpty && invoiceNumberError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty ? true : false;
+      return rateError.isEmpty && baleNumberError.isEmpty && thanError.isEmpty && meterError.isEmpty ? true : false;
     }
   }
 

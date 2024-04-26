@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../api/manage_yarn_reminder_services.dart';
 import '../../../generated/l10n.dart';
 import '../../../helpers/helper_functions.dart';
@@ -31,7 +29,9 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
   int currentPage = 1;
   List<PaymentReceived> paymentToBeReceivedList = [];
   ManageYarnReminderServices manageYarnReminderServices = ManageYarnReminderServices();
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
 
   @override
   void initState() {
@@ -40,6 +40,21 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
       _isLoading = !_isLoading;
     });
     paymentToBeReceivedApi(currentPage.toString());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > paymentToBeReceivedList.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          paymentToBeReceivedApi(currentPage.toString());
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,24 +67,11 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
           title: S.of(context).paymentToBeReceived,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
-            child: SmartRefresher(
-              enablePullUp: true,
-              controller: _refreshController,
-              onRefresh: () async {
-                setState(() {
-                  paymentToBeReceivedList.clear();
-                  currentPage = 1;
-                });
-                paymentToBeReceivedApi(currentPage.toString());
-                _refreshController.refreshCompleted();
-              },
-              onLoading: () async {
-                paymentToBeReceivedApi(currentPage.toString());
-                _refreshController.loadComplete();
-              },
-              child: ListView.builder(
-                itemCount: paymentToBeReceivedList.length,
-                itemBuilder: (context, index) {
+            child: ListView.builder(
+              itemCount: paymentToBeReceivedList.length + 1,
+              controller: _controller,
+              itemBuilder: (context, index) {
+                if (index < paymentToBeReceivedList.length) {
                   return CustomAccordionWithoutExpanded(
                       titleChild: Column(
                         children: [
@@ -117,7 +119,7 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Cloth Quality', paymentToBeReceivedList[index].qualityName!),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Invoice Amount', '₹ ${paymentToBeReceivedList[index].invoiceAmount!}'),
+                              _buildInfoColumn('Invoice Amount', '₹${HelperFunctions.formatPrice(paymentToBeReceivedList[index].invoiceAmount.toString())}'),
                             ],
                           ),
                           SizedBox(height: Dimensions.height10),
@@ -127,7 +129,7 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
                               SizedBox(width: Dimensions.width20),
                               _buildInfoColumn('Total Meter', paymentToBeReceivedList[index].totalMeter!),
                               SizedBox(width: Dimensions.width20),
-                              _buildInfoColumn('Rate', '₹ ${paymentToBeReceivedList[index].rate!}'),
+                              _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(paymentToBeReceivedList[index].rate.toString())}'),
                             ],
                           ),
                         ],
@@ -149,8 +151,10 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
                         ],
                       )
                   );
-                },
-              ),
+                } else {
+                  const SizedBox();
+                }
+              },
             ),
           )
         )
@@ -160,9 +164,9 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 4.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,11 +177,9 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
       ),
     );
   }
-  Future<PaymentToBeReceivedModel?> paymentToBeReceivedApi(
-      String pageNo
-      ) async {
+  Future<void> paymentToBeReceivedApi(String pageNo) async {
     setState(() {
-      _isLoading = true; // Show loader before making API call
+      _isLoading = true;
     });
     try {
       if (await HelperFunctions.isPossiblyNetworkAvailable()) {
@@ -186,21 +188,16 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
         if (model!.success == true) {
           if(model.data != null) {
             if (model.data!.isEmpty) {
-              if (currentPage == 1) {
-                setState(() {
-                  noRecordFound = true;
-                });
-              } else {
-                _refreshController.loadNoData();
-              }
+              setState(() {
+                _isLoading = false;
+              });
             } else {
               if (currentPage == 1) {
                 paymentToBeReceivedList.clear();
               }
               setState(() {
-                noRecordFound = false;
                 paymentToBeReceivedList.addAll(model.data!);
-                currentPage++;
+                totalItems = model.total ?? 0;
               });
             }
           } else {
@@ -221,10 +218,17 @@ class _PaymentToBeReceivedState extends State<PaymentToBeReceived> {
           isNetworkAvailable = false;
         });
       }
-    }
-    finally {
+    } catch (e) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again later.',
+        mode: SnackbarMode.error,
+      );
+    } finally {
       setState(() {
         _isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

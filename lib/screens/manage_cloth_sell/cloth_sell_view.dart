@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ClothSellView extends StatefulWidget {
   final int sellID;
@@ -30,7 +29,9 @@ class ClothSellView extends StatefulWidget {
 }
 
 class _ClothSellViewState extends State<ClothSellView> {
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
   List<InvoiceDetail> invoices = [];
   int currentPage = 1;
   bool isFilterApplied = false;
@@ -51,6 +52,15 @@ class _ClothSellViewState extends State<ClothSellView> {
     if (widget.sellID != null) {
       _getSellDetails();
       _loadData(currentPage);
+      _controller.addListener(() {
+        if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+          if (totalItems > invoices.length && !isLoadingMore) {
+            currentPage++;
+            isLoadingMore = true;
+            _loadData(currentPage);
+          }
+        }
+      });
     } else {
       setState(() {
         noRecordFound = true;
@@ -58,6 +68,12 @@ class _ClothSellViewState extends State<ClothSellView> {
       });
     }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -122,19 +138,19 @@ class _ClothSellViewState extends State<ClothSellView> {
                               children: [
                                 _buildInfoColumn('Deal Date', clothSellData!.sellDate!.toString()),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Cloth Quality', clothSellData!.qualityName!),
+                                _buildInfoColumn('Cloth Quality', clothSellData!.qualityName ?? 'N/A'),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Rate', '₹${clothSellData!.rate!}'),
+                                _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(clothSellData!.rate.toString())}'),
                               ],
                             ),
                             SizedBox(height: Dimensions.height10),
                             Row(
                               children: [
-                                _buildInfoColumn('Total Than', clothSellData!.totalThan!),
+                                _buildInfoColumn('Total Than', clothSellData!.totalThan ?? 'N/A'),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Than Delivered', clothSellData!.thanDelivered!),
+                                _buildInfoColumn('Than Delivered', clothSellData!.thanDelivered ?? 'N/A'),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Than Remaining', clothSellData!.thanRemaining!),
+                                _buildInfoColumn('Than Remaining', clothSellData!.thanRemaining ?? 'N/A'),
                               ],
                             ),
                             SizedBox(height: Dimensions.height10),
@@ -142,7 +158,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                               children: [
                                 _buildInfoColumn('Due Date', clothSellData!.sellDueDate!.toString()),
                                 SizedBox(width: Dimensions.width20),
-                                _buildInfoColumn('Status', clothSellData!.dealStatus! == 'ongoing' ? 'Ongoing' : 'Completed'),SizedBox(width: Dimensions.width20),
+                                _buildInfoColumn('Status', clothSellData!.dealStatus! == 'ongoing' ? 'On Going' : 'Completed'),SizedBox(width: Dimensions.width20),
                                 SizedBox(width: Dimensions.width20),
                                 _buildInfoColumn('', ''),
                               ],
@@ -224,25 +240,23 @@ class _ClothSellViewState extends State<ClothSellView> {
                     SizedBox(height: Dimensions.height10),
                     invoices.isNotEmpty ? SizedBox(
                       height: MediaQuery.of(context).size.height / 1.5,
-                      child: SmartRefresher(
-                        controller: _refreshController,
-                        enablePullUp: true,
-                        onRefresh: () async {
-                          setState(() {
-                            invoices.clear();
-                            currentPage = 1;
-                          });
-                          await _loadData(currentPage);
-                          _refreshController.refreshCompleted();
-                        },
-                        onLoading: () async {
-                          await _loadData(currentPage);
-                          _refreshController.loadComplete();
-                        },
-                        child: ListView.builder(
-                          itemCount: invoices.length,
-                          itemBuilder: (context, index) {
+                      child: ListView.builder(
+                        controller: _controller,
+                        itemCount: invoices.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < invoices.length) {
                             var invoice = invoices[index];
+                            List<int> thanList = [];
+                            List<int> meterList = [];
+
+                            for(var detail in invoice.baleDetails!) {
+                              thanList.add(int.parse(detail.than!));
+                              meterList.add(int.parse(detail.meter!));
+                            }
+
+                            // Calculate Totals
+                            int totalThan = thanList.reduce((sum, element) => sum + element);
+                            int totalMeter = meterList.reduce((sum, element) => sum + element);
                             return CustomAccordion(
                               titleChild: Row(
                                 children: [
@@ -250,7 +264,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                                   SizedBox(width: Dimensions.width20),
                                   _buildInfoColumn('Invoice No', invoice.invoiceNumber!),
                                   SizedBox(width: Dimensions.width20),
-                                  _buildInfoColumn('Rate', '₹${invoice.rate!}'),
+                                  _buildInfoColumn('Total Than', '$totalThan'),
                                 ],
                               ),
                               contentChild: Column(
@@ -260,11 +274,11 @@ class _ClothSellViewState extends State<ClothSellView> {
                                   SizedBox(height: Dimensions.height10),
                                   Row(
                                     children: [
-                                      _buildInfoColumn('Bale Number', '${invoice.baleDetails!.first.baleNumber!} - ${invoice.baleDetails!.last.baleNumber!}'),
+                                      _buildInfoColumn('Bale Number', '${invoice.baleDetails!.first.baleNumber!} to ${invoice.baleDetails!.last.baleNumber!}'),
                                       SizedBox(width: Dimensions.width20),
-                                      _buildInfoColumn('Than', '${invoice.baleDetails!.first.than!} - ${invoice.baleDetails!.last.than!}'),
+                                      _buildInfoColumn('Meter', '$totalMeter'),
                                       SizedBox(width: Dimensions.width20),
-                                      _buildInfoColumn('Meter', '${invoice.baleDetails!.first.meter!} - ${invoice.baleDetails!.last.meter!}'),
+                                      _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(invoice.rate.toString())}'),
                                     ],
                                   ),
                                   SizedBox(height: Dimensions.height10),
@@ -274,7 +288,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                                       SizedBox(width: Dimensions.width20),
                                       _buildInfoColumn('GST', invoice.gst!),
                                       SizedBox(width: Dimensions.width20),
-                                      _buildInfoColumn('Invoice Amount', invoice.invoiceAmount ?? 'N/A'),
+                                      _buildInfoColumn('Invoice Amount', '₹${HelperFunctions.formatPrice(invoice.invoiceAmount.toString())}' ?? 'N/A'),
                                     ],
                                   ),
                                   SizedBox(height: Dimensions.height10),
@@ -282,7 +296,7 @@ class _ClothSellViewState extends State<ClothSellView> {
                                     children: [
                                       _buildInfoColumn('Payment Type', invoice.paymentType == 'current' ? 'Current' : 'Dhara'),
                                       SizedBox(width: Dimensions.width20),
-                                      _buildInfoColumn('Additional Discount', invoice.discount!),
+                                      _buildInfoColumn('Additional Discount', '${invoice.discount}%' ?? 'N/A'),
                                       SizedBox(width: Dimensions.width20),
                                       _buildInfoColumn('Payment Received', invoice.paidStatus == 'yes' ? 'Yes' : 'No'),
                                     ],
@@ -290,9 +304,9 @@ class _ClothSellViewState extends State<ClothSellView> {
                                   SizedBox(height: Dimensions.height10),
                                   Row(
                                     children: [
-                                      _buildInfoColumn('Payment Amount Received', invoice.receivedAmount ?? 'N/A' ),
+                                      _buildInfoColumn('Payment Amount Received', '₹${HelperFunctions.formatPrice(invoice.receivedAmount.toString())}' ?? 'N/A' ),
                                       SizedBox(width: Dimensions.width20),
-                                      _buildInfoColumn('Difference in Amount', invoice.differenceAmount ?? 'N/A'),
+                                      _buildInfoColumn('Difference in Amount', '₹${HelperFunctions.formatPrice(invoice.differenceAmount.toString())}' ?? 'N/A'),
                                       SizedBox(width: Dimensions.width20),
                                       _buildInfoColumn('Payment Method', invoice.paymentMethod != null ? invoice.paymentMethod == 'rtgs' ? 'RTGS' : 'Cheque' : 'N/A'),
                                     ],
@@ -343,13 +357,15 @@ class _ClothSellViewState extends State<ClothSellView> {
                                 ],
                               ),
                             );
-                          },
-                        ),
+                          } else {
+                            return const SizedBox();
+                          }
+                        },
                       ),
                     ) : Center(child: Column(
                       children: [
                         SizedBox(height: Dimensions.height30),
-                        NoRecordFound(),
+                        const NoRecordFound(),
                       ],
                     )),
                   ],
@@ -364,7 +380,7 @@ class _ClothSellViewState extends State<ClothSellView> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
     return Expanded(
       child: Column(
@@ -440,10 +456,12 @@ class _ClothSellViewState extends State<ClothSellView> {
                   invoices.addAll(deliveryListModel.data!);
                   isLoading = false;
                   noRecordFound = false;
-                  currentPage++;
+                  totalItems = deliveryListModel.total ?? 0;
                 });
               } else {
-                _refreshController.loadNoData();
+                setState(() {
+                  isLoading = false;
+                });
               }
             } else {
               setState(() {
@@ -474,6 +492,7 @@ class _ClothSellViewState extends State<ClothSellView> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

@@ -101,5 +101,13 @@
   "updateClothQuality": "Update Cloth Quality",
   "updateHammal": "Update Hammal",
   "updateSellDeal": "Update Sell Deal",
-  "yarnToBeReceived": "Yarn To Be Received"
+  "yarnToBeReceived": "Yarn To Be Received",
+  "inventories": "Inventories",
+  "yarnInventory": "Yarn Inventory",
+  "clothInventory": "Cloth Inventory",
+  "searchHere": "Search here...",
+  "addInventory": "Add Inventory",
+  "updateInventory": "Update Inventory",
+  "unpaidHistory": "Unpaid History",
+  "totalUnpaidAmount": "Total Unpaid Amount"
 }

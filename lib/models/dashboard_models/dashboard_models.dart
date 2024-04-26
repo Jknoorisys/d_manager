@@ -190,8 +190,8 @@ class PurchaseDeal {
 
 class SellDeal {
   int? sellId;
-  DateTime? sellDate;
-  DateTime? sellDueDate;
+  String? sellDate;
+  String? sellDueDate;
   String? firmId;
   String? partyId;
   String? qualityId;
@@ -235,8 +235,8 @@ class SellDeal {
 
   factory SellDeal.fromJson(Map<String, dynamic> json) => SellDeal(
     sellId: json["sell_id"],
-    sellDate: json["sell_date"] == null ? null : DateTime.parse(json["sell_date"]),
-    sellDueDate: json["sell_due_date"] == null ? null : DateTime.parse(json["sell_due_date"]),
+    sellDate: json["sell_date"],
+    sellDueDate: json["sell_due_date"],
     firmId: json["firm_id"],
     partyId: json["party_id"],
     qualityId: json["quality_id"],
@@ -258,8 +258,8 @@ class SellDeal {
 
   Map<String, dynamic> toJson() => {
     "sell_id": sellId,
-    "sell_date": "${sellDate!.year.toString().padLeft(4, '0')}-${sellDate!.month.toString().padLeft(2, '0')}-${sellDate!.day.toString().padLeft(2, '0')}",
-    "sell_due_date": "${sellDueDate!.year.toString().padLeft(4, '0')}-${sellDueDate!.month.toString().padLeft(2, '0')}-${sellDueDate!.day.toString().padLeft(2, '0')}",
+    "sell_date": sellDate,
+    "sell_due_date": sellDueDate,
     "firm_id": firmId,
     "party_id": partyId,
     "quality_id": qualityId,
@@ -282,7 +282,7 @@ class SellDeal {
 
 class Filter {
   String? startDate;
-  DateTime? endDate;
+  String? endDate;
 
   Filter({
     this.startDate,
@@ -291,11 +291,11 @@ class Filter {
 
   factory Filter.fromJson(Map<String, dynamic> json) => Filter(
     startDate: json["start_date"],
-    endDate: json["end_date"] == null ? null : DateTime.parse(json["end_date"]),
+    endDate: json["end_date"],
   );
 
   Map<String, dynamic> toJson() => {
     "start_date": startDate,
-    "end_date": "${endDate!.year.toString().padLeft(4, '0')}-${endDate!.month.toString().padLeft(2, '0')}-${endDate!.day.toString().padLeft(2, '0')}",
+    "end_date": endDate,
   };
 }

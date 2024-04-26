@@ -7,6 +7,7 @@ import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../helpers/helper_functions.dart';
 import '../../models/dashboard_models/dashboard_models.dart';
 
 class Purchases extends StatefulWidget {
@@ -21,7 +22,7 @@ class _PurchasesState extends State<Purchases> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(Dimensions.height15),
-      child: widget.purchaseDeals == null ? const NoRecordFound() : ListView.builder(
+      child: widget.purchaseDeals.isEmpty ? const NoRecordFound() : ListView.builder(
         itemCount: widget.purchaseDeals.length,
         itemBuilder: (context, index) {
           return CustomAccordion(
@@ -73,7 +74,7 @@ class _PurchasesState extends State<Purchases> {
                   children: [
                     Expanded(flex:1,child: _buildInfoColumn('Deal Date', widget.purchaseDeals[index].purchaseDate!.toString())),
                     SizedBox(width: Dimensions.width20),
-                    Expanded(flex:1,child: _buildInfoColumn('Rate', widget.purchaseDeals[index].rate!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(widget.purchaseDeals[index].rate.toString())}')),
                     SizedBox(width: Dimensions.width20),
                     Expanded(flex:1,child: _buildInfoColumn('Yarn Type', widget.purchaseDeals[index].yarnTypeName!)),
                   ],
@@ -84,19 +85,19 @@ class _PurchasesState extends State<Purchases> {
               children: [
                 Row(
                   children: [
-                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', widget.purchaseDeals[index].paymentType!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Payment Type', widget.purchaseDeals[index].paymentType == 'dhara' ? 'Dhara' : 'Current')),
+                    SizedBox(width: Dimensions.width20),
+                    Expanded(flex:1,child: _buildInfoColumn('Due Date', widget.purchaseDeals[index].paymentDueDate != null ? widget.purchaseDeals[index].paymentDueDate.toString() : 'N/A')),
                     SizedBox(width: Dimensions.width20),
                     Expanded(flex:1,child: _buildInfoColumn('Lot Number', widget.purchaseDeals[index].lotNumber!)),
-                    SizedBox(width: Dimensions.width20),
-                    Expanded(flex:1,child: _buildInfoColumn('Box Ordered', widget.purchaseDeals[index].orderedBoxCount!)),
                   ],
                 ),
                 SizedBox(height: Dimensions.height10),
                 Row(
                   children: [
-                    Expanded(flex:1,child: _buildInfoColumn('Box Delivered', widget.purchaseDeals[index].deliveredBoxCount!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Gross Received', '${widget.purchaseDeals[index].grossReceivedWeight} ton' ?? 'N/A')),
                     SizedBox(width: Dimensions.width20),
-                    Expanded(flex:1,child: _buildInfoColumn('Box Remaining', widget.purchaseDeals[index].yarnTypeId!)),
+                    Expanded(flex:1,child: _buildInfoColumn('Gross Remaining', '${double.parse(widget.purchaseDeals[index].grossWeight.toString()) - double.parse(widget.purchaseDeals[index].grossReceivedWeight.toString())} ton' ?? 'N/A')),
                     SizedBox(width: Dimensions.width20),
                     Expanded(flex:1,child: _buildInfoColumn('Cops', widget.purchaseDeals[index].cops!)),
                   ],
@@ -139,7 +140,7 @@ class _PurchasesState extends State<Purchases> {
                                   text: widget.purchaseDeals[index].netWeight!,
                                 ),
                                 TextSpan(
-                                  text: ' Ton',
+                                  text: ' Kg',
                                   style: TextStyle(
                                     fontSize: Dimensions.font12,
                                   ),
@@ -199,9 +200,9 @@ class _PurchasesState extends State<Purchases> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,7 @@
+// To parse this JSON data, do
+//
+//     final deliveryListModel = deliveryListModelFromJson(jsonString);
+
 import 'dart:convert';
 
 DeliveryListModel deliveryListModelFromJson(String str) => DeliveryListModel.fromJson(json.decode(str));
@@ -40,7 +44,6 @@ class DeliveryDetails {
   int? purchaseDeliveryId;
   int? yarnPurchaseId;
   DateTime? deliveryDate;
-  String? deliveredBoxCount;
   String? rate;
   String? grossWeight;
   String? netWeight;
@@ -63,7 +66,6 @@ class DeliveryDetails {
     this.purchaseDeliveryId,
     this.yarnPurchaseId,
     this.deliveryDate,
-    this.deliveredBoxCount,
     this.rate,
     this.grossWeight,
     this.netWeight,
@@ -87,7 +89,6 @@ class DeliveryDetails {
     purchaseDeliveryId: json["purchase_delivery_id"],
     yarnPurchaseId: json["yarn_purchase_id"],
     deliveryDate: json["delivery_date"] == null ? null : DateTime.parse(json["delivery_date"]),
-    deliveredBoxCount: json["delivered_box_count"],
     rate: json["rate"],
     grossWeight: json["gross_weight"],
     netWeight: json["net_weight"],
@@ -111,7 +112,6 @@ class DeliveryDetails {
     "purchase_delivery_id": purchaseDeliveryId,
     "yarn_purchase_id": yarnPurchaseId,
     "delivery_date": "${deliveryDate!.year.toString().padLeft(4, '0')}-${deliveryDate!.month.toString().padLeft(2, '0')}-${deliveryDate!.day.toString().padLeft(2, '0')}",
-    "delivered_box_count": deliveredBoxCount,
     "rate": rate,
     "gross_weight": grossWeight,
     "net_weight": netWeight,
@@ -133,8 +133,8 @@ class DeliveryDetails {
 }
 
 class Filter {
-  String? paidStatus;
-  String? billReceived;
+  dynamic paidStatus;
+  dynamic billReceived;
 
   Filter({
     this.paidStatus,

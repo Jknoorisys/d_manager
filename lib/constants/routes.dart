@@ -11,6 +11,10 @@ import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_add.d
 import 'package:d_manager/screens/manage_cloth_sell/manage_invoice/invoice_view.dart';
 import 'package:d_manager/screens/manage_history/purchase_history.dart';
 import 'package:d_manager/screens/manage_history/sell_history.dart';
+import 'package:d_manager/screens/manage_history/unpaid_history/unpaid_history.dart';
+import 'package:d_manager/screens/manage_inventory/inventory.dart';
+import 'package:d_manager/screens/manage_inventory/purchase_inventory_list.dart';
+import 'package:d_manager/screens/manage_inventory/sell_inventory_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_cloth_quality/cloth_quality_list.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_add.dart';
 import 'package:d_manager/screens/manage_masters/manage_firm/firm_list.dart';
@@ -94,11 +98,15 @@ class AppRoutes {
   // History
   static const String purchaseHistory = '/purchase-history';
   static const String sellHistory = '/sell-history';
+  static const String unpaidHistory = '/unpaid-history';
 
   // Notifications
-
   static const String notificationList = '/notification-list';
 
+  // Manage Inventory
+  static const String inventoryDashboard = '/inventory-dashboard';
+  static const String purchaseInventory = '/purchase-inventory';
+  static const String sellInventory = '/sell-inventory';
 
   static final Map<String, WidgetBuilder> routes = {
     splashScreen: (context) => const SplashScreen(),
@@ -213,9 +221,14 @@ class AppRoutes {
     // Manage History
     purchaseHistory: (context) => const PurchaseHistory(),
     sellHistory: (context) => const SellHistory(),
+    unpaidHistory: (context) => const UnpaidHistory(),
 
     // Notification List
     notificationList: (context) => const NotificationList(),
 
+    // Manage Inventory
+    purchaseInventory: (context) => const PurchaseInventoryList(),
+    sellInventory: (context) => const SellInventoryList(),
+    inventoryDashboard: (context) => const Inventory(),
   };
 }

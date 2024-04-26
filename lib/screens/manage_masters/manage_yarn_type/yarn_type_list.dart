@@ -10,13 +10,13 @@ import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class YarnTypeList extends StatefulWidget {
   const YarnTypeList({Key? key}) : super(key: key);
@@ -27,11 +27,13 @@ class YarnTypeList extends StatefulWidget {
 
 class _YarnTypeListState extends State<YarnTypeList> {
   final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
+  bool isLoadingMore = false;
+  int totalItems = 0;
+  final _controller = ScrollController();
   List<YarnDetail> yarns = [];
   int currentPage = 1;
   bool isLoading = false;
-  bool isNetworkAvailable = false;
+  bool isNetworkAvailable = true;
   ManageYarnServices yarnServices = ManageYarnServices();
 
   @override
@@ -41,12 +43,21 @@ class _YarnTypeListState extends State<YarnTypeList> {
       isLoading = !isLoading;
     });
     _loadData(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > yarns.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage, searchController.text.trim());
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
   @override
@@ -111,25 +122,11 @@ class _YarnTypeListState extends State<YarnTypeList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    controller: _refreshController,
-                    enablePullDown: true,
-                    enablePullUp: true,
-                    onRefresh: () async {
-                      setState(() {
-                        yarns.clear();
-                        currentPage = 1;
-                      });
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child: ListView.builder(
-                      itemCount: yarns.length,
-                      itemBuilder: (context, index) {
+                  child: (yarns.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: yarns.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < yarns.length) {
                         var yarn = yarns[index];
                         return CustomAccordion(
                           titleChild: Column(
@@ -211,8 +208,15 @@ class _YarnTypeListState extends State<YarnTypeList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        // if (totalItems > yarns.length) {
+                        //   return const CustomLoader();
+                        // } else {
+                        //   return const SizedBox(height: 0);
+                        // }
+                        return const SizedBox(height: 0);
+                      }
+                    },
                   ),
                 ),
               ],
@@ -251,10 +255,12 @@ class _YarnTypeListState extends State<YarnTypeList> {
 
               setState(() {
                 yarns.addAll(yarnListModel.data!);
-                currentPage++;
+                totalItems = yarnListModel.total ?? 0;
               });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                isLoading = false;
+              });
             }
           } else {
             CustomApiSnackbar.show(
@@ -280,6 +286,7 @@ class _YarnTypeListState extends State<YarnTypeList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

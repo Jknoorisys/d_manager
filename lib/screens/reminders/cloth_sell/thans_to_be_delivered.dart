@@ -1,9 +1,5 @@
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-
 import '../../../api/manage_yarn_reminder_services.dart';
 import '../../../generated/l10n.dart';
 import '../../../helpers/helper_functions.dart';
@@ -31,7 +27,9 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
   int currentPage = 1;
   List<ThansPending> thansToBeDelivered = [];
   ManageYarnReminderServices manageYarnReminderServices = ManageYarnReminderServices();
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
 
   @override
   void initState() {
@@ -40,7 +38,23 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
       _isLoading = !_isLoading;
     });
     thansToBeDeliveredReminder(currentPage.toString());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > thansToBeDelivered.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          thansToBeDeliveredReminder(currentPage.toString());
+        }
+      }
+    });
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomDrawer(
@@ -51,25 +65,11 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
           title: S.of(context).thansToBeDelivered,
           content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
-            child:
-            SmartRefresher(
-              enablePullUp: true,
-              controller: _refreshController,
-              onRefresh: () async {
-                setState(() {
-                  thansToBeDelivered.clear();
-                  currentPage = 1;
-                });
-                thansToBeDeliveredReminder(currentPage.toString());
-                _refreshController.refreshCompleted();
-              },
-              onLoading: () async {
-                thansToBeDeliveredReminder(currentPage.toString());
-                _refreshController.loadComplete();
-              },
-              child: ListView.builder(
-                itemCount: thansToBeDelivered.length,
-                itemBuilder: (context, index) {
+            child: ListView.builder(
+              itemCount: thansToBeDelivered.length + 1,
+              controller: _controller,
+              itemBuilder: (context, index) {
+                if (index < thansToBeDelivered.length) {
                   return CustomAccordionWithoutExpanded(
                     titleChild: Column(
                       children: [
@@ -117,13 +117,13 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                             SizedBox(width: Dimensions.width20),
                             _buildInfoColumn('Cloth Quality', thansToBeDelivered[index].qualityName!),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Rate', '₹ ${thansToBeDelivered[index].rate!}'),
+                            _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(thansToBeDelivered[index].rate.toString())}'),
                           ],
                         ),
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Total Thans', thansToBeDelivered[index].totalThan!),
+                            _buildInfoColumn('Total Thans', '${thansToBeDelivered[index].totalThan!}'),
                             SizedBox(width: Dimensions.width20),
                             _buildInfoColumn('', ''),
                             SizedBox(width: Dimensions.width20),
@@ -161,7 +161,7 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                                         ),
                                         children: [
                                           TextSpan(
-                                            text: thansToBeDelivered[index].thanDelivered,
+                                            text: '${thansToBeDelivered[index].thanDelivered!}',
                                           ),
                                         ],
                                       ),
@@ -181,7 +181,7 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    BigText(text: 'Thans Remainig', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                    BigText(text: 'Thans Remaining', color: AppTheme.nearlyBlack, size: Dimensions.font12),
                                     BigText(text:'${thansToBeDelivered[index].thanRemaining}',color: AppTheme.primary, size: Dimensions.font18)
                                   ],
                                 )
@@ -208,20 +208,23 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
                       ],
                     ),
                   );
-                },
-              ),
+                } else {
+                  const SizedBox();
+                }
+              },
             ),
           )
         )
     );
   }
+
   Widget _buildInfoColumn(String title, String value) {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 4.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,9 +235,8 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
       ),
     );
   }
-  Future<ThansToBeDeliveredModel?> thansToBeDeliveredReminder(
-      String pageNo
-      ) async {
+
+  Future<void> thansToBeDeliveredReminder(String pageNo) async {
     setState(() {
       _isLoading = true; // Show loader before making API call
     });
@@ -245,21 +247,16 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
         if (model!.success == true) {
           if (model.data != null) {
             if (model.data!.isEmpty) {
-              if (currentPage == 1) {
-                setState(() {
-                  noRecordFound = true;
-                });
-              } else {
-                _refreshController.loadNoData();
-              }
+             setState(() {
+                _isLoading = false;
+             });
             } else {
               if (currentPage == 1) {
                 thansToBeDelivered.clear();
               }
               setState(() {
-                noRecordFound = false;
                 thansToBeDelivered.addAll(model.data!);
-                currentPage++;
+                totalItems = model.total ?? 0;
               });
             }
           } else {
@@ -280,9 +277,17 @@ class _ThansToBeDeliveredState extends State<ThansToBeDelivered> {
           isNetworkAvailable = false;
         });
       }
+    } catch (e) {
+      CustomApiSnackbar.show(
+        context,
+        'Error',
+        'Something went wrong, please try again later.',
+        mode: SnackbarMode.error,
+      );
     } finally {
       setState(() {
         _isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

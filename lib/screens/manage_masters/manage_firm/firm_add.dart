@@ -140,6 +140,7 @@ class _FirmAddState extends State<FirmAdd> {
                         keyboardType: TextInputType.name,
                         borderRadius: Dimensions.radius10,
                         errorText: errorPartyName.toString() != 'null' ? errorPartyName.toString() : '',
+                        autoFocus: true,
                       ),
                       Gap(Dimensions.height15),
 

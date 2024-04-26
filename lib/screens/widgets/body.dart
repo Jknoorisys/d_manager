@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:d_manager/api/notification_services.dart';
 import 'package:d_manager/constants/app_theme.dart';
 import 'package:d_manager/constants/dimension.dart';
@@ -35,6 +37,7 @@ class CustomBody extends StatefulWidget {
 }
 
 class _CustomBodyState extends State<CustomBody> {
+  DateTime? currentBackPressTime;
   @override
   void initState() {
     super.initState();
@@ -90,27 +93,32 @@ class _CustomBodyState extends State<CustomBody> {
         title: widget.isAppBarTitle == true ? Image.asset(AppImages.appLogoHorizontal, width: Dimensions.width50*5, height: Dimensions.height50*5,) : null,
         centerTitle: true,
       ),
-      body: widget.isBackgroundGradient == false ? _buildContent() : Container(
-        height: Dimensions.screenHeight,
-        decoration: const BoxDecoration(
-          gradient: AppTheme.appGradientLight,
-        ),
-        child: Stack(
-          children: [
-            widget.content,
-            if (widget.isLoading == true)
-              Container(
-                color: Colors.black.withOpacity(0.5),
-                child: const Center(
-                  child: GFLoader(
-                    type: GFLoaderType.circle,
-                    loaderColorOne: AppTheme.primary,
-                    loaderColorTwo: AppTheme.secondary,
-                    loaderColorThree: AppTheme.secondaryLight,
+      body: widget.isBackgroundGradient == false ? _buildContent() : GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Container(
+          height: Dimensions.screenHeight,
+          decoration: const BoxDecoration(
+            gradient: AppTheme.appGradientLight,
+          ),
+          child: Stack(
+            children: [
+              widget.content,
+              if (widget.isLoading == true)
+                Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: const Center(
+                    child: GFLoader(
+                      type: GFLoaderType.circle,
+                      loaderColorOne: AppTheme.primary,
+                      loaderColorTwo: AppTheme.secondary,
+                      loaderColorThree: AppTheme.secondaryLight,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: widget.bottomNavigationBar ,
@@ -118,54 +126,59 @@ class _CustomBodyState extends State<CustomBody> {
   }
 
   _buildContent(){
-    return Stack(
-      children: [
-        Column(
-          children: [
-            widget.title != null ? Container(
-              width: Dimensions.screenWidth,
-              decoration: BoxDecoration(
-                color: AppTheme.secondary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(Dimensions.radius30),
-                  bottomRight: Radius.circular(Dimensions.radius30),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              widget.title != null ? Container(
+                width: Dimensions.screenWidth,
+                decoration: BoxDecoration(
+                  color: AppTheme.secondary,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(Dimensions.radius30),
+                    bottomRight: Radius.circular(Dimensions.radius30),
+                  ),
                 ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: Dimensions.height15, horizontal: Dimensions.height30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                     Text(widget.title!, style: AppTheme.headline),
+                      widget.filterButton ?? Container(),
+                    ],
+                  ),
+                )
+              ) : Container(),
+              widget.title != null ?  SizedBox(height: Dimensions.width10,) : Container(),
+              widget.dashboardCard ?? Container(),
+              widget.dashboardCard != null ? Padding(
+                  padding: EdgeInsets.only(left:Dimensions.height30 , right: Dimensions.height30, top: Dimensions.height10),
+                  child: AppTheme.divider,
+              ) : Container(),
+              Expanded(
+                child: widget.internetNotAvailable == true ? (widget.noRecordFound == false ? widget.content : const NoRecordFound()) : const NoInternetConnection(),
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: Dimensions.height15, horizontal: Dimensions.height30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                   Text(widget.title!, style: AppTheme.headline),
-                    widget.filterButton ?? Container(),
-                  ],
-                ),
-              )
-            ) : Container(),
-            widget.title != null ?  SizedBox(height: Dimensions.width10,) : Container(),
-            widget.dashboardCard ?? Container(),
-            widget.dashboardCard != null ? Padding(
-                padding: EdgeInsets.only(left:Dimensions.height30 , right: Dimensions.height30, top: Dimensions.height10),
-                child: AppTheme.divider,
-            ) : Container(),
-            Expanded(
-              child: widget.internetNotAvailable == true ? (widget.noRecordFound == false ? widget.content : const NoRecordFound()) : const NoInternetConnection(),
-            ),
-          ],
-        ),
-        if (widget.isLoading == true)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(
-              child: GFLoader(
-                type: GFLoaderType.circle,
-                loaderColorOne: AppTheme.primary,
-                loaderColorTwo: AppTheme.secondary,
-                loaderColorThree: AppTheme.secondaryLight,
-              ),
-            ),
+            ],
           ),
-      ],
+          if (widget.isLoading == true)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: GFLoader(
+                  type: GFLoaderType.circle,
+                  loaderColorOne: AppTheme.primary,
+                  loaderColorTwo: AppTheme.secondary,
+                  loaderColorThree: AppTheme.secondaryLight,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final purchaseHistoryModel = purchaseHistoryModelFromJson(jsonString);
-
 import 'dart:convert';
 
 PurchaseHistoryModel purchaseHistoryModelFromJson(String str) => PurchaseHistoryModel.fromJson(json.decode(str));
@@ -41,138 +37,102 @@ class PurchaseHistoryModel {
 }
 
 class PurchaseHistoryList {
-  int? purchaseId;
-  String? purchaseDate;
-  String? firmId;
-  String? partyId;
-  String? yarnTypeId;
-  String? lotNumber;
-  String? orderedBoxCount;
-  String? deliveredBoxCount;
-  String? netWeight;
-  String? grossReceivedWeight;
-  String? grossWeight;
+  int? purchaseDeliveryId;
+  String? userId;
+  int? yarnPurchaseId;
+  String? deliveryDate;
   String? rate;
-  String? denier;
-  String? cops;
+  String? grossWeight;
+  String? netWeight;
+  String? purchaseAmount;
+  String? gstBillAmount;
+  String? paidAmount;
   String? paymentType;
   String? paymentDueDate;
-  String? dharaDays;
-  String? status;
-  String? dealStatus;
+  String? paidStatus;
+  String? paymentDate;
+  String? billUrl;
+  String? firmId;
   String? firmName;
+  String? partyId;
   String? partyName;
+  String? yarnTypeId;
   String? yarnName;
-  String? yarnTypeName;
-  int? totalDeliveries;
-  int? totalDeliveryBox;
-  double? totalGrossWeight;
-  double? totalNetWeight;
-  int? totalBillAmount;
-  int? totalPaidAmount;
-  int? totalCops;
-  int? totalDenier;
+  String? typeName;
 
   PurchaseHistoryList({
-    this.purchaseId,
-    this.purchaseDate,
-    this.firmId,
-    this.partyId,
-    this.yarnTypeId,
-    this.lotNumber,
-    this.orderedBoxCount,
-    this.deliveredBoxCount,
-    this.netWeight,
-    this.grossReceivedWeight,
-    this.grossWeight,
+    this.purchaseDeliveryId,
+    this.userId,
+    this.yarnPurchaseId,
+    this.deliveryDate,
     this.rate,
-    this.denier,
-    this.cops,
+    this.grossWeight,
+    this.netWeight,
+    this.purchaseAmount,
+    this.gstBillAmount,
+    this.paidAmount,
     this.paymentType,
     this.paymentDueDate,
-    this.dharaDays,
-    this.status,
-    this.dealStatus,
+    this.paidStatus,
+    this.paymentDate,
+    this.billUrl,
+    this.firmId,
     this.firmName,
+    this.partyId,
     this.partyName,
+    this.yarnTypeId,
     this.yarnName,
-    this.yarnTypeName,
-    this.totalDeliveries,
-    this.totalDeliveryBox,
-    this.totalGrossWeight,
-    this.totalNetWeight,
-    this.totalBillAmount,
-    this.totalPaidAmount,
-    this.totalCops,
-    this.totalDenier,
+    this.typeName,
   });
 
   factory PurchaseHistoryList.fromJson(Map<String, dynamic> json) => PurchaseHistoryList(
-    purchaseId: json["purchase_id"],
-    purchaseDate: json["purchase_date"],
-    firmId: json["firm_id"],
-    partyId: json["party_id"],
-    yarnTypeId: json["yarn_type_id"],
-    lotNumber: json["lot_number"],
-    orderedBoxCount: json["ordered_box_count"],
-    deliveredBoxCount: json["delivered_box_count"],
-    netWeight: json["net_weight"],
-    grossReceivedWeight: json["gross_received_weight"],
-    grossWeight: json["gross_weight"],
+    purchaseDeliveryId: json["purchase_delivery_id"],
+    userId: json["user_id"],
+    yarnPurchaseId: json["yarn_purchase_id"],
+    deliveryDate: json["delivery_date"],
     rate: json["rate"],
-    denier: json["denier"],
-    cops: json["cops"],
+    grossWeight: json["gross_weight"],
+    netWeight: json["net_weight"],
+    purchaseAmount: json["purchase_amount"],
+    gstBillAmount: json["gst_bill_amount"],
+    paidAmount: json["paid_amount"],
     paymentType: json["payment_type"],
     paymentDueDate: json["payment_due_date"],
-    dharaDays: json["dhara_days"],
-    status: json["status"],
-    dealStatus: json["deal_status"],
+    paidStatus: json["paid_status"],
+    paymentDate: json["payment_date"],
+    billUrl: json["bill_url"],
+    firmId: json["firm_id"],
     firmName: json["firm_name"],
+    partyId: json["party_id"],
     partyName: json["party_name"],
+    yarnTypeId: json["yarn_type_id"],
     yarnName: json["yarn_name"],
-    yarnTypeName: json["yarn_type_name"],
-    totalDeliveries: json["total_deliveries"],
-    totalDeliveryBox: json["total_delivery_box"],
-    totalGrossWeight: json["total_gross_weight"]?.toDouble(),
-    totalNetWeight: json["total_net_weight"]?.toDouble(),
-    totalBillAmount: json["total_bill_amount"],
-    totalPaidAmount: json["total_paid_amount"],
-    totalCops: json["total_cops"],
-    totalDenier: json["total_denier"],
+    typeName: json["type_name"],
   );
 
   Map<String, dynamic> toJson() => {
-    "purchase_id": purchaseId,
-    "purchase_date": purchaseDate,
-    "firm_id": firmId,
-    "party_id": partyId,
-    "yarn_type_id": yarnTypeId,
-    "lot_number": lotNumber,
-    "ordered_box_count": orderedBoxCount,
-    "delivered_box_count": deliveredBoxCount,
-    "net_weight": netWeight,
-    "gross_received_weight": grossReceivedWeight,
-    "gross_weight": grossWeight,
+    "purchase_delivery_id": purchaseDeliveryId,
+    "user_id": userId,
+    "yarn_purchase_id": yarnPurchaseId,
+    "delivery_date": deliveryDate,
     "rate": rate,
-    "denier": denier,
-    "cops": cops,
+    "gross_weight": grossWeight,
+    "net_weight": netWeight,
+    "purchase_amount": purchaseAmount,
+    "gst_bill_amount": gstBillAmount,
+    "paid_amount": paidAmount,
     "payment_type": paymentType,
     "payment_due_date": paymentDueDate,
-    "dhara_days": dharaDays,
-    "status": status,
-    "deal_status": dealStatus,
+    "paid_status": paidStatus,
+    "payment_date": paymentDate,
+    "bill_url": billUrl,
+    "firm_id": firmId,
     "firm_name": firmName,
+    "party_id": partyId,
     "party_name": partyName,
+    "yarn_type_id": yarnTypeId,
     "yarn_name": yarnName,
-    "yarn_type_name": yarnTypeName,
-    "total_deliveries": totalDeliveries,
-    "total_delivery_box": totalDeliveryBox,
-    "total_gross_weight": totalGrossWeight,
-    "total_net_weight": totalNetWeight,
-    "total_bill_amount": totalBillAmount,
-    "total_paid_amount": totalPaidAmount,
-    "total_cops": totalCops,
-    "total_denier": totalDenier,
+    "type_name": typeName,
   };
 }
 
@@ -180,8 +140,8 @@ class Filter {
   dynamic firmId;
   dynamic partyId;
   dynamic yarnTypeId;
-  String? startDate;
-  String? endDate;
+  dynamic startDate;
+  dynamic endDate;
 
   Filter({
     this.firmId,

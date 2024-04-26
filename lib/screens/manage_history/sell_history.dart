@@ -17,20 +17,17 @@ import 'package:d_manager/constants/dimension.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../api/manage_history_services.dart';
 import '../../helpers/helper_functions.dart';
 import '../../models/history_models/sell_history_model.dart';
 import '../manage_cloth_sell/cloth_sell_view.dart';
-import '../widgets/new_custom_dropdown.dart';
+import '../widgets/no_record_found.dart';
 import '../widgets/snackbar.dart';
-import '../../models/sell_models/active_parties_model.dart';
 import '../../api/dropdown_services.dart';
 import '../../api/manage_firm_services.dart';
 import '../../api/manage_party_services.dart';
 import '../../models/dropdown_models/dropdown_cloth_quality_list_model.dart';
-import '../../models/sell_models/active_firms_model.dart';
 
 class SellHistory extends StatefulWidget {
   const SellHistory({super.key});
@@ -51,9 +48,10 @@ class _SellHistoryState extends State<SellHistory> {
   bool isLoading = false;
   ManageHistoryServices manageHistoryServices = ManageHistoryServices();
   int currentPage = 1;
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
 
-  //
   ManageFirmServices firmServices = ManageFirmServices();
   ManagePartyServices partyServices = ManagePartyServices();
   DropdownServices dropdownServices = DropdownServices();
@@ -66,7 +64,6 @@ class _SellHistoryState extends State<SellHistory> {
   List<Party> parties = [];
   List<ClothQuality> cloths = [];
   bool isFilterApplied = false;
-  bool noRecordFound = false;
   bool isNetworkAvailable = true;
   DateTime? firstDateForPurchase = DateTime.now();
   DateTime? lastDateForPurchase = DateTime.now().add(const Duration(days: 7));
@@ -77,9 +74,24 @@ class _SellHistoryState extends State<SellHistory> {
       isLoading = !isLoading;
     });
     getSellHistory(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > sellHistoryData.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          getSellHistory(currentPage, searchController.text.trim());
+        }
+      }
+    });
     _getFirms();
     _getParties();
     _getClothTypes();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -154,27 +166,12 @@ class _SellHistoryState extends State<SellHistory> {
                 ),
                 SizedBox(height: Dimensions.height10),
                 AppTheme.divider,
-                Expanded(
-                  child:
-                  SmartRefresher(
-                    enablePullUp: true,
-                    controller: _refreshController,
-                    onRefresh: () async {
-                      setState(() {
-                        sellHistoryData.clear();
-                        currentPage = 1;
-                      });
-                      getSellHistory(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      getSellHistory(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child:
-                    ListView.builder(
-                      itemCount: sellHistoryData.length,
-                      itemBuilder: (context, index) {
+                Expanded (
+                  child: (sellHistoryData.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: sellHistoryData.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < sellHistoryData.length) {
                         return CustomAccordion(
                           titleChild: Column(
                             children: [
@@ -198,7 +195,7 @@ class _SellHistoryState extends State<SellHistory> {
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [
                                               SizedBox(
-                                                width : Dimensions.screenWidth * 0.5,
+                                                  width : Dimensions.screenWidth * 0.5,
                                                   child: BigText(text: sellHistoryData[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
                                               Row(
                                                 children: [
@@ -227,11 +224,11 @@ class _SellHistoryState extends State<SellHistory> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Deal Date', sellHistoryData[index].sellDate!.toString())),
+                                  Expanded(flex:1,child: _buildInfoColumn('Invoice Date', sellHistoryData[index].invoiceDate!.toString())),
                                   SizedBox(width: Dimensions.width20),
                                   Expanded(flex:1,child: _buildInfoColumn('Cloth Quality', sellHistoryData[index].qualityName!)),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Total Thans', sellHistoryData[index].totalThan!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Thans', '${sellHistoryData[index].totalThan!}')),
                                 ],
                               ),
                             ],
@@ -241,39 +238,29 @@ class _SellHistoryState extends State<SellHistory> {
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Deal Rate','₹${sellHistoryData[index].rate!}')),
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Meter', '${sellHistoryData[index].totalMeter!}')),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Than Delivered', sellHistoryData[index].thanDelivered!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Rate','₹${HelperFunctions.formatPrice(sellHistoryData[index].rate.toString())}')),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Than Remaining', sellHistoryData[index].thanRemaining!)),
+                                  Expanded(flex:1,child: _buildInfoColumn('Due Date', sellHistoryData[index].dueDate!.toString())),
                                 ],
                               ),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Total Meter', sellHistoryData[index].totalMeter!.toString())),
+                                  Expanded(flex:1,child: _buildInfoColumn('Invoice Number', sellHistoryData[index].invoiceNumber!)),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Difference Amount', '₹${sellHistoryData[index].totalDifferenceAmount!.toString()}')),
+                                  Expanded(flex:1,child: _buildInfoColumn('Total Invoice Amount', '₹${HelperFunctions.formatPrice(sellHistoryData[index].invoiceAmount!.toString())}')),
                                   SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Due Date', sellHistoryData[index].sellDueDate!.toString())),
+                                  Expanded(flex:1,child: _buildInfoColumn('Difference Amount', '₹${HelperFunctions.formatPrice(sellHistoryData[index].differenceAmount!.toString())}')),
                                 ],
                               ),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                children: [
-                                  Expanded(flex:1,child: _buildInfoColumn('Total Invoice Amount', '₹${sellHistoryData[index].totalInvoiceAmount!.toString()}')),
-                                  SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('Status', sellHistoryData[index].dealStatus! == 'completed' ? 'Completed' : 'On Going')),
-                                  SizedBox(width: Dimensions.width20),
-                                  Expanded(flex:1,child: _buildInfoColumn('', '')),
-                                ],
-                              ),
-                              SizedBox(height: Dimensions.height10),
+                              SizedBox(height: Dimensions.height20),
                               Row(
                                 children: [
                                   Container(
                                       width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
+                                      height: Dimensions.height40*2.5,
                                       padding: EdgeInsets.all(Dimensions.height10),
                                       decoration: BoxDecoration(
                                         color: AppTheme.white,
@@ -292,7 +279,7 @@ class _SellHistoryState extends State<SellHistory> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                               children: [
-                                                TextSpan(text: '₹${sellHistoryData[index].totalGstAmount!.toString()}',),
+                                                TextSpan(text: '₹${HelperFunctions.formatPrice(sellHistoryData[index].gst!.toString())}',),
                                               ],
                                             ),
                                           ),
@@ -302,7 +289,7 @@ class _SellHistoryState extends State<SellHistory> {
                                   SizedBox(width: Dimensions.width20),
                                   Container(
                                       width: MediaQuery.of(context).size.width/2.65,
-                                      height: Dimensions.height40*2,
+                                      height: Dimensions.height40*2.5,
                                       padding: EdgeInsets.all(Dimensions.height10),
                                       decoration: BoxDecoration(
                                         color: AppTheme.white,
@@ -313,7 +300,7 @@ class _SellHistoryState extends State<SellHistory> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           BigText(text: 'Total Received Amount', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                          BigText(text: '₹${sellHistoryData[index].totalReceivedAmount!.toString()}',color: AppTheme.primary, size: Dimensions.font18)
+                                          BigText(text: '₹${HelperFunctions.formatPrice(sellHistoryData[index].receivedAmount!.toString())}',color: AppTheme.primary, size: Dimensions.font18)
                                         ],
                                       )
                                   ),
@@ -325,7 +312,7 @@ class _SellHistoryState extends State<SellHistory> {
                                 children: [
                                   CustomElevatedButton(
                                     onPressed: (){
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: sellHistoryData[index].sellId!,)));
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ClothSellView(sellID: int.parse(sellHistoryData[index].sellId!),)));
                                     },
                                     buttonText: 'View Details',
                                     isBackgroundGradient: false,
@@ -338,8 +325,10 @@ class _SellHistoryState extends State<SellHistory> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
                   ),
 
                 ),
@@ -353,9 +342,9 @@ class _SellHistoryState extends State<SellHistory> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -569,7 +558,6 @@ class _SellHistoryState extends State<SellHistory> {
     if (response != null) {
       setState(() {
         firms.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -578,7 +566,6 @@ class _SellHistoryState extends State<SellHistory> {
     if (response != null) {
       setState(() {
         parties.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -587,11 +574,10 @@ class _SellHistoryState extends State<SellHistory> {
     if (response != null) {
       setState(() {
         cloths.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
-  Future<SellHistoryModel?> getSellHistory(int pageNo, String search) async {
+  Future<void> getSellHistory(int pageNo, String search) async {
     setState(() {
       isLoading = true;
     });
@@ -606,6 +592,7 @@ class _SellHistoryState extends State<SellHistory> {
           selectedStartDate,
           selectedEndDate,
         );
+
         if (model != null) {
           if (model.success == true) {
             if (model.data!.isNotEmpty) {
@@ -615,10 +602,12 @@ class _SellHistoryState extends State<SellHistory> {
                   sellHistoryData.clear();
                 }
                 sellHistoryData.addAll(model.data!);
-                currentPage++;
+                totalItems = model.total ?? 0;
               });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                isLoading = false;
+              });
             }
           } else {
             CustomApiSnackbar.show(
@@ -644,6 +633,7 @@ class _SellHistoryState extends State<SellHistory> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

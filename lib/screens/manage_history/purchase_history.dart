@@ -1,6 +1,5 @@
 import 'package:d_manager/api/manage_invoice_services.dart';
 import 'package:d_manager/constants/constants.dart';
-import 'package:d_manager/constants/routes.dart';
 import 'package:d_manager/generated/l10n.dart';
 import 'package:d_manager/models/dropdown_models/drop_down_party_list_model.dart';
 import 'package:d_manager/models/dropdown_models/dropdown_film_list_model.dart';
@@ -18,7 +17,6 @@ import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../api/manage_history_services.dart';
 import '../../helpers/helper_functions.dart';
@@ -27,15 +25,9 @@ import '../../models/history_models/purchase_history_model.dart';
 import '../manage_yarn_purchase/yarn_purchase_view.dart';
 import '../widgets/custom_dropdown.dart';
 import '../widgets/snackbar.dart';
-import 'package:d_manager/api/manage_sell_deals.dart';
-import '../../models/sell_models/active_parties_model.dart';
-import '../../models/sell_models/sell_deal_list_model.dart';
-import '../widgets/new_custom_dropdown.dart';
 import '../../api/dropdown_services.dart';
 import '../../api/manage_firm_services.dart';
 import '../../api/manage_party_services.dart';
-import '../../models/dropdown_models/dropdown_cloth_quality_list_model.dart';
-import '../../models/sell_models/active_firms_model.dart';
 class PurchaseHistory extends StatefulWidget {
   const PurchaseHistory({super.key});
 
@@ -47,13 +39,12 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   final searchController = TextEditingController();
   List<PurchaseHistoryList> purchaseHistoryList = [];
 
-  DateTime selectedDate = DateTime.now();
-  DateTime firstDate = DateTime(2000);
-  DateTime lastDate = DateTime(2050);
   ManageHistoryServices manageHistoryServices = ManageHistoryServices();
   bool isLoading = false;
   int currentPage = 1;
-  final RefreshController _refreshController = RefreshController();
+  final _controller = ScrollController();
+  int totalItems = 0;
+  bool isLoadingMore = false;
 
   ManageFirmServices firmServices = ManageFirmServices();
 
@@ -64,16 +55,17 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   var selectedFirm;
   var selectedParty;
   var selectedYarn;
+  DateTime firstDate = DateTime(2000);
+  DateTime lastDate = DateTime(2050);
   var selectedStartDate;
   var selectedEndDate;
+  DateTime? firstDateForPurchase = DateTime.now();
+  DateTime? lastDateForPurchase = DateTime.now().add(const Duration(days: 7));
   List<Firm> firms = [];
   List<Party> parties = [];
   List<Yarn> yarns = [];
   bool isFilterApplied = false;
-  bool noRecordFound = false;
   bool isNetworkAvailable = true;
-  DateTime? firstDateForPurchase = DateTime.now();
-  DateTime? lastDateForPurchase = DateTime.now().add(const Duration(days: 7));
 
   @override
   void initState() {
@@ -82,9 +74,25 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       isLoading = !isLoading;
     });
     getPurchaseHistory(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > purchaseHistoryList.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          getPurchaseHistory(currentPage, searchController.text.trim());
+        }
+      }
+    });
     _getFirms();
     _getParties();
     _getYarns();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -160,217 +168,202 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                 SizedBox(height: Dimensions.height10),
                 AppTheme.divider,
                 Expanded(
-                  child:
-                  noRecordFound == false ? SmartRefresher(
-                    enablePullUp: true,
-                    controller: _refreshController,
-                    onRefresh: () async {
-                      setState(() {
-                        purchaseHistoryList.clear();
-                        currentPage = 1;
-                      });
-                      getPurchaseHistory(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      getPurchaseHistory(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child:
-                    ListView.builder(
-                      itemCount: purchaseHistoryList.length,
-                      itemBuilder: (context, index) {
-                        return
-                          CustomAccordion(
-                            titleChild: Column(
-                              children: [
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Row(
-                                    children: [
-                                      SizedBox(height: Dimensions.height10),
-                                      Flexible(
-                                        child: Row(
-                                          children: [
-                                            SizedBox(width: Dimensions.width10),
-                                            CircleAvatar(
-                                              backgroundColor: AppTheme.secondary,
-                                              radius: Dimensions.height20,
-                                              child: BigText(text: purchaseHistoryList[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
-                                            ),
-                                            SizedBox(width: Dimensions.height10),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.start,
+                  child: (purchaseHistoryList.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    itemCount: purchaseHistoryList.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < purchaseHistoryList.length) {
+                        return CustomAccordion(
+                          titleChild: Column(
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: Row(
+                                  children: [
+                                    SizedBox(height: Dimensions.height10),
+                                    Flexible(
+                                      child: Row(
+                                        children: [
+                                          SizedBox(width: Dimensions.width10),
+                                          CircleAvatar(
+                                            backgroundColor: AppTheme.secondary,
+                                            radius: Dimensions.height20,
+                                            child: BigText(text: purchaseHistoryList[index].partyName![0], color: AppTheme.primary, size: Dimensions.font18),
+                                          ),
+                                          SizedBox(width: Dimensions.height10),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                  width : Dimensions.screenWidth * 0.5,
+                                                  child: BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
+                                              Row(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundColor: AppTheme.black,
+                                                    radius: Dimensions.height10,
+                                                    child: BigText(text: purchaseHistoryList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
+                                                  ),
+                                                  SizedBox(width: Dimensions.width10),
+                                                  SizedBox(
+                                                      width : Dimensions.screenWidth * 0.5,
+                                                      child: SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: Dimensions.height10),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              AppTheme.divider,
+                              SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Expanded(flex:1,child: _buildInfoColumn('Deal Date', purchaseHistoryList[index].deliveryDate ?? 'N/A')),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Yarn Name', purchaseHistoryList[index].yarnName!)),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Net Weight', purchaseHistoryList[index].netWeight != null ? '${purchaseHistoryList[index].netWeight} Kg' : 'N/A')),
+                                ],
+                              ),
+                            ],
+                          ),
+                          contentChild: Column(
+                            children: [
+                              SizedBox(height: Dimensions.height10),
+                              // Row(
+                              //   children: [
+                              //     Expanded(flex:1,child: _buildInfoColumn('Lot Number', purchaseHistoryList[index].lotNumber ?? 'N/A')),
+                              //     SizedBox(width: Dimensions.width20),
+                              //     Expanded(flex:1,child: _buildInfoColumn('Total Box', purchaseHistoryList[index].orderedBoxCount ?? 'N/A')),
+                              //     SizedBox(width: Dimensions.width20),
+                              //     Expanded(flex:1,child: _buildInfoColumn('Box Received', purchaseHistoryList[index].deliveredBoxCount ?? 'N/A')),
+                              //   ],
+                              // ),
+                              // SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Expanded(flex:1,child: _buildInfoColumn('Rate', '₹${HelperFunctions.formatPrice(purchaseHistoryList[index].rate.toString())}')),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('Payment Due Date', purchaseHistoryList[index].paymentDueDate!.toString())),
+                                  SizedBox(width: Dimensions.width20),
+                                  Expanded(flex:1,child: _buildInfoColumn('', '')),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height10),
+                              // Row(
+                              //   children: [
+                              //     Expanded(flex:1,child: _buildInfoColumn('Bill Amount', purchaseHistoryList[index].totalBillAmount != null ? purchaseHistoryList[index].totalBillAmount.toString() : 'N/A')),
+                              //     SizedBox(width: Dimensions.width20),
+                              //     Expanded(flex:1,child: _buildInfoColumn('Amount Paid', purchaseHistoryList[index].totalPaidAmount != null ? purchaseHistoryList[index].totalPaidAmount.toString() : 'N/A')),
+                              //     SizedBox(width: Dimensions.width20),
+                              //     Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString() == 'completed' ? 'Completed' : 'On Going')),
+                              //   ],
+                              // ),
+                              // SizedBox(height: Dimensions.height10),
+                              Row(
+                                children: [
+                                  Container(
+                                      width: MediaQuery.of(context).size.width/2.65,
+                                      height: Dimensions.height40*2,
+                                      padding: EdgeInsets.all(Dimensions.height10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        border: Border.all(color: AppTheme.primary),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          BigText(text: 'Total Gross Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          RichText(
+                                            text: TextSpan(
+                                              style: TextStyle(
+                                                color: AppTheme.primary,
+                                                fontSize: Dimensions.font18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                               children: [
-                                                SizedBox(
-                                                    width : Dimensions.screenWidth * 0.5,
-                                                    child: BigText(text: purchaseHistoryList[index].partyName!, color: AppTheme.primary, size: Dimensions.font16, overflow: TextOverflow.ellipsis,)),
-                                                Row(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      backgroundColor: AppTheme.black,
-                                                      radius: Dimensions.height10,
-                                                      child: BigText(text: purchaseHistoryList[index].firmName![0], color: AppTheme.secondaryLight, size: Dimensions.font12),
-                                                    ),
-                                                    SizedBox(width: Dimensions.width10),
-                                                    SizedBox(
-                                                        width : Dimensions.screenWidth * 0.5,
-                                                        child: SmallText(text: purchaseHistoryList[index].firmName!, color: AppTheme.black, size: Dimensions.font12)),
-                                                  ],
+                                                TextSpan(text: purchaseHistoryList[index].grossWeight!,),
+                                                TextSpan(
+                                                  text: ' ton',
+                                                  style: TextStyle(
+                                                    fontSize: Dimensions.font12,
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: Dimensions.height10),
-                                    ],
+                                          ),
+                                        ],
+                                      )
                                   ),
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                AppTheme.divider,
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Deal Date', purchaseHistoryList[index].purchaseDate!.toString())),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Yarn Name', purchaseHistoryList[index].yarnName!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Total Weight', purchaseHistoryList[index].totalNetWeight!.toString())),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            contentChild: Column(
-                              children: [
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Lot Number', purchaseHistoryList[index].lotNumber!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Total Box', purchaseHistoryList[index].orderedBoxCount!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Box Received', purchaseHistoryList[index].deliveredBoxCount!.toString())),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Rate', purchaseHistoryList[index].rate!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Net Weight', purchaseHistoryList[index].netWeight!)),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Payment Due Date', purchaseHistoryList[index].paymentDueDate!.toString())),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Expanded(flex:1,child: _buildInfoColumn('Bill Amount', purchaseHistoryList[index].totalBillAmount!.toString())),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Amount Paid', purchaseHistoryList[index].totalPaidAmount!.toString())),
-                                    SizedBox(width: Dimensions.width20),
-                                    Expanded(flex:1,child: _buildInfoColumn('Deal Status', purchaseHistoryList[index].dealStatus!.toString() == 'completed' ? 'Completed' : 'On Going')),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height10),
-                                Row(
-                                  children: [
-                                    Container(
-                                        width: MediaQuery.of(context).size.width/2.65,
-                                        height: Dimensions.height40*2,
-                                        padding: EdgeInsets.all(Dimensions.height10),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.white,
-                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                          border: Border.all(color: AppTheme.primary),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            BigText(text: 'Total Weight', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                            RichText(
-                                              text: TextSpan(
-                                                style: TextStyle(
-                                                  color: AppTheme.primary,
-                                                  fontSize: Dimensions.font18,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                children: [
-                                                  TextSpan(text: purchaseHistoryList[index].grossWeight!,),
-                                                  TextSpan(
-                                                    text: ' ton',
-                                                    style: TextStyle(
-                                                      fontSize: Dimensions.font12,
-                                                    ),
-                                                  ),
-                                                ],
+                                  SizedBox(width: Dimensions.width20),
+                                  Container(
+                                      width: MediaQuery.of(context).size.width/2.65,
+                                      height: Dimensions.height40*2,
+                                      padding: EdgeInsets.all(Dimensions.height10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.white,
+                                        borderRadius: BorderRadius.circular(Dimensions.radius10/2),
+                                        border: Border.all(color: AppTheme.primary),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          BigText(text: 'Total Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
+                                          RichText(
+                                            text: TextSpan(
+                                              style: TextStyle(
+                                                color: AppTheme.primary,
+                                                fontSize: Dimensions.font18,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                            ),
-                                          ],
-                                        )
-                                    ),
-                                    SizedBox(width: Dimensions.width20),
-                                    Container(
-                                        width: MediaQuery.of(context).size.width/2.65,
-                                        height: Dimensions.height40*2,
-                                        padding: EdgeInsets.all(Dimensions.height10),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.white,
-                                          borderRadius: BorderRadius.circular(Dimensions.radius10/2),
-                                          border: Border.all(color: AppTheme.primary),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            BigText(text: 'Total Weight Received', color: AppTheme.nearlyBlack, size: Dimensions.font12),
-                                            RichText(
-                                              text: TextSpan(
-                                                style: TextStyle(
-                                                  color: AppTheme.primary,
-                                                  fontSize: Dimensions.font18,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                children: [
-                                                  TextSpan(text: purchaseHistoryList[index].grossReceivedWeight,),
-                                                  TextSpan(
-                                                    text: ' ton',
-                                                    style: TextStyle(
-                                                      fontSize: Dimensions.font12,
-                                                    ),
+                                              children: [
+                                                TextSpan(text: purchaseHistoryList[index].grossWeight,),
+                                                TextSpan(
+                                                  text: ' ton',
+                                                  style: TextStyle(
+                                                    fontSize: Dimensions.font12,
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        )
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: Dimensions.height15),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    CustomElevatedButton(
-                                      onPressed: (){
-                                        // Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': filteredPurchaseHistoryList[index]});
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView(purchaseId:purchaseHistoryList[index].purchaseId!.toString())));
-                                      },
-                                      buttonText: 'View Details',
-                                      isBackgroundGradient: false,
-                                      backgroundColor: AppTheme.primary,
-                                      textSize: Dimensions.font14,
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          );
-                      },
-                    ),
-                  ) : NoRecordFound(),
+                                          ),
+                                        ],
+                                      )
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: Dimensions.height15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  CustomElevatedButton(
+                                    onPressed: (){
+                                      // Navigator.pushNamed(context, AppRoutes.yarnPurchaseView, arguments: {'yarnPurchaseData': filteredPurchaseHistoryList[index]});
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => YarnPurchaseView(purchaseId:purchaseHistoryList[index].purchaseDeliveryId!.toString())));
+                                    },
+                                    buttonText: 'View Details',
+                                    isBackgroundGradient: false,
+                                    backgroundColor: AppTheme.primary,
+                                    textSize: Dimensions.font14,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
@@ -382,9 +375,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     String formattedValue = value;
     if (title.contains('Date') && value != 'N/A' && value != '' && value != null) {
       DateTime date = DateTime.parse(value);
-      formattedValue = DateFormat('dd-MMM-yy').format(date);
+      formattedValue = DateFormat('dd MMM yy').format(date);
     }
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width / 3.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -598,7 +591,6 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     if (response != null) {
       setState(() {
         firms.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -608,7 +600,6 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     if (response != null) {
       setState(() {
         parties.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
@@ -618,11 +609,10 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     if (response != null) {
       setState(() {
         yarns.addAll(response.data!);
-        isLoading = false;
       });
     }
   }
-  Future<PurchaseHistoryModel?> getPurchaseHistory(int pageNo, String search) async {
+  Future<void> getPurchaseHistory(int pageNo, String search) async {
     setState(() {
       isLoading = true;
     });
@@ -647,14 +637,16 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                 }
                 setState(() {
                   purchaseHistoryList.addAll(model.data!);
-                  currentPage++;
+                  totalItems = model.total ?? 0;
                 });
               } else {
-                _refreshController.loadNoData();
+                setState(() {
+                  isLoading = false;
+                });
               }
             } else {
               setState(() {
-                noRecordFound = true;
+                isLoading = false;
               });
             }
           } else {
@@ -681,6 +673,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

@@ -10,13 +10,13 @@ import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PartyList extends StatefulWidget {
   const PartyList({Key? key}) : super(key: key);
@@ -27,7 +27,9 @@ class PartyList extends StatefulWidget {
 
 class _PartyListState extends State<PartyList> {
   final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
+  bool isLoadingMore = false;
+  int totalItems = 0;
+  final _controller = ScrollController();
   List<PartyDetail> parties = [];
   int currentPage = 1;
   bool isLoading = false;
@@ -41,11 +43,20 @@ class _PartyListState extends State<PartyList> {
       isLoading = !isLoading;
     });
     _loadData(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > parties.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage, searchController.text.trim());
+        }
+      }
+    });
   }
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
   @override
@@ -54,7 +65,6 @@ class _PartyListState extends State<PartyList> {
       content: CustomBody(
         title: S.of(context).partyList,
         isLoading: isLoading,
-        noRecordFound: noRecordFound,
         internetNotAvailable: isNetworkAvailable,
         content: Padding(
             padding: EdgeInsets.all(Dimensions.height15),
@@ -106,24 +116,11 @@ class _PartyListState extends State<PartyList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    controller: _refreshController,
-                    enablePullUp: true,
-                    onRefresh: () async {
-                      setState(() {
-                        parties.clear();
-                        currentPage = 1;
-                      });
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child: ListView.builder(
-                      itemCount: parties.length,
-                      itemBuilder: (context, index) {
+                  child: (parties.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: parties.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < parties.length) {
                         var party = parties[index];
                         return CustomAccordion(
                           titleChild: Column(
@@ -231,8 +228,15 @@ class _PartyListState extends State<PartyList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        // if (totalItems > parties.length) {
+                        //   return const CustomLoader();
+                        // } else {
+                        //   return const SizedBox(height: 0);
+                        // }
+                        return const SizedBox(height: 0);
+                      }
+                    },
                   ),
                 ),
               ],
@@ -276,10 +280,12 @@ class _PartyListState extends State<PartyList> {
 
               setState(() {
                 parties.addAll(partyListModel.data!);
-                currentPage++;
+                totalItems = partyListModel.total ?? 0;
               });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                isLoading = false;
+              });
             }
           } else {
             setState(() {
@@ -311,6 +317,7 @@ class _PartyListState extends State<PartyList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

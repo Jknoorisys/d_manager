@@ -9,13 +9,13 @@ import 'package:d_manager/screens/widgets/body.dart';
 import 'package:d_manager/screens/widgets/buttons.dart';
 import 'package:d_manager/screens/widgets/custom_accordion.dart';
 import 'package:d_manager/screens/widgets/drawer/zoom_drawer.dart';
+import 'package:d_manager/screens/widgets/no_record_found.dart';
 import 'package:d_manager/screens/widgets/snackbar.dart';
 import 'package:d_manager/screens/widgets/text_field.dart';
 import 'package:d_manager/screens/widgets/texts.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/checkbox/gf_checkbox.dart';
 import 'package:getwidget/types/gf_checkbox_type.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'cloth_quality_add.dart';
 
@@ -28,7 +28,9 @@ class ClothQualityList extends StatefulWidget {
 
 class _ClothQualityListState extends State<ClothQualityList> {
   final searchController = TextEditingController();
-  final RefreshController _refreshController = RefreshController();
+  bool isLoadingMore = false;
+  int totalItems = 0;
+  final _controller = ScrollController();
   List<ClothQuality> qualities = [];
   int currentPage = 1;
   bool isLoading = false;
@@ -42,12 +44,21 @@ class _ClothQualityListState extends State<ClothQualityList> {
       isLoading = !isLoading;
     });
     _loadData(currentPage, searchController.text.trim());
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent) {
+        if (totalItems > qualities.length && !isLoadingMore) {
+          currentPage++;
+          isLoadingMore = true;
+          _loadData(currentPage, searchController.text.trim());
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     searchController.dispose();
-    _refreshController.dispose();
+    _controller.dispose();
     super.dispose();
   }
   @override
@@ -112,25 +123,11 @@ class _ClothQualityListState extends State<ClothQualityList> {
                 AppTheme.divider,
                 SizedBox(height: Dimensions.height10),
                 Expanded(
-                  child: SmartRefresher(
-                    controller: _refreshController,
-                    enablePullDown: true,
-                    enablePullUp: true,
-                    onRefresh: () async {
-                      setState(() {
-                        qualities.clear();
-                        currentPage = 1;
-                      });
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.refreshCompleted();
-                    },
-                    onLoading: () async {
-                      await _loadData(currentPage, searchController.text.trim());
-                      _refreshController.loadComplete();
-                    },
-                    child: ListView.builder(
-                      itemCount: qualities.length,
-                      itemBuilder: (context, index) {
+                  child: (qualities.isEmpty && isLoading == false) ? const NoRecordFound() : ListView.builder(
+                    controller: _controller,
+                    itemCount: qualities.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index < qualities.length) {
                         var quality = qualities[index];
                         return CustomAccordion(
                           titleChild: Column(
@@ -205,8 +202,15 @@ class _ClothQualityListState extends State<ClothQualityList> {
                             ],
                           ),
                         );
-                      },
-                    ),
+                      } else {
+                        // if (totalItems > qualities.length) {
+                        //   return const CustomLoader();
+                        // } else {
+                        //   return const SizedBox(height: 0);
+                        // }
+                        return const SizedBox(height: 0);
+                      }
+                    },
                   ),
                 ),
               ],
@@ -233,10 +237,12 @@ class _ClothQualityListState extends State<ClothQualityList> {
 
               setState(() {
                 qualities.addAll(clothQualityListModel.data!);
-                currentPage++;
+                totalItems = clothQualityListModel.total ?? 0;
               });
             } else {
-              _refreshController.loadNoData();
+              setState(() {
+                isLoading = false;
+              });
             }
           } else {
             CustomApiSnackbar.show(
@@ -262,6 +268,7 @@ class _ClothQualityListState extends State<ClothQualityList> {
     } finally {
       setState(() {
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }

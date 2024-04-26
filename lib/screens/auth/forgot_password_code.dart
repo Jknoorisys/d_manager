@@ -63,253 +63,258 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              height: Dimensions.screenHeight,
-              decoration: const BoxDecoration(
-                gradient: AppTheme.appGradientLight,
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(Dimensions.width25),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo or Header
-                    const AnimatedLogo(),
-                    SizedBox(height: Dimensions.height20),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                height: Dimensions.screenHeight,
+                decoration: const BoxDecoration(
+                  gradient: AppTheme.appGradientLight,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(Dimensions.width25),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Logo or Header
+                      const AnimatedLogo(),
+                      SizedBox(height: Dimensions.height20),
 
-                    // verification text
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: Dimensions.width10),
-                      child: Text(
-                        S.of(context).emailVerification,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: Dimensions.font20),
-                        textAlign: TextAlign.center,
+                      // verification text
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: Dimensions.width10),
+                        child: Text(
+                          S.of(context).emailVerification,
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: Dimensions.font20),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: Dimensions.width30, vertical: Dimensions.width10),
-                      child: RichText(
-                        text: TextSpan(
-                          text: S.of(context).enterTheCodeSentTo,
-                          children: [
-                            TextSpan(
-                              text: " ${widget.emailAddress ?? "xyz@gmail.com"}",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: Dimensions.font14,
+                      Padding(
+                        padding:
+                        EdgeInsets.symmetric(horizontal: Dimensions.width30, vertical: Dimensions.width10),
+                        child: RichText(
+                          text: TextSpan(
+                            text: S.of(context).enterTheCodeSentTo,
+                            children: [
+                              TextSpan(
+                                text: " ${widget.emailAddress ?? "xyz@gmail.com"}",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Dimensions.font14,
+                                ),
                               ),
-                            ),
-                          ],
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: Dimensions.font14,
-                          ),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SizedBox(
-                      height: Dimensions.height20,
-                    ),
-
-                    // fields for OTP
-                    Form(
-                      key: formKey,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: Dimensions.width10,
-                          horizontal: Dimensions.width30,
-                        ),
-                        child: PinCodeTextField(
-                          appContext: context,
-                          pastedTextStyle: const TextStyle(
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          length: 4,
-                          obscureText: false,
-                          blinkWhenObscuring: true,
-                          animationType: AnimationType.fade,
-                          validator: (v) {
-                            if (v!.length < 4) {
-                              return S.of(context).codeShouldBe4DigitsLong;
-                            } else {
-                              return null;
-                            }
-                          },
-                          pinTheme: PinTheme(
-                            errorBorderWidth: 1,
-                            inactiveBorderWidth: 1,
-                            activeBorderWidth: 1,
-                            selectedBorderWidth: 1,
-                            shape: PinCodeFieldShape.box,
-                            activeColor: AppTheme.primary,
-                            selectedColor: AppTheme.primary,
-                            selectedFillColor: Colors.white,
-                            inactiveColor: Colors.grey,
-                            inactiveFillColor: Colors.white,
-                            borderRadius: BorderRadius.circular(5),
-                            fieldHeight: Dimensions.height60,
-                            fieldWidth: Dimensions.height60,
-                            activeFillColor: AppTheme.secondaryLight,
-                          ),
-                          cursorColor: Colors.black,
-                          animationDuration: const Duration(milliseconds: 300),
-                          enableActiveFill: false,
-                          errorAnimationController: errorController,
-                          controller: otpController,
-                          keyboardType: TextInputType.number,
-                          boxShadows: const [
-                            BoxShadow(
-                              offset: Offset(0, 1),
-                              color: Colors.black12,
-                              blurRadius: 10,
-                            )
-                          ],
-                          onCompleted: (v) {
-                            debugPrint(S.of(context).completed);
-                          },
-                          onChanged: (value) {
-                            debugPrint(value);
-                            setState(() {
-                              currentText = value;
-                            });
-                          },
-                          beforeTextPaste: (text) {
-                            debugPrint(S.of(context).allowingToPasteText);
-                            return true;
-                          },
-                        ),
-                      ),
-                    ),
-
-                    // validation OTP
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Dimensions.width30),
-                      child: Text(
-                        hasError ? S.of(context).invalidOtp : "",
-                        style: TextStyle(
-                          color: Colors.red.shade800,
-                          fontSize: Dimensions.font14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-
-                    // resend OTP
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          S.of(context).didntReceiveTheCode,
-                          style: TextStyle(color: Colors.black54, fontSize: Dimensions.font14),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              isLoading = !isLoading;
-                            });
-                            _resendOtp(widget.emailAddress.toString());
-                          },
-                          child: Text(
-                            S.of(context).resend,
+                            ],
                             style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: Dimensions.font14,
+                            ),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(
+                        height: Dimensions.height20,
+                      ),
+
+                      // fields for OTP
+                      Form(
+                        key: formKey,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: Dimensions.width10,
+                            horizontal: Dimensions.width30,
+                          ),
+                          child: PinCodeTextField(
+                            appContext: context,
+                            pastedTextStyle: const TextStyle(
                               color: AppTheme.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: Dimensions.font16,
                             ),
+                            length: 4,
+                            obscureText: false,
+                            blinkWhenObscuring: true,
+                            animationType: AnimationType.fade,
+                            validator: (v) {
+                              if (v!.length < 4) {
+                                return S.of(context).codeShouldBe4DigitsLong;
+                              } else {
+                                return null;
+                              }
+                            },
+                            pinTheme: PinTheme(
+                              errorBorderWidth: 1,
+                              inactiveBorderWidth: 1,
+                              activeBorderWidth: 1,
+                              selectedBorderWidth: 1,
+                              shape: PinCodeFieldShape.box,
+                              activeColor: AppTheme.primary,
+                              selectedColor: AppTheme.primary,
+                              selectedFillColor: Colors.white,
+                              inactiveColor: Colors.grey,
+                              inactiveFillColor: Colors.white,
+                              borderRadius: BorderRadius.circular(5),
+                              fieldHeight: Dimensions.height60,
+                              fieldWidth: Dimensions.height60,
+                              activeFillColor: AppTheme.secondaryLight,
+                            ),
+                            cursorColor: Colors.black,
+                            animationDuration: const Duration(milliseconds: 300),
+                            enableActiveFill: false,
+                            errorAnimationController: errorController,
+                            controller: otpController,
+                            keyboardType: TextInputType.number,
+                            boxShadows: const [
+                              BoxShadow(
+                                offset: Offset(0, 1),
+                                color: Colors.black12,
+                                blurRadius: 10,
+                              )
+                            ],
+                            onCompleted: (v) {
+                              debugPrint(S.of(context).completed);
+                            },
+                            onChanged: (value) {
+                              debugPrint(value);
+                              setState(() {
+                                currentText = value;
+                              });
+                            },
+                            beforeTextPaste: (text) {
+                              debugPrint(S.of(context).allowingToPasteText);
+                              return true;
+                            },
                           ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: Dimensions.height10,
-                    ),
+                        ),
+                      ),
 
-                    // verify button
-                    CustomElevatedButton(
-                        onPressed: () {
-                          formKey.currentState!.validate();
-                          // conditions for validating
-                          if (currentText.length != 4) {
-                            errorController!.add(ErrorAnimationType
-                                .shake); // Triggering error shake animation
-                            setState(() => hasError = true);
-                          } else {
-                            setState(
-                                  () {
-                                hasError = false;
-                                if (HelperFunctions.checkInternet() == false) {
-                                  CustomApiSnackbar.show(
-                                    context,
-                                    'Warning',
-                                    'No internet connection',
-                                    mode: SnackbarMode.warning,
-                                  );
-                                } else {
-                                  setState(() {
-                                    isLoading = !isLoading;
-                                  });
-                                  _verifyOtp(otpController.text, widget.emailAddress.toString());
-                                }
-                              },
-                            );
-                          }
-                        },
-                        buttonText: S.of(context).verify
-                    ),
+                      // validation OTP
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dimensions.width30),
+                        child: Text(
+                          hasError ? S.of(context).invalidOtp : "",
+                          style: TextStyle(
+                            color: Colors.red.shade800,
+                            fontSize: Dimensions.font14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
 
-                    // clear and set buttons
-                    // SizedBox(
-                    //   height: Dimensions.height10,
-                    // ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: <Widget>[
-                    //     Flexible(
-                    //       child: TextButton(
-                    //         child: Text(S.of(context).clear),
-                    //         onPressed: () {
-                    //           otpController.clear();
-                    //         },
-                    //       ),
-                    //     ),
-                    //     Flexible(
-                    //       child: TextButton(
-                    //         child: Text(S.of(context).setText),
-                    //         onPressed: () {
-                    //           setState(() {
-                    //             otpController.text = "4130";
-                    //           });
-                    //         },
-                    //       ),
-                    //     ),
-                    //   ],
-                    // )
-                  ],
+                      // resend OTP
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            S.of(context).didntReceiveTheCode,
+                            style: TextStyle(color: Colors.black54, fontSize: Dimensions.font14),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                isLoading = !isLoading;
+                              });
+                              _resendOtp(widget.emailAddress.toString());
+                            },
+                            child: Text(
+                              S.of(context).resend,
+                              style: TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: Dimensions.font16,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: Dimensions.height10,
+                      ),
+
+                      // verify button
+                      CustomElevatedButton(
+                          onPressed: () {
+                            formKey.currentState!.validate();
+                            // conditions for validating
+                            if (currentText.length != 4) {
+                              errorController!.add(ErrorAnimationType
+                                  .shake); // Triggering error shake animation
+                              setState(() => hasError = true);
+                            } else {
+                              setState(
+                                    () {
+                                  hasError = false;
+                                  if (HelperFunctions.checkInternet() == false) {
+                                    CustomApiSnackbar.show(
+                                      context,
+                                      'Warning',
+                                      'No internet connection',
+                                      mode: SnackbarMode.warning,
+                                    );
+                                  } else {
+                                    setState(() {
+                                      isLoading = !isLoading;
+                                    });
+                                    _verifyOtp(otpController.text, widget.emailAddress.toString());
+                                  }
+                                },
+                              );
+                            }
+                          },
+                          buttonText: S.of(context).verify
+                      ),
+
+                      // clear and set buttons
+                      // SizedBox(
+                      //   height: Dimensions.height10,
+                      // ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: <Widget>[
+                      //     Flexible(
+                      //       child: TextButton(
+                      //         child: Text(S.of(context).clear),
+                      //         onPressed: () {
+                      //           otpController.clear();
+                      //         },
+                      //       ),
+                      //     ),
+                      //     Flexible(
+                      //       child: TextButton(
+                      //         child: Text(S.of(context).setText),
+                      //         onPressed: () {
+                      //           setState(() {
+                      //             otpController.text = "4130";
+                      //           });
+                      //         },
+                      //       ),
+                      //     ),
+                      //   ],
+                      // )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          if (isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: GFLoader(
-                  type: GFLoaderType.circle,
-                  loaderColorOne: AppTheme.primary,
-                  loaderColorTwo: AppTheme.secondary,
-                  loaderColorThree: AppTheme.secondaryLight,
+            if (isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: GFLoader(
+                    type: GFLoaderType.circle,
+                    loaderColorOne: AppTheme.primary,
+                    loaderColorTwo: AppTheme.secondary,
+                    loaderColorThree: AppTheme.secondaryLight,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

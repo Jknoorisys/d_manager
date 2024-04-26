@@ -41,102 +41,118 @@ class SellHistoryModel {
 }
 
 class SellHistoryModelList {
-  int? sellId;
-  DateTime? sellDate;
-  DateTime? sellDueDate;
+  int? invoiceId;
+  String? userId;
+  String? sellId;
+  DateTime? invoiceDate;
+  String? invoiceNumber;
+  String? paymentType;
+  DateTime? paymentDueDate;
+  String? rate;
+  String? discount;
+  String? invoiceAmount;
+  String? totalThan;
+  String? totalMeter;
+  String? gst;
+  DateTime? dueDate;
+  String? paidStatus;
+  String? receivedAmount;
+  String? differenceAmount;
+  dynamic paymentDate;
+  dynamic paymentMethod;
   String? firmId;
   String? firmName;
   String? partyId;
-  String? partyFirm;
   String? partyName;
   String? qualityId;
   String? qualityName;
-  String? totalThan;
-  String? rate;
-  String? thanDelivered;
-  String? thanRemaining;
-  String? dealStatus;
-  String? status;
-  int? invoiceCount;
-  int? totalMeter;
-  double? totalGstAmount;
-  double? totalInvoiceAmount;
-  int? totalReceivedAmount;
-  double? totalDifferenceAmount;
+  String? baleNumber;
 
   SellHistoryModelList({
+    this.invoiceId,
+    this.userId,
     this.sellId,
-    this.sellDate,
-    this.sellDueDate,
+    this.invoiceDate,
+    this.invoiceNumber,
+    this.paymentType,
+    this.paymentDueDate,
+    this.rate,
+    this.discount,
+    this.invoiceAmount,
+    this.totalThan,
+    this.totalMeter,
+    this.gst,
+    this.dueDate,
+    this.paidStatus,
+    this.receivedAmount,
+    this.differenceAmount,
+    this.paymentDate,
+    this.paymentMethod,
     this.firmId,
     this.firmName,
     this.partyId,
-    this.partyFirm,
     this.partyName,
     this.qualityId,
     this.qualityName,
-    this.totalThan,
-    this.rate,
-    this.thanDelivered,
-    this.thanRemaining,
-    this.dealStatus,
-    this.status,
-    this.invoiceCount,
-    this.totalMeter,
-    this.totalGstAmount,
-    this.totalInvoiceAmount,
-    this.totalReceivedAmount,
-    this.totalDifferenceAmount,
+    this.baleNumber,
   });
 
   factory SellHistoryModelList.fromJson(Map<String, dynamic> json) => SellHistoryModelList(
+    invoiceId: json["invoice_id"],
+    userId: json["user_id"],
     sellId: json["sell_id"],
-    sellDate: json["sell_date"] == null ? null : DateTime.parse(json["sell_date"]),
-    sellDueDate: json["sell_due_date"] == null ? null : DateTime.parse(json["sell_due_date"]),
+    invoiceDate: json["invoice_date"] == null ? null : DateTime.parse(json["invoice_date"]),
+    invoiceNumber: json["invoice_number"],
+    paymentType: json["payment_type"],
+    paymentDueDate: json["payment_due_date"] == null ? null : DateTime.parse(json["payment_due_date"]),
+    rate: json["rate"],
+    discount: json["discount"],
+    invoiceAmount: json["invoice_amount"],
+    totalThan: json["total_than"],
+    totalMeter: json["total_meter"],
+    gst: json["gst"],
+    dueDate: json["due_date"] == null ? null : DateTime.parse(json["due_date"]),
+    paidStatus: json["paid_status"],
+    receivedAmount: json["received_amount"],
+    differenceAmount: json["difference_amount"],
+    paymentDate: json["payment_date"],
+    paymentMethod: json["payment_method"],
     firmId: json["firm_id"],
     firmName: json["firm_name"],
     partyId: json["party_id"],
-    partyFirm: json["party_firm"],
     partyName: json["party_name"],
     qualityId: json["quality_id"],
     qualityName: json["quality_name"],
-    totalThan: json["total_than"],
-    rate: json["rate"],
-    thanDelivered: json["than_delivered"],
-    thanRemaining: json["than_remaining"],
-    dealStatus: json["deal_status"],
-    status: json["status"],
-    invoiceCount: json["invoice_count"],
-    totalMeter: json["total_meter"],
-    totalGstAmount: json["total_gst_amount"]?.toDouble(),
-    totalInvoiceAmount: json["total_invoice_amount"]?.toDouble(),
-    totalReceivedAmount: json["total_received_amount"],
-    totalDifferenceAmount: json["total_difference_amount"]?.toDouble(),
+    baleNumber: json["bale_number"],
   );
 
   Map<String, dynamic> toJson() => {
+    "invoice_id": invoiceId,
+    "user_id": userId,
     "sell_id": sellId,
-    "sell_date": "${sellDate!.year.toString().padLeft(4, '0')}-${sellDate!.month.toString().padLeft(2, '0')}-${sellDate!.day.toString().padLeft(2, '0')}",
-    "sell_due_date": "${sellDueDate!.year.toString().padLeft(4, '0')}-${sellDueDate!.month.toString().padLeft(2, '0')}-${sellDueDate!.day.toString().padLeft(2, '0')}",
+    "invoice_date": "${invoiceDate!.year.toString().padLeft(4, '0')}-${invoiceDate!.month.toString().padLeft(2, '0')}-${invoiceDate!.day.toString().padLeft(2, '0')}",
+    "invoice_number": invoiceNumber,
+    "payment_type": paymentType,
+    "payment_due_date": "${paymentDueDate!.year.toString().padLeft(4, '0')}-${paymentDueDate!.month.toString().padLeft(2, '0')}-${paymentDueDate!.day.toString().padLeft(2, '0')}",
+    "rate": rate,
+    "discount": discount,
+    "invoice_amount": invoiceAmount,
+    "total_than": totalThan,
+    "total_meter": totalMeter,
+    "gst": gst,
+    "due_date": "${dueDate!.year.toString().padLeft(4, '0')}-${dueDate!.month.toString().padLeft(2, '0')}-${dueDate!.day.toString().padLeft(2, '0')}",
+    "paid_status": paidStatus,
+    "received_amount": receivedAmount,
+    "difference_amount": differenceAmount,
+    "payment_date": paymentDate,
+    "payment_method": paymentMethod,
     "firm_id": firmId,
     "firm_name": firmName,
     "party_id": partyId,
-    "party_firm": partyFirm,
     "party_name": partyName,
     "quality_id": qualityId,
     "quality_name": qualityName,
-    "total_than": totalThan,
-    "rate": rate,
-    "than_delivered": thanDelivered,
-    "than_remaining": thanRemaining,
-    "deal_status": dealStatus,
-    "status": status,
-    "invoice_count": invoiceCount,
-    "total_meter": totalMeter,
-    "total_gst_amount": totalGstAmount,
-    "total_invoice_amount": totalInvoiceAmount,
-    "total_received_amount": totalReceivedAmount,
-    "total_difference_amount": totalDifferenceAmount,
+    "bale_number": baleNumber,
   };
 }
 

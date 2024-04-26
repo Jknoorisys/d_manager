@@ -86,9 +86,9 @@ class _DeliveryDetailViewState extends State<DeliveryDetailView> {
                         SizedBox(height: Dimensions.height10),
                         Row(
                           children: [
-                            _buildInfoColumn('Box Delivered', deliveryDetailData!.deliveredBoxCount.toString()),
+                            _buildInfoColumn('Ton Delivered', deliveryDetailData!.deliveredBoxCount != null ? deliveryDetailData!.deliveredBoxCount.toString() : 'N/A'),
                             SizedBox(width: Dimensions.width20),
-                            _buildInfoColumn('Net Weight', '${deliveryDetailData!.netWeight.toString()} ton'),
+                            _buildInfoColumn('Net Weight', '${deliveryDetailData!.netWeight.toString()} Kg'),
                             SizedBox(width: Dimensions.width20),
                             _buildInfoColumn('Gross Weight', '${deliveryDetailData!.grossWeight.toString()} ton'),
                           ],
